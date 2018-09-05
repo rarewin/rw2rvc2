@@ -66,7 +66,7 @@ static int g_position = 0;
  * @param[in] message   a message to be printed out
  * @param[in] position  position of the token where the error occurred
  */
-static void error(char *message, int position)
+static void error_token(char *message, int position)
 {
 	fprintf(stderr, "%s: %s\n", message, g_tokens[position].input);
 	exit(1);
@@ -114,7 +114,7 @@ static struct node_t *number(void)
 		return new_node_num(g_tokens[g_position++].value);
 	}
 
-	error("expected number", g_position);
+	error_token("expected number", g_position);
 	/* NOTREACHED */
 	return NULL;
 }
@@ -137,7 +137,7 @@ static struct node_t *expr(void)
 	}
 
 	if (g_tokens[g_position].type != TK_EOF)
-		error("stray token", g_position);
+		error_token("stray token", g_position);
 
 	return lhs;
 }
@@ -197,11 +197,59 @@ static int tokenize(char *p)
 }
 
 /**
+ * @brief error with gen
+ * @param[in] message  a message to be printed out
+ */
+static void error_gen(char *message)
+{
+	fprintf(stderr, "%s\n", message);
+	exit(1);
+}
+
+static char *TEMP_REGS[] = {"t0", "t1", "t2", "t3", "t4", "t5", "t6",
+			    "a1", "a2", "a3", "a4", "a5", "a6", "a7", NULL};
+
+/**
+ * @brief generate assembly
+ */
+char *gen(struct node_t *node)
+{
+	static int reg_cur = 0;
+	char *r = NULL;
+	char *dst, *src;
+
+	if (node->type == ND_NUM) {
+		if (!(r = TEMP_REGS[reg_cur++])) {
+			error_gen("register exhausted");
+		}
+
+		printf("	li	%s, %d\n", r, node->value);
+		return r;
+	}
+
+	dst = gen(node->lhs);
+	src = gen(node->rhs);
+
+	switch (node->type) {
+	case ND_PLUS:
+		printf("	add	%s, %s, %s\n", dst, dst, src);
+		break;
+	case ND_MINUS:
+		printf("	sub	%s, %s, %s\n", dst, dst, src);
+		break;
+	default:
+		error_gen("unexpected token");
+		break;
+	}
+
+	return dst;
+}
+
+/**
  * @brief main function
  */
 int main(int argc, char **argv)
 {
-	int i = 0;
 	struct node_t *node = NULL;
 
 	if (argc != 2) {
@@ -219,37 +267,7 @@ int main(int argc, char **argv)
 	printf(".global main\n");
 	printf("main:\n");
 
-	/* error if first token is not a number */
-	if (g_tokens[i].type != TK_NUM){
-		error("unexpected token", i);
-		return 1;
-	}
-
-	printf("	li	a0, %d\n", g_tokens[i].value);
-	i++;
-
-	while (g_tokens[i].type != TK_EOF) {
-
-		switch (g_tokens[i].type) {
-		case TK_PLUS:
-			i++;
-			if (g_tokens[i].type != TK_NUM)
-				error("unexpected token", i);
-			printf("	addi	a0, a0, %d\n", g_tokens[i].value);
-			i++;
-			continue;
-		case TK_MINUS:
-			i++;
-			if (g_tokens[i].type != TK_NUM)
-				error("unexpected token", i);
-			printf("	addi	a0, a0, %d\n", -1 * g_tokens[i].value);
-			i++;
-			continue;
-		default:
-			error("unexpected token", i);
-		}
-	}
-
+	printf("	mv	a0, %s\n", gen(node));	/* pseudo instruction <= addi a0, (reg), 0 */
 	printf("	ret\n");
 
 	return 0;
