@@ -28,3 +28,4 @@ test: rw2rvc2
 	@./tools/test.sh "254 + 1" 255
 	@./tools/test.sh "64 + 64 + 64" 192
 	@./tools/test.sh "64 - 64 + 64 - 64" 0
+	@./tools/test.sh "1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10" 55
