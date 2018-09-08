@@ -54,7 +54,7 @@ typedef struct node_t {
  * @brief token array
  */
 static struct token_t g_tokens[256];
-static int g_index = 0;
+static int g_token_index = 0;
 
 /**
  * @brief recursive descendant parser
@@ -73,6 +73,20 @@ static void error_token(char *message, int position)
 }
 
 /**
+ * @brief allocate memory to a new node
+ */
+static struct node_t *allocate_node(void)
+{
+	static struct node_t node_array[256];
+	static unsigned int index = 0;
+
+	if (index >= sizeof(node_array))	/**< @todo reallocation */
+		return NULL;
+
+	return &node_array[index++];
+}
+
+/**
  * @brief allocate memory for a node
  * @param[in] op   operation
  * @param[in] lhs  left hand side
@@ -80,7 +94,7 @@ static void error_token(char *message, int position)
  */
 static struct node_t *new_node(node_type_t op, struct node_t *lhs, struct node_t *rhs)
 {
-	node_t *node = malloc(sizeof(struct node_t));
+	node_t *node = allocate_node();
 
 	node->type = op;
 	node->lhs = lhs;
@@ -95,7 +109,7 @@ static struct node_t *new_node(node_type_t op, struct node_t *lhs, struct node_t
  */
 static struct node_t *new_node_num(int value)
 {
-	struct node_t *node = malloc(sizeof(struct node_t));
+	struct node_t *node = allocate_node();
 
 	node->type = ND_NUM;
 	node->lhs = NULL;
@@ -158,18 +172,18 @@ static int tokenize(char *p)
 		if (*p == '+' || *p == '-') {
 			switch (*p) {
 			case '+':
-				g_tokens[g_index].type = TK_PLUS;
+				g_tokens[g_token_index].type = TK_PLUS;
 				break;
 			case '-':
-				g_tokens[g_index].type =  TK_MINUS;
+				g_tokens[g_token_index].type =  TK_MINUS;
 				break;
 			default:
 				break;
 			}
-			g_tokens[g_index].value = 0;	/* not used */
-			g_tokens[g_index].input = p;
+			g_tokens[g_token_index].value = 0;	/* not used */
+			g_tokens[g_token_index].input = p;
 
-			g_index++;
+			g_token_index++;
 			p++;
 
 			continue;
@@ -177,10 +191,10 @@ static int tokenize(char *p)
 
 		/* number */
 		if (isdigit(*p)) {
-			g_tokens[g_index].type = TK_NUM;
-			g_tokens[g_index].input = p;
-			g_tokens[g_index].value = strtol(p, &p, 10);
-			g_index++;
+			g_tokens[g_token_index].type = TK_NUM;
+			g_tokens[g_token_index].input = p;
+			g_tokens[g_token_index].value = strtol(p, &p, 10);
+			g_token_index++;
 
 			continue;
 		}
@@ -189,9 +203,9 @@ static int tokenize(char *p)
 		return -1;
 	}
 
-	g_tokens[g_index].type = TK_EOF;
-	g_tokens[g_index].input = NULL;
-	g_tokens[g_index].value = 0;
+	g_tokens[g_token_index].type = TK_EOF;
+	g_tokens[g_token_index].input = NULL;
+	g_tokens[g_token_index].value = 0;
 
 	return 0;
 }
@@ -215,31 +229,28 @@ static char *TEMP_REGS[] = {"t0", "t1", "t2", "t3", "t4", "t5", "t6",
 char *gen(struct node_t *node)
 {
 	static int reg_cur = 0;
-	char *r = NULL;
 	char *dst, *src;
 
 	if (node->type == ND_NUM) {
-		if (!(r = TEMP_REGS[reg_cur++])) {
+		if (!(dst = TEMP_REGS[reg_cur++])) {
 			error_gen("register exhausted");
 		}
+		printf("	li	%s, %d\n", dst, node->value);
+	} else {
+		dst = gen(node->lhs);
+		src = gen(node->rhs);
 
-		printf("	li	%s, %d\n", r, node->value);
-		return r;
-	}
-
-	dst = gen(node->lhs);
-	src = gen(node->rhs);
-
-	switch (node->type) {
-	case ND_PLUS:
-		printf("	add	%s, %s, %s\n", dst, dst, src);
-		break;
-	case ND_MINUS:
-		printf("	sub	%s, %s, %s\n", dst, dst, src);
-		break;
-	default:
-		error_gen("unexpected token");
-		break;
+		switch (node->type) {
+		case ND_PLUS:
+			printf("	add	%s, %s, %s\n", dst, dst, src);
+			break;
+		case ND_MINUS:
+			printf("	sub	%s, %s, %s\n", dst, dst, src);
+			break;
+		default:
+			error_gen("unexpected token");
+			break;
+		}
 	}
 
 	return dst;
