@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "rw2rvc2.h"
 
@@ -57,13 +58,19 @@ struct vector_t *tokenize(char *p)
 		}
 
 		/* arithmetic symbols */
-		if (*p == '+' || *p == '-') {
+		if (strchr("+-*/", *p) != NULL) {
 			switch (*p) {
 			case '+':
 				add_token(v, TK_PLUS, p);
 				break;
 			case '-':
 				add_token(v, TK_MINUS, p);
+				break;
+			case '*':
+				add_token(v, TK_MUL, p);
+				break;
+			case '/':
+				add_token(v, TK_DIV, p);
 				break;
 			default:
 				break;

@@ -59,6 +59,17 @@ static struct node_t *new_node_num(int value)
 }
 
 /**
+ * @brief conversion table for token type to node type
+ */
+static node_type_t CONVERSION_TOKEN_TO_NODE[] = {
+	[TK_PLUS]  = ND_PLUS,
+	[TK_MINUS] = ND_MINUS,
+	[TK_MUL]   = ND_MUL,
+	[TK_DIV]   = ND_DIV,
+	[TK_NUM]   = ND_NUM,
+};
+
+/**
  * @brief number
  */
 static struct node_t *number(struct vector_t *tokens)
@@ -74,20 +85,32 @@ static struct node_t *number(struct vector_t *tokens)
 }
 
 /**
- * @brief conversion table for token type to node type
+ * @brief multiplication
  */
-static node_type_t CONVERSION_TOKEN_TO_NODE[] = {
-	[TK_PLUS]  = ND_PLUS,
-	[TK_MINUS] = ND_MINUS,
-	[TK_NUM]   = ND_NUM,
-};
+static struct node_t *muldiv(struct vector_t *tokens)
+{
+	struct node_t *lhs = number(tokens);
+
+	for (;;) {
+		struct token_t *t = tokens->data[g_position];
+		token_type_t op = t->type;
+
+		if (op != TK_MUL && op != TK_DIV)
+			break;
+
+		g_position++;
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, number(tokens));
+	}
+
+	return lhs;
+}
 
 /**
  * @brief expression
  */
 struct node_t *expr(struct vector_t *tokens)
 {
-	struct node_t *lhs = number(tokens);
+	struct node_t *lhs = muldiv(tokens);
 
 	for (;;) {
 		struct token_t *t = tokens->data[g_position];
@@ -97,7 +120,7 @@ struct node_t *expr(struct vector_t *tokens)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, number(tokens));
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, muldiv(tokens));
 	}
 
 	return lhs;

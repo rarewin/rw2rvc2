@@ -2,16 +2,20 @@
 
 #include "rw2rvc2.h"
 
+#define TRANS_ELEMENT(e)    [e] = #e
+
 /**
  * @brief debug function for tokenizer
  */
 void show_token(struct vector_t *tokens)
 {
 	const char *table[] = {
-		[TK_PLUS] = "TK_PLUS",
-		[TK_MINUS] = "TK_MINUS",
-		[TK_NUM]   = "TK_NUM",
-		[TK_EOF]   = "TK_EOF",
+		TRANS_ELEMENT(TK_PLUS),
+		TRANS_ELEMENT(TK_MINUS),
+		TRANS_ELEMENT(TK_MUL),
+		TRANS_ELEMENT(TK_DIV),
+		TRANS_ELEMENT(TK_NUM),
+		TRANS_ELEMENT(TK_EOF),
 	};
 	unsigned int i;
 
@@ -25,18 +29,19 @@ void show_token(struct vector_t *tokens)
  */
 void show_ir(struct vector_t *irv)
 {
-#define OP2STR_ELEMENT(e)    [e] = #e
 	struct ir_t *ir;
 	unsigned int i;
 
 	const char *OP2STR[] = {
-		OP2STR_ELEMENT(IR_PLUS),
-		OP2STR_ELEMENT(IR_MINUS),
-		OP2STR_ELEMENT(IR_IMM),
-		OP2STR_ELEMENT(IR_MOV),
-		OP2STR_ELEMENT(IR_RETURN),
-		OP2STR_ELEMENT(IR_KILL),
-		OP2STR_ELEMENT(IR_NOP),
+		TRANS_ELEMENT(IR_PLUS),
+		TRANS_ELEMENT(IR_MINUS),
+		TRANS_ELEMENT(IR_MUL),
+		TRANS_ELEMENT(IR_DIV),
+		TRANS_ELEMENT(IR_IMM),
+		TRANS_ELEMENT(IR_MOV),
+		TRANS_ELEMENT(IR_RETURN),
+		TRANS_ELEMENT(IR_KILL),
+		TRANS_ELEMENT(IR_NOP),
 	};
 
 	for (i = 0; i < irv->len; i++) {

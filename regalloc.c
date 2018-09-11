@@ -63,6 +63,8 @@ void allocate_regs(struct vector_t *irv)
 		case IR_MOV:
 		case IR_PLUS:
 		case IR_MINUS:
+		case IR_MUL:
+		case IR_DIV:
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
 			break;

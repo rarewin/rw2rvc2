@@ -30,6 +30,12 @@ void gen_riscv(struct vector_t *irv)
 		case IR_MINUS:
 			printf("	sub	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
 			break;
+		case IR_MUL:
+			printf("	mul	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
+		case IR_DIV:
+			printf("	div	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 		case IR_NOP:
 		case IR_KILL:
 		default:

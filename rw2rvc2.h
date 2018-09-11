@@ -17,6 +17,8 @@ typedef struct vector_t {
 typedef enum {
 	TK_PLUS,
 	TK_MINUS,
+	TK_MUL,
+	TK_DIV,
 	TK_NUM,
 	TK_EOF,
 } token_type_t;
@@ -36,6 +38,8 @@ typedef struct token_t {
 typedef enum {
 	ND_PLUS,
 	ND_MINUS,
+	ND_MUL,
+	ND_DIV,
 	ND_NUM,
 } node_type_t;
 
@@ -55,6 +59,8 @@ typedef struct node_t {
 typedef enum {
 	IR_PLUS,
 	IR_MINUS,
+	IR_MUL,
+	IR_DIV,
 	IR_IMM,
 	IR_MOV,
 	IR_RETURN,

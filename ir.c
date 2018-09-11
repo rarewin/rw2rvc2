@@ -6,6 +6,8 @@
 static node_type_t CONVERSION_NODE_TO_IR[] = {
 	[ND_PLUS]  = IR_PLUS,
 	[ND_MINUS] = IR_MINUS,
+	[ND_MUL] = IR_MUL,
+	[ND_DIV] = IR_DIV,
 };
 
 /**
