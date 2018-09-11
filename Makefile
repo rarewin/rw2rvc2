@@ -1,7 +1,7 @@
 CFLAGS = -Wall -Wextra -Wswitch-enum -Wswitch-enum
 
 ifeq ($(DEBUG),1)
-	CFLAGS += -g -O0
+	CFLAGS += -g -O0 -DDEBUG
 else
 	CFLAGS += -O2
 endif

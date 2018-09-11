@@ -5,6 +5,18 @@
 #include <string.h>
 
 /**
+ * @brief Vector type
+ */
+typedef struct vector_t {
+	void **data;
+	size_t capacity;
+	size_t len;
+} vector_t;
+
+static struct vector_t *g_tokens;
+static int g_position = 0;
+
+/**
  * @brief types of tokens
  */
 typedef enum {
@@ -52,12 +64,6 @@ typedef struct node_t {
 } node_t;
 
 /**
- * @brief token array
- */
-static struct token_t g_tokens[256];
-static int g_token_index = 0;
-
-/**
  * @brief types of IR
  */
 typedef enum {
@@ -88,19 +94,83 @@ typedef struct ir_t {
 } ir_t;
 
 /**
- * @brief recursive descendant parser
+ * @brief allocate memory to a new vector
+ * @param[in] old  vector
  */
-static int g_position = 0;
+static struct vector_t *allocate_vector(void)
+{
+	const size_t ALLOCATE_SIZE = 256;
+
+	static struct vector_t *vector_array = NULL;
+	static size_t index = 0;
+	static size_t size = 0;
+
+	/* initial allocation */
+	if (vector_array == NULL) {
+		size += ALLOCATE_SIZE;
+		vector_array = (struct vector_t*)malloc(sizeof(struct vector_t) * size);
+	}
+
+	if (index >= size) {
+		size += ALLOCATE_SIZE;
+		vector_array = (struct vector_t*)realloc(vector_array, sizeof(struct vector_t) * size);
+	}
+
+	return &vector_array[index++];
+}
+
+const size_t VECTOR_DATA_DEFAULT_CAPACITY = 16;
 
 /**
- * @brief error with token
- * @param[in] message   a message to be printed out
- * @param[in] position  position of the token where the error occurred
+ *
  */
-static void error_token(char *message, int position)
+struct vector_t *new_vector(void)
 {
-	fprintf(stderr, "%s: %s\n", message, g_tokens[position].input);
-	exit(1);
+	const size_t ALLOCATE_SIZE = 256;
+
+	static void *vector_data_array = NULL;
+	static size_t index = 0;
+	static size_t size = 0;
+
+	struct vector_t *v = allocate_vector();
+
+	/* initial allocation */
+	if (vector_data_array == NULL) {
+		size += ALLOCATE_SIZE;
+		vector_data_array = (void*)malloc(sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * size);
+	}
+
+	if (index >= size) {
+		size += ALLOCATE_SIZE;
+		vector_data_array = (void*)realloc(vector_data_array, sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * size);
+	}
+
+	v->capacity = VECTOR_DATA_DEFAULT_CAPACITY;
+	v->len = 0;
+	v->data = (vector_data_array + VECTOR_DATA_DEFAULT_CAPACITY * index);
+	index++;
+
+	return v;
+}
+
+/**
+ *
+ */
+void vector_push(struct vector_t *v, void *element)
+{
+	if (v->len >= v->capacity) {
+		if (v->capacity == VECTOR_DATA_DEFAULT_CAPACITY) {
+			void *old = v->data;
+			v->capacity *= 2;
+			v->data = malloc(sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * v->capacity);
+			memcpy(v->data, old, sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY);
+		} else {
+			v->capacity *= 2;
+			v->data = realloc(v->data, sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * v->capacity);
+		}
+	}
+
+	v->data[v->len++] = element;
 }
 
 /**
@@ -114,7 +184,7 @@ static struct ir_t *allocate_ir(void)
 	static size_t index = 0;
 	static size_t size = 0;
 
-	/* initial allocate */
+	/* initial allocation */
 	if (ir_array == NULL) {
 		size += ALLOCATE_SIZE;
 		ir_array = (struct ir_t*)malloc(sizeof(struct ir_t) * size);
@@ -129,12 +199,12 @@ static struct ir_t *allocate_ir(void)
 	return &ir_array[index++];
 }
 
-struct ir_t *ins[1000];
-int inp = 0;
-int regno = 0;
-
 /**
  * @brief new IR
+ * @param[in] op   operation type of the new IR
+ * @param[in] lhs  LHS
+ * @param[in] rhs  RHS
+ * @return a pointer to the new IR
  */
 static struct ir_t *new_ir(ir_type_t op, int lhs, int rhs)
 {
@@ -149,24 +219,27 @@ static struct ir_t *new_ir(ir_type_t op, int lhs, int rhs)
 
 /**
  * @brief generate IR (sub function)
+ * @param[in] v    vector
  * @param[in] node node
  * @return LHS
  */
-int gen_ir_sub(struct node_t *node)
+int gen_ir_sub(struct vector_t *v, struct node_t *node)
 {
+	static int regno = 0;
+
 	int lhs, rhs;
 	int r = regno;
 
 	if (node->type == ND_NUM) {
-		ins[inp++] = new_ir(IR_IMM, regno++, node->value);
+		vector_push(v, new_ir(IR_IMM, regno++, node->value));
 		return r;
 	}
 
-	lhs = gen_ir_sub(node->lhs);
-	rhs = gen_ir_sub(node->rhs);
+	lhs = gen_ir_sub(v, node->lhs);
+	rhs = gen_ir_sub(v, node->rhs);
 
-	ins[inp++] = new_ir(CONVERSION_NODE_TO_IR[node->type], lhs, rhs);
-	ins[inp++] = new_ir(IR_KILL, rhs, 0);
+	vector_push(v, new_ir(CONVERSION_NODE_TO_IR[node->type], lhs, rhs));
+	vector_push(v, new_ir(IR_KILL, rhs, 0));
 
 	return lhs;
 }
@@ -176,14 +249,16 @@ int gen_ir_sub(struct node_t *node)
  * @param[in] node  node
  * @return 0
  */
-int gen_ir(struct node_t *node)
+struct vector_t *gen_ir(struct node_t *node)
 {
+	struct vector_t *v;
 	int r;
 
-	r = gen_ir_sub(node);
-	ins[inp++] = new_ir(IR_RETURN, r, 0);
+	v = new_vector();
+	r = gen_ir_sub(v, node);
+	vector_push(v, new_ir(IR_RETURN, r, 0));
 
-	return 0;
+	return v;
 }
 
 /**
@@ -195,13 +270,11 @@ static struct node_t *allocate_node(void)
 	const size_t ALLOCATE_SIZE = 256;
 	static struct node_t *node_array = NULL;
 	static size_t index = 0;
-	static size_t size = 0;
+	static size_t size = ALLOCATE_SIZE;
 
 	/* initial allocate */
-	if (node_array == NULL) {
-		size += ALLOCATE_SIZE;
+	if (node_array == NULL)
 		node_array = (struct node_t*)malloc(sizeof(struct node_t) * size);
-	}
 
 	/* reallocate */
 	if (index >= size) {
@@ -250,12 +323,13 @@ static struct node_t *new_node_num(int value)
  */
 static struct node_t *number(void)
 {
-	if (g_tokens[g_position].type == TK_NUM) {
-		return new_node_num(g_tokens[g_position++].value);
+	struct token_t *t = g_tokens->data[g_position];
+
+	if (t->type == TK_NUM) {
+		g_position++;
+		return new_node_num(t->value);
 	}
 
-	error_token("expected number", g_position);
-	/* NOTREACHED */
 	return NULL;
 }
 
@@ -267,7 +341,8 @@ static struct node_t *expr(void)
 	struct node_t *lhs = number();
 
 	for (;;) {
-		token_type_t op = g_tokens[g_position].type;
+		struct token_t *t = g_tokens->data[g_position];
+		token_type_t op = t->type;
 
 		if (op != TK_PLUS && op != TK_MINUS)
 			break;
@@ -276,17 +351,56 @@ static struct node_t *expr(void)
 		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, number());
 	}
 
-	if (g_tokens[g_position].type != TK_EOF)
-		error_token("stray token", g_position);
-
 	return lhs;
 }
 
 /**
- * @brief tokenizer
+ * @brief allocate memory to the new token
+ * @return a pointer to the new token
  */
-static int tokenize(char *p)
+static struct token_t *allocate_token(void)
 {
+	const size_t ALLOCATE_SIZE = 256;
+	static struct token_t *token_array = NULL;
+	static size_t index = 0;
+	static size_t size = ALLOCATE_SIZE;
+
+	if (token_array == NULL)
+		token_array = (struct token_t*)malloc(sizeof(struct token_t) * size);
+
+	if (index >= size) {
+		size += ALLOCATE_SIZE;
+		token_array = (struct token_t*)realloc(token_array, sizeof(struct token_t) * size);
+	}
+
+	return &token_array[index++];
+}
+
+/**
+ * @brief add token
+ * @param[in]  v
+ * @param[in]  type
+ * @param[in]  input
+ */
+struct token_t *add_token(struct vector_t *v, token_type_t type, char *input)
+{
+	struct token_t *t = allocate_token();
+
+	t->type = type;
+	t->input = input;
+	vector_push(v, t);
+
+	return t;
+}
+
+/**
+ * @brief tokenizer
+ * @param[in] p  input stream
+ */
+static struct vector_t *tokenize(char *p)
+{
+	struct vector_t *v = new_vector();
+
 	while (*p) {
 		/* ignore spaces */
 		if (isspace(*p)) {
@@ -298,51 +412,65 @@ static int tokenize(char *p)
 		if (*p == '+' || *p == '-') {
 			switch (*p) {
 			case '+':
-				g_tokens[g_token_index].type = TK_PLUS;
+				add_token(v, TK_PLUS, p);
 				break;
 			case '-':
-				g_tokens[g_token_index].type =  TK_MINUS;
+				add_token(v, TK_MINUS, p);
 				break;
 			default:
 				break;
 			}
-			g_tokens[g_token_index].value = 0;	/* not used */
-			g_tokens[g_token_index].input = p;
-
-			g_token_index++;
 			p++;
-
 			continue;
 		}
 
 		/* number */
 		if (isdigit(*p)) {
-			g_tokens[g_token_index].type = TK_NUM;
-			g_tokens[g_token_index].input = p;
-			g_tokens[g_token_index].value = strtol(p, &p, 10);
-			g_token_index++;
-
+			struct token_t *t = add_token(v, TK_NUM, p);
+			t->value = strtol(p, &p, 10);
 			continue;
 		}
 
 		fprintf(stderr, "tokenize error: %s", p);
-		return -1;
+		exit(1);
 	}
 
-	g_tokens[g_token_index].type = TK_EOF;
-	g_tokens[g_token_index].input = NULL;
-	g_tokens[g_token_index].value = 0;
+	add_token(v, TK_EOF, 0);
 
-	return 0;
+	return v;
 }
+
+/**
+ * @brief debug function for tokenizer
+ */
+#if defined(DEBUG)
+void show_token(void)
+{
+	const char *table[] = {
+		[TK_PLUS] = "TK_PLUS",
+		[TK_MINUS] = "TK_MINUS",
+		[TK_NUM]   = "TK_NUM",
+		[TK_EOF]   = "TK_EOF",
+	};
+	unsigned int i;
+
+	for (i = 0; i < g_tokens->len; i++) {
+		printf("%s\n", table[((struct token_t*)(g_tokens->data[i]))->type]);
+	}
+}
+#endif
 
 static char *TEMP_REGS[] = {"t0", "t1", "t2", "t3", "t4", "t5", "t6",
 			    "a1", "a2", "a3", "a4", "a5", "a6", "a7", NULL};
 #define NUM_OF_TEMP_REGS  14  // = sizeof(TEMP_REGS) / ziefof(TEMP_REGS[0]) - 1
 static bool used_temp_regs[NUM_OF_TEMP_REGS];
-int reg_map[1000];
 
-int find_allocatable_reg(int ir_reg)
+/**
+ * @brief find an allocatable temporary register
+ * @param[in] ir_reg   register
+ * @param[in] reg_map  register map
+ */
+int find_allocatable_reg(int ir_reg, int *reg_map)
 {
 	int i;
 
@@ -371,28 +499,30 @@ void release_reg(int r)
 
 /**
  * @brief allocate register
+ * @param[in] irv
  */
-void allocate_regs(void)
+void allocate_regs(struct vector_t *irv)
 {
 	struct ir_t *ir;
-	int i;
+	int *reg_map = malloc(sizeof(int) * irv->len);
+	unsigned int i;
 
 	/* initialize */
-	for (i = 0; i < (int)(sizeof(reg_map) / sizeof(reg_map[0])); i++)
+	for (i = 0; i < irv->len; i++)
 		reg_map[i] = -1;
 
-	for (i = 0; i < inp; i++) {
-		ir = ins[i];
+	for (i = 0; i < irv->len; i++) {
+		ir = irv->data[i];
 
 		switch (ir->op) {
 		case IR_IMM:
-			ir->lhs = find_allocatable_reg(ir->lhs);
+			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 			break;
 		case IR_MOV:
 		case IR_PLUS:
 		case IR_MINUS:
-			ir->lhs = find_allocatable_reg(ir->lhs);
-			ir->rhs = find_allocatable_reg(ir->rhs);
+			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
+			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
 			break;
 		case IR_RETURN:
 			release_reg(reg_map[ir->lhs]);
@@ -406,13 +536,16 @@ void allocate_regs(void)
 			break;
 		}
 	}
+
+	free(reg_map);
 }
 
 #if defined(DEBUG)
-static void show_ir(void)
+static void show_ir(struct vector_t *irv)
 {
 #define OP2STR_ELEMENT(e)    [e] = #e
-	int i;
+	struct ir_t *ir;
+	unsigned int i;
 
 	const char *OP2STR[] = {
 		OP2STR_ELEMENT(IR_PLUS),
@@ -424,23 +557,25 @@ static void show_ir(void)
 		OP2STR_ELEMENT(IR_NOP),
 	};
 
-	for (i = 0; ins[i] != NULL; i++) {
+	for (i = 0; i < irv->len; i++) {
+		ir = irv->data[i];
 		printf("%s(%d) %d %d\n",
-		       OP2STR[ins[i]->op], ins[i]->op, ins[i]->lhs, ins[i]->rhs);
+		       OP2STR[ir->op], ir->op, ir->lhs, ir->rhs);
 	}
 }
 #endif
 
 /**
  * @brief generate assembly
+ * @param[in] irv  vector of IR
  */
-static void gen_riscv(void)
+static void gen_riscv(struct vector_t *irv)
 {
-	int i;
+	unsigned int i;
 	struct ir_t *ir;
 
-	for (i = 0; i < inp; i++) {
-		ir = ins[i];
+	for (i = 0; i < irv->len; i++) {
+		ir = irv->data[i];
 
 		switch (ir->op) {
 		case IR_IMM:
@@ -480,23 +615,26 @@ int main(int argc, char **argv)
 	}
 
 	/* tokenize */
-	if (tokenize(argv[1]))
-		return 1;
+	g_tokens = tokenize(argv[1]);
+
+#if defined(DEBUG)
+	show_token();
+#endif
 
 	node = expr();
 
-	gen_ir(node);
+	struct vector_t *irv = gen_ir(node);
 
 #if defined(DEBUG)
-	show_ir();
+	show_ir(irv);
 #endif
 
 	printf(".section .text\n");
 	printf(".global main\n");
 	printf("main:\n");
 
-	allocate_regs();
-	gen_riscv();
+	allocate_regs(irv);
+	gen_riscv(irv);
 
 	return 0;
 }
