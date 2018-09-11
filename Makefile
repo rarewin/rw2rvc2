@@ -1,4 +1,9 @@
-CFLAGS = -Wall -Wextra -Wswitch-enum -Wswitch-enum
+CFLAGS =  -Wall -Wextra -Wswitch-enum -Wswitch-enum
+CFLAGS += -MD
+
+SRCS = $(wildcard *.c)
+OBJS = $(SRCS:.c=.o)
+DEPS = $(SRCS:.c=.d)
 
 ifeq ($(DEBUG),1)
 	CFLAGS += -g -O0 -DDEBUG
@@ -8,15 +13,24 @@ endif
 
 all: rw2rvc2
 
-rw2rvc2: rw2rvc2.c
+rw2rvc2: $(OBJS)
+
+-include $(DEPS)
 
 .PHONY: clean
 clean:
 	rm -f rw2rvc2
+	rm -f $(OBJS)
+	rm -f $(DEPS)
+
+.PHONY: rebuild
+rebuild:
+	make clean
+	make
 
 .PHONY: test
 test: TEMP := $(shell tempfile)
-test: rw2rvc2
+test: rebuild
 	@./tools/test.sh 10 10
 	@./tools/test.sh 0 0
 	@./tools/test.sh 255 255
