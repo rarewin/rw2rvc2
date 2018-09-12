@@ -25,6 +25,33 @@ void show_token(struct vector_t *tokens)
 }
 
 /**
+ * @brief debug function for parser
+ */
+void show_node(struct node_t *node, int indent)
+{
+	const char *table[] = {
+		TRANS_ELEMENT(ND_PLUS),
+		TRANS_ELEMENT(ND_MINUS),
+		TRANS_ELEMENT(ND_MUL),
+		TRANS_ELEMENT(ND_DIV),
+		TRANS_ELEMENT(ND_NUM),
+	};
+
+	int i;
+
+	for (i = 0; i < indent; i++)
+		putchar(' ');
+
+	printf("%s: %d\n", table[node->type], node->value);
+
+	if (node->lhs != NULL)
+		show_node(node->lhs, indent + 1);
+
+	if (node->rhs != NULL)
+		show_node(node->rhs, indent + 1);
+}
+
+/**
  * @brief debug function for IR
  */
 void show_ir(struct vector_t *irv)

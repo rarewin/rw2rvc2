@@ -24,6 +24,9 @@ int main(int argc, char **argv)
 
 	node = expr(tokens);
 
+#if defined(DEBUG)
+	show_node(node, 0);
+#endif
 	struct vector_t *irv = gen_ir(node);
 
 #if defined(DEBUG)

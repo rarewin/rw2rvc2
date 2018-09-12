@@ -114,20 +114,6 @@ struct vector_t *new_vector(void);
 void gen_riscv(struct vector_t *irv);
 
 
-/* debug.c */
-
-/**
- * @brief debug function for tokenizer
- * @param[in] vector of tokens
- */
-void show_token(struct vector_t *tokens);
-
-/**
- * @brief debug function for IR
- */
-void show_ir(struct vector_t *irv);
-
-
 /* regalloc.c */
 /**
  * @brief get a temporary register's index
@@ -149,4 +135,21 @@ void allocate_regs(struct vector_t *irv);
  * @return 0
  */
 struct vector_t *gen_ir(struct node_t *node);
+/* debug.c */
+
+/**
+ * @brief debug function for tokenizer
+ * @param[in] vector of tokens
+ */
+void show_token(struct vector_t *tokens);
+
+/**
+ * @brief debug function for IR
+ */
+void show_ir(struct vector_t *irv);
+
+/**
+ * @brief debug function for parser
+ */
+void show_node(struct node_t *node, int indent);
 #endif
