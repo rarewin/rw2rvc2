@@ -8,6 +8,7 @@ static node_type_t CONVERSION_NODE_TO_IR[] = {
 	[ND_MINUS] = IR_MINUS,
 	[ND_MUL] = IR_MUL,
 	[ND_DIV] = IR_DIV,
+	[ND_RETURN] = IR_RETURN,
 };
 
 /**
@@ -67,6 +68,13 @@ int gen_ir_sub(struct vector_t *v, struct node_t *node)
 	int lhs, rhs;
 	int r = regno;
 
+	if (node == NULL)
+		return -1;
+
+	if (node->type == ND_RETURN) {
+		vector_push(v, new_ir(IR_RETURN, gen_ir_sub(v, node), 0));
+	}
+
 	if (node->type == ND_NUM) {
 		vector_push(v, new_ir(IR_IMM, regno++, node->value));
 		return r;
@@ -86,12 +94,14 @@ int gen_ir_sub(struct vector_t *v, struct node_t *node)
  */
 struct vector_t *gen_ir(struct node_t *node)
 {
-	struct vector_t *v;
+	struct vector_t *v = NULL;
 	int r;
 
-	v = new_vector();
-	r = gen_ir_sub(v, node);
-	vector_push(v, new_ir(IR_RETURN, r, 0));
+	if (node->type == ND_RETURN) {
+		v = new_vector();
+		r = gen_ir_sub(v, node->lhs);
+		vector_push(v, new_ir(IR_RETURN, r, 0));
+	}
 
 	return v;
 }

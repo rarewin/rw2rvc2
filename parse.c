@@ -1,6 +1,20 @@
+#include <stdio.h>
+
 #include "rw2rvc2.h"
 
 static int g_position = 0;
+
+static void expect_token(struct vector_t *tokens, token_type_t type)
+{
+	struct token_t *t = tokens->data[g_position];
+
+	if (t->type == type) {
+		g_position++;
+	} else {
+		fprintf(stderr, "unexpect token\n");
+		exit(1);
+	}
+}
 
 /**
  * @brief allocate memory to a new node
@@ -67,6 +81,7 @@ static node_type_t CONVERSION_TOKEN_TO_NODE[] = {
 	[TK_MUL]   = ND_MUL,
 	[TK_DIV]   = ND_DIV,
 	[TK_NUM]   = ND_NUM,
+	[TK_RETURN] = ND_RETURN,
 };
 
 /**
@@ -107,8 +122,9 @@ static struct node_t *muldiv(struct vector_t *tokens)
 
 /**
  * @brief expression
+ * @param[in]  tokens  vector for tokens
  */
-struct node_t *expr(struct vector_t *tokens)
+static struct node_t *expression(struct vector_t *tokens)
 {
 	struct node_t *lhs = muldiv(tokens);
 
@@ -124,4 +140,49 @@ struct node_t *expr(struct vector_t *tokens)
 	}
 
 	return lhs;
+}
+
+/**
+ * @brief "return"
+ * @param[in] tokens  vector for tokens
+ * @return
+ */
+static struct node_t *keyword_return(struct vector_t *tokens)
+{
+	struct token_t *t = tokens->data[g_position];
+	struct node_t *lhs = NULL;
+
+	if (t->type == TK_RETURN) {
+		g_position++;
+		lhs = new_node(ND_RETURN, expression(tokens), NULL);
+	} else {
+		fprintf(stderr, "no return keywords\n");
+		exit(1);
+	}
+
+	expect_token(tokens, TK_SEMICOLON);
+
+	return lhs;
+}
+
+/**
+ * jump_statement := GOTO IDENTIFIER ';'
+ *                 | CONTINUE ';'
+ *                 | BREAK ';'
+ *                 | RETURN ';'
+ *                 | RETURN expression ';'
+ */
+static struct node_t *jump_statement(struct vector_t *tokens)
+{
+	struct node_t *lhs = keyword_return(tokens);
+
+	return lhs;
+}
+
+/**
+ * @brief main function of parser
+ */
+struct node_t *parse(struct vector_t *tokens)
+{
+	return jump_statement(tokens);
 }

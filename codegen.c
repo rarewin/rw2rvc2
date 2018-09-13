@@ -10,6 +10,10 @@ void gen_riscv(struct vector_t *irv)
 	unsigned int i;
 	struct ir_t *ir;
 
+	printf(".section .text\n");
+	printf(".global main\n");
+	printf("main:\n");
+
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];
 
@@ -21,7 +25,8 @@ void gen_riscv(struct vector_t *irv)
 			printf("	mv	%s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
 			break;
 		case IR_RETURN:
-			printf("	mv	a0, %s\n", get_temp_reg_str(ir->lhs));
+			if (ir->lhs != -1)
+				printf("	mv	a0, %s\n", get_temp_reg_str(ir->lhs));
 			printf("	ret\n");
 			break;
 		case IR_PLUS:

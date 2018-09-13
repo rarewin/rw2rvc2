@@ -49,16 +49,24 @@ struct token_t *add_token(struct vector_t *v, token_type_t type, char *input)
 struct vector_t *tokenize(char *p)
 {
 	struct vector_t *v = new_vector();
+	const struct keyword_t {
+		char *word;
+		token_type_t tkval;
+	} keywords[] = {
+		{"return", TK_RETURN},
+	};
+	unsigned int i;
 
 	while (*p) {
+
 		/* ignore spaces */
 		if (isspace(*p)) {
 			p++;
 			continue;
 		}
 
-		/* arithmetic symbols */
-		if (strchr("+-*/", *p) != NULL) {
+		/* symbols */
+		if (strchr("+-*/;", *p) != NULL) {
 			switch (*p) {
 			case '+':
 				add_token(v, TK_PLUS, p);
@@ -72,6 +80,9 @@ struct vector_t *tokenize(char *p)
 			case '/':
 				add_token(v, TK_DIV, p);
 				break;
+			case ';':
+				add_token(v, TK_SEMICOLON, p);
+				break;
 			default:
 				break;
 			}
@@ -84,6 +95,24 @@ struct vector_t *tokenize(char *p)
 			struct token_t *t = add_token(v, TK_NUM, p);
 			t->value = strtol(p, &p, 10);
 			continue;
+		}
+
+		if (isalpha(*p) || *p == '_') {
+			size_t len = 1;
+
+			while (isalpha(p[len]) || isdigit(p[len]) || p[len] == '_')
+				len++;
+
+			for (i = 0; i < (sizeof(keywords) / sizeof(keywords[0])); i++) {
+				if (strncmp(keywords[i].word, p, len) == 0) {
+					add_token(v, keywords[i].tkval, p);
+					p += len;
+					break;
+				}
+			}
+
+			if (i < (sizeof(keywords) / sizeof(keywords[0])))
+				continue;
 		}
 
 		fprintf(stderr, "tokenize error: %s", p);

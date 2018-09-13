@@ -22,20 +22,17 @@ int main(int argc, char **argv)
 	show_token(tokens);
 #endif
 
-	node = expr(tokens);
+	node = parse(tokens);
 
 #if defined(DEBUG)
 	show_node(node, 0);
 #endif
+
 	struct vector_t *irv = gen_ir(node);
 
 #if defined(DEBUG)
 	show_ir(irv);
 #endif
-
-	printf(".section .text\n");
-	printf(".global main\n");
-	printf("main:\n");
 
 	allocate_regs(irv);
 	gen_riscv(irv);

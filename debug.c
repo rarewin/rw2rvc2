@@ -15,6 +15,8 @@ void show_token(struct vector_t *tokens)
 		TRANS_ELEMENT(TK_MUL),
 		TRANS_ELEMENT(TK_DIV),
 		TRANS_ELEMENT(TK_NUM),
+		TRANS_ELEMENT(TK_SEMICOLON),
+		TRANS_ELEMENT(TK_RETURN),
 		TRANS_ELEMENT(TK_EOF),
 	};
 	unsigned int i;
@@ -35,20 +37,22 @@ void show_node(struct node_t *node, int indent)
 		TRANS_ELEMENT(ND_MUL),
 		TRANS_ELEMENT(ND_DIV),
 		TRANS_ELEMENT(ND_NUM),
+		TRANS_ELEMENT(ND_SEMICOLON),
+		TRANS_ELEMENT(ND_RETURN),
 	};
 
 	int i;
+
+	if (node == NULL)
+		return;
 
 	for (i = 0; i < indent; i++)
 		putchar(' ');
 
 	printf("%s: %d\n", table[node->type], node->value);
 
-	if (node->lhs != NULL)
-		show_node(node->lhs, indent + 1);
-
-	if (node->rhs != NULL)
-		show_node(node->rhs, indent + 1);
+	show_node(node->lhs, indent + 1);
+	show_node(node->rhs, indent + 1);
 }
 
 /**

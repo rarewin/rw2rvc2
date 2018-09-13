@@ -1,3 +1,6 @@
+/**
+ * @brief header file for rw2rvc
+ */
 #if !defined(RW2RVC2_H_INCLUDED)
 #define RW2RVC2_H_INCLUDED
 #include <stdlib.h>
@@ -6,41 +9,45 @@
  * @brief Vector type
  */
 typedef struct vector_t {
-	void **data;
-	size_t capacity;
-	size_t len;
+	void **data;		/**< pointer to data */
+	size_t capacity;	/**< vector capacity */
+	size_t len;		/**< current length */
 } vector_t;
 
 /**
  * @brief types of tokens
  */
 typedef enum {
-	TK_PLUS,
-	TK_MINUS,
-	TK_MUL,
-	TK_DIV,
-	TK_NUM,
-	TK_EOF,
+	TK_PLUS,	/**< + */
+	TK_MINUS,	/**< - */
+	TK_MUL,		/**< * */
+	TK_DIV,		/**< / */
+	TK_NUM,		/**< numbers */
+	TK_SEMICOLON,	/**< ; */
+	TK_RETURN,	/**< "return" */
+	TK_EOF,		/**< EOF */
 } token_type_t;
 
 /**
  * @brief Token type
  */
 typedef struct token_t {
-	token_type_t type;
-	int value;
-	char *input;
+	token_type_t type;	/**< token type */
+	int value;		/**< token value */
+	char *input;		/**< input string */
 } token_t;
 
 /**
  * @brief types of nodes
  */
 typedef enum {
-	ND_PLUS,
-	ND_MINUS,
-	ND_MUL,
-	ND_DIV,
-	ND_NUM,
+	ND_PLUS,	/**< + */
+	ND_MINUS,	/**< - */
+	ND_MUL,		/**< * */
+	ND_DIV,		/**< / */
+	ND_NUM,		/**< numbers */
+	ND_SEMICOLON,	/**< ; */
+	ND_RETURN,	/**< "return" */
 } node_type_t;
 
 /**
@@ -61,9 +68,9 @@ typedef enum {
 	IR_MINUS,
 	IR_MUL,
 	IR_DIV,
+	IR_RETURN,
 	IR_IMM,
 	IR_MOV,
-	IR_RETURN,
 	IR_KILL,
 	IR_NOP,
 } ir_type_t;
@@ -80,10 +87,9 @@ typedef struct ir_t {
 
 /* parser.c */
 /**
- * @brief expression
- * @param[in]  tokens  vector for tokens
+ * @brief main function of parser
  */
-struct node_t *expr(struct vector_t *tokens);
+struct node_t *parse(struct vector_t *token);
 
 /**
  * @brief tokenizer
