@@ -4,8 +4,7 @@
 #include "rw2rvc2.h"
 
 /**
- * @brief allocate memory to a new vector
- * @param[in] old  vector
+ * @brief ベクタにメモリを割り当てる
  */
 static struct vector_t *allocate_vector(void)
 {
@@ -21,8 +20,9 @@ static struct vector_t *allocate_vector(void)
 		vector_array = (struct vector_t*)malloc(sizeof(struct vector_t) * size);
 	}
 
+	/* リサイズ */
 	if (index >= size) {
-		size += ALLOCATE_SIZE;
+		size *= 2;
 		vector_array = (struct vector_t*)realloc(vector_array, sizeof(struct vector_t) * size);
 	}
 
@@ -50,14 +50,15 @@ struct vector_t *new_vector(void)
 		vector_data_array = (void*)malloc(sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * size);
 	}
 
+	/* リサイズ */
 	if (index >= size) {
-		size += ALLOCATE_SIZE;
+		size *= 2;
 		vector_data_array = (void*)realloc(vector_data_array, sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * size);
 	}
 
 	v->capacity = VECTOR_DATA_DEFAULT_CAPACITY;
 	v->len = 0;
-	v->data = (vector_data_array + VECTOR_DATA_DEFAULT_CAPACITY * index);
+	v->data = ((void*)vector_data_array + sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * index);
 	index++;
 
 	return v;

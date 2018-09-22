@@ -18,14 +18,22 @@ typedef struct vector_t {
  * @brief types of tokens
  */
 typedef enum {
-	TK_PLUS,	/**< + */
-	TK_MINUS,	/**< - */
-	TK_MUL,		/**< * */
-	TK_DIV,		/**< / */
-	TK_NUM,		/**< numbers */
-	TK_SEMICOLON,	/**< ; */
-	TK_RETURN,	/**< "return" */
-	TK_EOF,		/**< EOF */
+	TK_PLUS,		/**< + */
+	TK_MINUS,		/**< - */
+	TK_MUL,			/**< * */
+	TK_DIV,			/**< / */
+	TK_NUM,			/**< 数値  */
+	TK_STRING,		/**< 文字列 */
+	TK_CHAR,		/**< 文字 */
+	TK_SEMICOLON,		/**< ; */
+	TK_COLON,		/**< : */
+	TK_OPEN_PAREN,		/**< ( */
+	TK_CLOSE_PAREN,		/**< ) */
+	TK_DOUBLE_QUOTE,	/**< " */
+	TK_SINGLE_QUOTE,	/**< ' */
+	TK_RETURN,		/**< "return" */
+	TK_GOTO,		/**< "goto" */
+	TK_EOF,			/**< EOF */
 } token_type_t;
 
 /**
@@ -41,22 +49,25 @@ typedef struct token_t {
  * @brief types of nodes
  */
 typedef enum {
-	ND_PLUS,	/**< + */
-	ND_MINUS,	/**< - */
-	ND_MUL,		/**< * */
-	ND_DIV,		/**< / */
-	ND_NUM,		/**< numbers */
-	ND_SEMICOLON,	/**< ; */
-	ND_RETURN,	/**< "return" */
+	ND_PLUS,		/**< + */
+	ND_MINUS,		/**< - */
+	ND_MUL,			/**< * */
+	ND_DIV,			/**< / */
+	ND_NUM,			/**< numbers */
+	ND_SEMICOLON,		/**< ; */
+	ND_RETURN,		/**< "return" */
+	ND_STATEMENT_LIST,	/**< statement list */
 } node_type_t;
 
 /**
- * @brief Node
+ * @brief ノード構造体
  */
 typedef struct node_t {
-	node_type_t type;
-	struct node_t *lhs;
-	struct node_t *rhs;
+	node_type_t type;		/**< タイプ (ND_XXXX) */
+	struct node_t *lhs;		/**< 左辺値 */
+	struct node_t *rhs;		/**< 右辺値 */
+	struct node_t *expression;	/**< */
+	struct vector_t *statements;	/**< 文 */
 	int value;
 } node_t;
 
@@ -83,6 +94,16 @@ typedef struct ir_t {
 	int lhs;
 	int rhs;
 } ir_t;
+
+/**
+ * @brief 表示色
+ */
+typedef enum {
+	COL_RED    = 31,
+	COL_GREEN  = 32,
+	COL_YELLOW = 33,
+	COL_BLUE   = 34,
+} dprint_color_t;
 
 
 /* parser.c */
@@ -114,8 +135,8 @@ struct vector_t *new_vector(void);
 /* codegen.c */
 
 /**
- * @brief generate assembly
- * @param[in] irv  vector of IR
+ * @brief RISC-Vのアセンブラを生成する
+ * @param[in] irv  中間表現(IR)のVector
  */
 void gen_riscv(struct vector_t *irv);
 
@@ -136,13 +157,30 @@ void allocate_regs(struct vector_t *irv);
 
 /* ir.c */
 /**
- * @brief generate IR
- * @param[in] node  node
- * @return 0
+ * @brief 中間表現(IR)を生成する
+ * @param[in] node  ノードへのポインタ
+ * @return 生成されたIRへのポインタ
  */
 struct vector_t *gen_ir(struct node_t *node);
-/* debug.c */
 
+
+/* display.c */
+/**
+ * @brief 文字を色付きで標準出力する
+ * @param[in] color   表示色
+ * @param[in] format  表示フォーマット
+ * @return 出力した文字数
+ */
+int color_printf(dprint_color_t color, const char *format, ...);
+
+/**
+ * @brief エラー表示をエラー出力に吐き出す
+ * @param[in] format  表示フォーマット
+ * @return 出力した文字数
+ */
+int error_printf(const char *format, ...);
+
+/* debug.c */
 /**
  * @brief debug function for tokenizer
  * @param[in] vector of tokens
@@ -157,5 +195,5 @@ void show_ir(struct vector_t *irv);
 /**
  * @brief debug function for parser
  */
-void show_node(struct node_t *node, int indent);
+void show_node(struct node_t *node, unsigned int indent);
 #endif

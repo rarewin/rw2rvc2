@@ -1,3 +1,6 @@
+/**
+ * @brief トークナイザー
+ */
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,11 +18,13 @@ static struct token_t *allocate_token(void)
 	static size_t index = 0;
 	static size_t size = ALLOCATE_SIZE;
 
+	/* 初期化 */
 	if (token_array == NULL)
 		token_array = (struct token_t*)malloc(sizeof(struct token_t) * size);
 
+	/* サイズを拡大する */
 	if (index >= size) {
-		size += ALLOCATE_SIZE;
+		size *= 2;
 		token_array = (struct token_t*)realloc(token_array, sizeof(struct token_t) * size);
 	}
 
@@ -28,9 +33,9 @@ static struct token_t *allocate_token(void)
 
 /**
  * @brief add token
- * @param[in]  v
- * @param[in]  type
- * @param[in]  input
+ * @param[in]  v      トークンを詰めるvector_t
+ * @param[in]  type   タイプ (TK_XXX)
+ * @param[in]  input  入力文字列へのポインタ
  */
 struct token_t *add_token(struct vector_t *v, token_type_t type, char *input)
 {
@@ -44,7 +49,8 @@ struct token_t *add_token(struct vector_t *v, token_type_t type, char *input)
 }
 
 /**
- * @brief tokenizer
+ * @brief トークナイザー メイン
+ * @param[in] p  入力文字列へのポインタ
  */
 struct vector_t *tokenize(char *p)
 {
@@ -54,6 +60,7 @@ struct vector_t *tokenize(char *p)
 		token_type_t tkval;
 	} keywords[] = {
 		{"return", TK_RETURN},
+		{"goto",   TK_GOTO},
 	};
 	unsigned int i;
 
@@ -66,7 +73,7 @@ struct vector_t *tokenize(char *p)
 		}
 
 		/* symbols */
-		if (strchr("+-*/;", *p) != NULL) {
+		if (strchr("+-*/;()'\"", *p) != NULL) {
 			switch (*p) {
 			case '+':
 				add_token(v, TK_PLUS, p);
@@ -82,6 +89,21 @@ struct vector_t *tokenize(char *p)
 				break;
 			case ';':
 				add_token(v, TK_SEMICOLON, p);
+				break;
+			case ':':
+				add_token(v, TK_COLON, p);
+				break;
+			case '(':
+				add_token(v, TK_OPEN_PAREN, p);
+				break;
+			case ')':
+				add_token(v, TK_CLOSE_PAREN, p);
+				break;
+			case '\'':
+				add_token(v, TK_SINGLE_QUOTE, p);
+				break;
+			case '"':
+				add_token(v, TK_DOUBLE_QUOTE, p);
 				break;
 			default:
 				break;
@@ -115,11 +137,11 @@ struct vector_t *tokenize(char *p)
 				continue;
 		}
 
-		fprintf(stderr, "tokenize error: %s", p);
+		color_printf(COL_RED, "tokenize error: %s\n", p);
 		exit(1);
 	}
 
-	add_token(v, TK_EOF, 0);
+	add_token(v, TK_EOF, "EOF");
 
 	return v;
 }

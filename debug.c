@@ -10,49 +10,90 @@
 void show_token(struct vector_t *tokens)
 {
 	const char *table[] = {
-		TRANS_ELEMENT(TK_PLUS),
-		TRANS_ELEMENT(TK_MINUS),
-		TRANS_ELEMENT(TK_MUL),
-		TRANS_ELEMENT(TK_DIV),
-		TRANS_ELEMENT(TK_NUM),
-		TRANS_ELEMENT(TK_SEMICOLON),
-		TRANS_ELEMENT(TK_RETURN),
-		TRANS_ELEMENT(TK_EOF),
+		TRANS_ELEMENT(TK_PLUS),		/**< + */
+		TRANS_ELEMENT(TK_MINUS),	/**< - */
+		TRANS_ELEMENT(TK_MUL),		/**< * */
+		TRANS_ELEMENT(TK_DIV),		/**< / */
+		TRANS_ELEMENT(TK_NUM),		/**< 数値  */
+		TRANS_ELEMENT(TK_STRING),	/**< 文字列 */
+		TRANS_ELEMENT(TK_CHAR),		/**< 文字 */
+		TRANS_ELEMENT(TK_SEMICOLON),	/**< ; */
+		TRANS_ELEMENT(TK_OPEN_PAREN),	/**< ( */
+		TRANS_ELEMENT(TK_CLOSE_PAREN),	/**< ) */
+		TRANS_ELEMENT(TK_DOUBLE_QUOTE),	/**< " */
+		TRANS_ELEMENT(TK_SINGLE_QUOTE),	/**< ' */
+		TRANS_ELEMENT(TK_RETURN),	/**< "return" */
+		TRANS_ELEMENT(TK_EOF),		/**< EOF */
 	};
 	unsigned int i;
 
 	for (i = 0; i < tokens->len; i++) {
-		printf("%s\n", table[((struct token_t*)(tokens->data[i]))->type]);
+		token_type_t tt = ((struct token_t*)(tokens->data[i]))->type;
+		printf("%02d: %s\n", tt, table[tt]);
 	}
+}
+
+/**
+ * @breif @p indent 文字だけ空白を標準出力する
+ * @param[in] indent  インデント量
+ */
+static void print_indent(unsigned int indent)
+{
+	unsigned int i;
+
+	for (i = 0; i < indent + 1; i++)
+		putchar(' ');
 }
 
 /**
  * @brief debug function for parser
  */
-void show_node(struct node_t *node, int indent)
+void show_node(struct node_t *node, unsigned int indent)
 {
 	const char *table[] = {
-		TRANS_ELEMENT(ND_PLUS),
-		TRANS_ELEMENT(ND_MINUS),
-		TRANS_ELEMENT(ND_MUL),
-		TRANS_ELEMENT(ND_DIV),
-		TRANS_ELEMENT(ND_NUM),
-		TRANS_ELEMENT(ND_SEMICOLON),
-		TRANS_ELEMENT(ND_RETURN),
+		TRANS_ELEMENT(ND_PLUS),			/**< + */
+		TRANS_ELEMENT(ND_MINUS),		/**< - */
+		TRANS_ELEMENT(ND_MUL),			/**< * */
+		TRANS_ELEMENT(ND_DIV),			/**< / */
+		TRANS_ELEMENT(ND_NUM),			/**< numbers */
+		TRANS_ELEMENT(ND_SEMICOLON),		/**< ; */
+		TRANS_ELEMENT(ND_RETURN),		/**< "return" */
+		TRANS_ELEMENT(ND_STATEMENT_LIST),	/**< statement list */
 	};
 
-	int i;
+	size_t i;
 
 	if (node == NULL)
 		return;
 
-	for (i = 0; i < indent; i++)
-		putchar(' ');
+	print_indent(indent);
 
 	printf("%s: %d\n", table[node->type], node->value);
 
-	show_node(node->lhs, indent + 1);
-	show_node(node->rhs, indent + 1);
+	if (node->statements != NULL) {
+		print_indent(indent + 1);
+		color_printf(COL_GREEN, "statements:\n");
+		for (i = 0; i < node->statements->len; i++)
+			show_node(node->statements->data[i], indent + 2);
+	}
+
+	if (node->expression != NULL) {
+		print_indent(indent + 1);
+		color_printf(COL_GREEN, "expression:\n");
+		show_node(node->expression, indent + 2);
+	}
+
+	if (node->lhs != NULL) {
+		print_indent(indent + 1);
+		color_printf(COL_GREEN, "lhs:\n");
+		show_node(node->lhs, indent + 1);
+	}
+
+	if (node->rhs != NULL) {
+		print_indent(indent + 1);
+		color_printf(COL_GREEN, "rhs:\n");
+		show_node(node->rhs, indent + 1);
+	}
 }
 
 /**

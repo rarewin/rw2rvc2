@@ -9,7 +9,7 @@ static char *TEMP_REGS[] = {"t0", "t1", "t2", "t3", "t4", "t5", "t6",
 static bool used_temp_regs[NUM_OF_TEMP_REGS];
 
 /**
- * @brief find an allocatable temporary register
+ * @brief 割り当て可能なスクラッチレジスタを探す
  * @param[in] ir_reg   register
  * @param[in] reg_map  register map
  */
@@ -69,7 +69,7 @@ void allocate_regs(struct vector_t *irv)
 			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
 			break;
 		case IR_RETURN:
-			release_reg(reg_map[ir->lhs]);
+			ir->lhs = reg_map[ir->lhs];
 			break;
 		case IR_KILL:
 			release_reg(reg_map[ir->lhs]);

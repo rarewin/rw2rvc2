@@ -51,3 +51,4 @@ test: rebuild
 	@./tools/test.sh "return 5 / 2;" 2
 	@./tools/test.sh "return 4 * 3 / 4;" 3
 	@./tools/test.sh "return 10 / 3 * 3;" 9
+	@./tools/test.sh "1 + 2; return 10 / 3 * 3;" 9

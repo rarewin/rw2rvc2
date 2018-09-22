@@ -3,7 +3,7 @@
 #include "rw2rvc2.h"
 
 /**
- * @brief generate assembly
+ * @brief RISC-Vのアセンブラを生成する
  */
 void gen_riscv(struct vector_t *irv)
 {
