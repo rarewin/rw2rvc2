@@ -2,6 +2,9 @@
 
 #include "rw2rvc2.h"
 
+/* static関数のプロトタイプ宣言. (循環コールのため) */
+static struct node_t *expression(struct vector_t *tokens);
+
 static int g_position = 0;
 
 /**
@@ -18,7 +21,22 @@ static void expect_token(struct vector_t *tokens, token_type_t type)
 	} else {
 		/* 期待値と異なった場合, 止まる. */
 		error_printf("unexpect token: %s\n", t->input);
+		error_printf("expect token: %d\n", type);
 		exit(1);
+	}
+}
+
+/**
+ * @brief 消費(トークン)
+ * @param[in] tokens  パースするトークンへのポインタ
+ * @param[in] type    期待値
+ */
+static void consume_token(struct vector_t *tokens, token_type_t type)
+{
+	struct token_t *t = tokens->data[g_position];
+
+	if (t->type == type) {
+		g_position++;	/* 期待値通りならインデックスを進めて戻る. */
 	}
 }
 
@@ -53,12 +71,15 @@ struct node_t *allocate_node(void)
  * @param[in] rhs          右辺
  * @param[in] expression   式
  * @param[in] statement    文 (Vector型)
+ * @param[in] name         名前
  */
 static struct node_t *new_node(node_type_t op,
 			       struct node_t *lhs,
 			       struct node_t *rhs,
 			       struct node_t *expression,
-			       struct vector_t *statements)
+			       struct vector_t *statements,
+			       char *name,
+			       int value)
 {
 	node_t *node = allocate_node();
 
@@ -67,21 +88,7 @@ static struct node_t *new_node(node_type_t op,
 	node->rhs = rhs;
 	node->expression = expression;
 	node->statements = statements;
-
-	return node;
-}
-
-/**
- * @brief allocate memory for a node of the number
- * @param[in] value  value of the number
- */
-static struct node_t *new_node_num(int value)
-{
-	struct node_t *node = allocate_node();
-
-	node->type = ND_NUM;
-	node->lhs = NULL;
-	node->rhs = NULL;
+	node->name = name;
 	node->value = value;
 
 	return node;
@@ -95,20 +102,31 @@ static node_type_t CONVERSION_TOKEN_TO_NODE[] = {
 	[TK_MINUS] = ND_MINUS,
 	[TK_MUL]   = ND_MUL,
 	[TK_DIV]   = ND_DIV,
-	[TK_NUM]   = ND_NUM,
+	[TK_NUM]   = ND_CONST,
 	[TK_RETURN] = ND_RETURN,
 };
 
 /**
- * @brief number
+ * @brief primary expression
+ *
+ * primary_expression := IDENTIFIER
+ *                     | CONSTANT
+ *                     | STRING_LITERAL
+ *                     | '(' expression ')'
+ *                     ;
  */
-static struct node_t *number(struct vector_t *tokens)
+static struct node_t *primary_expression(struct vector_t *tokens)
 {
 	struct token_t *t = tokens->data[g_position];
 
 	if (t->type == TK_NUM) {
 		g_position++;
-		return new_node_num(t->value);
+		return new_node(ND_CONST, NULL, NULL, NULL, NULL, NULL, t->value);
+	}
+
+	if (t->type == TK_IDENT) {
+		g_position++;
+		return new_node(ND_IDENT, NULL, NULL, NULL, NULL, t->name, -1);
 	}
 
 	return NULL;
@@ -121,7 +139,7 @@ static struct node_t *number(struct vector_t *tokens)
  */
 static struct node_t *muldiv(struct vector_t *tokens)
 {
-	struct node_t *lhs = number(tokens);
+	struct node_t *lhs = primary_expression(tokens);
 
 	for (;;) {
 		struct token_t *t = tokens->data[g_position];
@@ -131,8 +149,44 @@ static struct node_t *muldiv(struct vector_t *tokens)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, number(tokens), NULL, NULL);
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, primary_expression(tokens), NULL, NULL, NULL, -1);
 	}
+
+	return lhs;
+}
+
+static struct node_t *identifier(struct vector_t *tokens)
+{
+	struct token_t *t = tokens->data[g_position];
+
+	if (t->type == TK_IDENT) {
+		g_position++;
+		return new_node(ND_IDENT, NULL, NULL, NULL, NULL, t->name, -1);
+	}
+
+	return NULL;
+}
+
+/**
+ * @brief assignment expression
+ * assignment_expression := conditional_expression
+ *                        | unary_expression assignment_operator assignment_expression
+ *                          ;
+ */
+static struct node_t *assignment_expression(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct token_t *t;
+
+	if ((lhs = identifier(tokens)) == NULL)
+		return NULL;
+
+	t = tokens->data[g_position];
+	if (t->type != TK_EQUAL)
+		return lhs;
+
+	consume_token(tokens, TK_EQUAL);
+	lhs = new_node(ND_ASSIGN, lhs, expression(tokens), NULL, NULL, NULL, -1);
 
 	return lhs;
 }
@@ -140,20 +194,30 @@ static struct node_t *muldiv(struct vector_t *tokens)
 /**
  * @brief expression
  * @param[in]  tokens  vector for tokens
+ *
+ * expression := assignment_expression
+ *             | expression ',' assignment_expression
+ *             ;
  */
 static struct node_t *expression(struct vector_t *tokens)
 {
-	struct node_t *lhs = muldiv(tokens);
+	struct node_t *lhs;
+	struct token_t *t;
+
+	if ((lhs = assignment_expression(tokens)) != NULL)
+		return lhs;
+
+	lhs = muldiv(tokens);
 
 	for (;;) {
-		struct token_t *t = tokens->data[g_position];
+		t = tokens->data[g_position];
 		token_type_t op = t->type;
 
 		if (op != TK_PLUS && op != TK_MINUS)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, muldiv(tokens), NULL, NULL);
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, muldiv(tokens), NULL, NULL, NULL, -1);
 	}
 
 	return lhs;
@@ -171,7 +235,7 @@ static struct node_t *keyword_return(struct vector_t *tokens)
 
 	if (t->type == TK_RETURN) {
 		g_position++;
-		e = new_node(ND_RETURN, NULL, NULL, expression(tokens), NULL);
+		e = new_node(ND_RETURN, NULL, NULL, expression(tokens), NULL, NULL, -1);
 	} else {
 		return NULL;
 	}
@@ -235,7 +299,7 @@ struct node_t *statement_list(struct vector_t *tokens)
 
 		if (s != NULL) {
 			if (n == NULL)
-				n = new_node(ND_STATEMENT_LIST, NULL, NULL, NULL, new_vector());
+				n = new_node(ND_STATEMENT_LIST, NULL, NULL, NULL, new_vector(), NULL, -1);
 			vector_push(n->statements, s);
 		}
 

@@ -5,6 +5,7 @@
 #define RW2RVC2_H_INCLUDED
 #include <stdlib.h>
 
+
 /**
  * @brief Vector type
  */
@@ -14,6 +15,26 @@ typedef struct vector_t {
 	size_t len;		/**< current length */
 } vector_t;
 
+
+/**
+ * @brief 辞書要素用 構造体
+ */
+typedef struct dict_element_t {
+	char *key;
+	void *value;
+} dict_element_t;
+
+
+/**
+ * @brief 辞書用 構造体
+ */
+typedef struct dict_t {
+	struct dict_element_t *dict;
+	size_t len;
+	size_t capacity;
+} dict_t;
+
+
 /**
  * @brief types of tokens
  */
@@ -22,6 +43,7 @@ typedef enum {
 	TK_MINUS,		/**< - */
 	TK_MUL,			/**< * */
 	TK_DIV,			/**< / */
+	TK_EQUAL,		/**< = */
 	TK_NUM,			/**< 数値  */
 	TK_STRING,		/**< 文字列 */
 	TK_CHAR,		/**< 文字 */
@@ -31,6 +53,7 @@ typedef enum {
 	TK_CLOSE_PAREN,		/**< ) */
 	TK_DOUBLE_QUOTE,	/**< " */
 	TK_SINGLE_QUOTE,	/**< ' */
+	TK_IDENT,		/**< 識別子 (変数名等) */
 	TK_RETURN,		/**< "return" */
 	TK_GOTO,		/**< "goto" */
 	TK_EOF,			/**< EOF */
@@ -43,6 +66,7 @@ typedef struct token_t {
 	token_type_t type;	/**< token type */
 	int value;		/**< token value */
 	char *input;		/**< input string */
+	char *name;		/**< 識別子等の名前 */
 } token_t;
 
 /**
@@ -53,10 +77,12 @@ typedef enum {
 	ND_MINUS,		/**< - */
 	ND_MUL,			/**< * */
 	ND_DIV,			/**< / */
-	ND_NUM,			/**< numbers */
+	ND_CONST,		/**< 定数 */
+	ND_IDENT,		/**< 識別子 */
 	ND_SEMICOLON,		/**< ; */
 	ND_RETURN,		/**< "return" */
 	ND_STATEMENT_LIST,	/**< statement list */
+	ND_ASSIGN,		/**< 代入文 */
 } node_type_t;
 
 /**
@@ -66,9 +92,10 @@ typedef struct node_t {
 	node_type_t type;		/**< タイプ (ND_XXXX) */
 	struct node_t *lhs;		/**< 左辺値 */
 	struct node_t *rhs;		/**< 右辺値 */
-	struct node_t *expression;	/**< */
+	struct node_t *expression;	/**< 式 */
 	struct vector_t *statements;	/**< 文 */
-	int value;
+	char *name;			/**< 識別子等の名前 */
+	int value;			/**< 値 */
 } node_t;
 
 /**
@@ -83,6 +110,9 @@ typedef enum {
 	IR_IMM,
 	IR_MOV,
 	IR_KILL,
+	IR_LOAD,
+	IR_STORE,
+	IR_LOADADDR,
 	IR_NOP,
 } ir_type_t;
 
@@ -93,6 +123,7 @@ typedef struct ir_t {
 	ir_type_t op;
 	int lhs;
 	int rhs;
+	char *name;
 } ir_t;
 
 /**
@@ -118,27 +149,15 @@ struct node_t *parse(struct vector_t *token);
  */
 struct vector_t *tokenize(char *p);
 
-/**
- * @brief push an element to a vector
- * @param[in] v        vector storing an element
- * @param[in] element  an element to be pushed
- */
-void vector_push(struct vector_t *v, void *element);
-
-/**
- * @brief create a new vector
- * @return a created vector
- */
-struct vector_t *new_vector(void);
-
 
 /* codegen.c */
 
 /**
  * @brief RISC-Vのアセンブラを生成する
  * @param[in] irv  中間表現(IR)のVector
+ * @param[in] d    辞書
  */
-void gen_riscv(struct vector_t *irv);
+void gen_riscv(struct vector_t *irv, struct dict_t *d);
 
 
 /* regalloc.c */
@@ -159,9 +178,10 @@ void allocate_regs(struct vector_t *irv);
 /**
  * @brief 中間表現(IR)を生成する
  * @param[in] node  ノードへのポインタ
+ * @param[in] d     辞書へのポインタ
  * @return 生成されたIRへのポインタ
  */
-struct vector_t *gen_ir(struct node_t *node);
+struct vector_t *gen_ir(struct node_t *node, struct dict_t *d);
 
 
 /* display.c */
@@ -179,6 +199,42 @@ int color_printf(dprint_color_t color, const char *format, ...);
  * @return 出力した文字数
  */
 int error_printf(const char *format, ...);
+
+/* util.c */
+
+/**
+ * @brief push an element to a vector
+ * @param[in] v        vector storing an element
+ * @param[in] element  an element to be pushed
+ */
+void vector_push(struct vector_t *v, void *element);
+
+/**
+ * @brief create a new vector
+ * @return a created vector
+ */
+struct vector_t *new_vector(void);
+
+/**
+ * @brief 辞書を新規に作成する
+ */
+struct dict_t *new_dict(void);
+
+/**
+ * @brief 辞書にデータを追加する
+ * @param[in] d     辞書
+ * @param[in] key   キー
+ * @param[in] value 値
+ */
+void dict_append(struct dict_t *d, char *key, void *value);
+
+/**
+ * @brief 辞書からデータを参照する
+ * @param[in] d     辞書
+ * @param[in] key   キー
+ * @return データが存在したら値へのポインタを、存在しなければNULLを返す
+ */
+void *dict_lookup(struct dict_t *d, char *key);
 
 /* debug.c */
 /**

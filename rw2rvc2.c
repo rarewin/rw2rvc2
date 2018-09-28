@@ -9,6 +9,7 @@ int main(int argc, char **argv)
 {
 	struct vector_t *tokens;
 	struct node_t *node = NULL;
+	struct dict_t *d = NULL;
 
 	if (argc != 2) {
 		fprintf(stderr, "usage: %s [num]\n", argv[0]);
@@ -30,7 +31,8 @@ int main(int argc, char **argv)
 	show_node(node, 0);
 #endif
 
-	struct vector_t *irv = gen_ir(node);
+	d = new_dict();
+	struct vector_t *irv = gen_ir(node, d);
 
 #if defined(DEBUG)
 	color_printf(COL_YELLOW, "=====[IR]=====\n");
@@ -38,13 +40,11 @@ int main(int argc, char **argv)
 #endif
 
 	allocate_regs(irv);
-
 #if defined(DEBUG)
 	color_printf(COL_YELLOW, "=====[IR]=====\n");
 	show_ir(irv);
 #endif
-
-	gen_riscv(irv);
+	gen_riscv(irv, d);
 
 	return 0;
 }

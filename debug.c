@@ -15,6 +15,7 @@ void show_token(struct vector_t *tokens)
 		TRANS_ELEMENT(TK_MUL),		/**< * */
 		TRANS_ELEMENT(TK_DIV),		/**< / */
 		TRANS_ELEMENT(TK_NUM),		/**< 数値  */
+		TRANS_ELEMENT(TK_EQUAL),	/**< = */
 		TRANS_ELEMENT(TK_STRING),	/**< 文字列 */
 		TRANS_ELEMENT(TK_CHAR),		/**< 文字 */
 		TRANS_ELEMENT(TK_SEMICOLON),	/**< ; */
@@ -22,6 +23,7 @@ void show_token(struct vector_t *tokens)
 		TRANS_ELEMENT(TK_CLOSE_PAREN),	/**< ) */
 		TRANS_ELEMENT(TK_DOUBLE_QUOTE),	/**< " */
 		TRANS_ELEMENT(TK_SINGLE_QUOTE),	/**< ' */
+		TRANS_ELEMENT(TK_IDENT),	/**< 識別子 (変数名等) */
 		TRANS_ELEMENT(TK_RETURN),	/**< "return" */
 		TRANS_ELEMENT(TK_EOF),		/**< EOF */
 	};
@@ -55,10 +57,12 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_MINUS),		/**< - */
 		TRANS_ELEMENT(ND_MUL),			/**< * */
 		TRANS_ELEMENT(ND_DIV),			/**< / */
-		TRANS_ELEMENT(ND_NUM),			/**< numbers */
+		TRANS_ELEMENT(ND_IDENT),		/**< 識別子 */
+		TRANS_ELEMENT(ND_CONST),		/**< numbers */
 		TRANS_ELEMENT(ND_SEMICOLON),		/**< ; */
 		TRANS_ELEMENT(ND_RETURN),		/**< "return" */
 		TRANS_ELEMENT(ND_STATEMENT_LIST),	/**< statement list */
+		TRANS_ELEMENT(ND_ASSIGN),		/**< 代入文 */
 	};
 
 	size_t i;
@@ -81,6 +85,12 @@ void show_node(struct node_t *node, unsigned int indent)
 		print_indent(indent + 1);
 		color_printf(COL_GREEN, "expression:\n");
 		show_node(node->expression, indent + 2);
+	}
+
+	if (node->name != NULL) {
+		print_indent(indent + 1);
+		color_printf(COL_GREEN, "name: ");
+		printf("%s\n", node->name);
 	}
 
 	if (node->lhs != NULL) {
@@ -113,12 +123,15 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_MOV),
 		TRANS_ELEMENT(IR_RETURN),
 		TRANS_ELEMENT(IR_KILL),
+		TRANS_ELEMENT(IR_LOAD),
+		TRANS_ELEMENT(IR_STORE),
+		TRANS_ELEMENT(IR_LOADADDR),
 		TRANS_ELEMENT(IR_NOP),
 	};
 
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];
-		printf("%s(%d) %d %d\n",
-		       OP2STR[ir->op], ir->op, ir->lhs, ir->rhs);
+		printf("%s(%d) %d %d %s\n",
+		       OP2STR[ir->op], ir->op, ir->lhs, ir->rhs, ir->name);
 	}
 }

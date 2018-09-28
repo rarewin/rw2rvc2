@@ -55,6 +55,7 @@ struct token_t *add_token(struct vector_t *v, token_type_t type, char *input)
 struct vector_t *tokenize(char *p)
 {
 	struct vector_t *v = new_vector();
+	struct token_t *t;
 	const struct keyword_t {
 		char *word;
 		token_type_t tkval;
@@ -73,7 +74,7 @@ struct vector_t *tokenize(char *p)
 		}
 
 		/* symbols */
-		if (strchr("+-*/;()'\"", *p) != NULL) {
+		if (strchr("+-*/;()'\"=", *p) != NULL) {
 			switch (*p) {
 			case '+':
 				add_token(v, TK_PLUS, p);
@@ -105,6 +106,9 @@ struct vector_t *tokenize(char *p)
 			case '"':
 				add_token(v, TK_DOUBLE_QUOTE, p);
 				break;
+			case '=':
+				add_token(v, TK_EQUAL, p);
+				break;
 			default:
 				break;
 			}
@@ -114,7 +118,7 @@ struct vector_t *tokenize(char *p)
 
 		/* number */
 		if (isdigit(*p)) {
-			struct token_t *t = add_token(v, TK_NUM, p);
+			t = add_token(v, TK_NUM, p);
 			t->value = strtol(p, &p, 10);
 			continue;
 		}
@@ -125,16 +129,24 @@ struct vector_t *tokenize(char *p)
 			while (isalpha(p[len]) || isdigit(p[len]) || p[len] == '_')
 				len++;
 
+			/* 予約語かどうかの判定 */
 			for (i = 0; i < (sizeof(keywords) / sizeof(keywords[0])); i++) {
 				if (strncmp(keywords[i].word, p, len) == 0) {
-					add_token(v, keywords[i].tkval, p);
+					add_token(v, keywords[i].tkval, p);	/* 予約語だった */
 					p += len;
 					break;
 				}
 			}
 
+			/* 予約語だったら次のトークンへ */
 			if (i < (sizeof(keywords) / sizeof(keywords[0])))
 				continue;
+
+			/* 識別子 */
+			t = add_token(v, TK_IDENT, p);
+			t->name = strndup(p, len);
+			p += len;
+			continue;
 		}
 
 		color_printf(COL_RED, "tokenize error: %s\n", p);

@@ -38,19 +38,21 @@ static struct ir_t *allocate_ir(void)
 }
 
 /**
- * @brief new IR
- * @param[in] op   operation type of the new IR
- * @param[in] lhs  LHS
- * @param[in] rhs  RHS
- * @return a pointer to the new IR
+ * @brief 新しいIR行を作成つくる
+ * @param[in] op    IRのタイプ
+ * @param[in] lhs   LHS
+ * @param[in] rhs   RHS
+ * @param[in] name  identifier名
+ * @return 作成したIRへのポインタ
  */
-static struct ir_t *new_ir(ir_type_t op, int lhs, int rhs)
+static struct ir_t *new_ir(ir_type_t op, int lhs, int rhs, char *name)
 {
 	struct ir_t *ir = allocate_ir();
 
 	ir->op = op;
 	ir->lhs = lhs;
 	ir->rhs = rhs;
+	ir->name = name;
 
 	return ir;
 }
@@ -61,7 +63,7 @@ static struct ir_t *new_ir(ir_type_t op, int lhs, int rhs)
  * @param[in] node node
  * @return LHS
  */
-static int gen_ir_sub(struct vector_t *v, struct node_t *node)
+static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 {
 	static int regno = 0;
 	int lhs, rhs;
@@ -70,31 +72,45 @@ static int gen_ir_sub(struct vector_t *v, struct node_t *node)
 	if (node == NULL)
 		return -1;
 
-	switch (node->type) {
-
-	case ND_RETURN:
-		vector_push(v, new_ir(IR_RETURN, gen_ir_sub(v, node->expression), 0));
+	if (node->type == ND_RETURN) {
+		vector_push(v, new_ir(IR_RETURN, gen_ir_sub(v, d, node->expression), 0, NULL));
 		return r;
+	}
 
-	case ND_NUM:
-		vector_push(v, new_ir(IR_IMM, regno++, node->value));
+	if (node->type == ND_CONST) {
+		vector_push(v, new_ir(IR_IMM, regno++, node->value, NULL));
 		return r;
+	}
 
-	case ND_PLUS:
-	case ND_MINUS:
-	case ND_MUL:
-	case ND_DIV:
-		lhs = gen_ir_sub(v, node->lhs);
-		rhs = gen_ir_sub(v, node->rhs);
+	if (node->type == ND_ASSIGN) {
+		dict_append(d, node->lhs->name, 0);
+		lhs = gen_ir_sub(v, d, node->lhs);
+		rhs = gen_ir_sub(v, d, node->rhs);
+		vector_push(v, new_ir(IR_LOADADDR, regno++, -1, node->lhs->name));
+		vector_push(v, new_ir(IR_STORE, regno - 1, rhs, NULL));
+		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
+		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
+	}
 
-		vector_push(v, new_ir(CONVERSION_NODE_TO_IR[node->type], lhs, rhs));
-		vector_push(v, new_ir(IR_KILL, rhs, 0));
+	if (node->type == ND_IDENT) {
+		if (dict_lookup(d, node->name) == NULL) {
+			error_printf("uninitialized identifier: %s\n", node->name);
+			exit(1);
+		}
+		vector_push(v, new_ir(IR_LOADADDR, regno++, 0, node->name));
+		vector_push(v, new_ir(IR_LOAD, regno, regno - 1, NULL));
+		regno++;
+		return (regno - 1);
+	}
+
+	if (node->type == ND_PLUS || node->type == ND_MINUS ||
+	    node->type == ND_MUL  || node->type == ND_DIV) {
+		lhs = gen_ir_sub(v, d, node->lhs);
+		rhs = gen_ir_sub(v, d, node->rhs);
+
+		vector_push(v, new_ir(CONVERSION_NODE_TO_IR[node->type], lhs, rhs, NULL));
+		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
 		return lhs;
-
-	case ND_SEMICOLON:
-	case ND_STATEMENT_LIST:
-	default:
-		break;
 	}
 
 	return r;
@@ -103,28 +119,16 @@ static int gen_ir_sub(struct vector_t *v, struct node_t *node)
 /**
  * @brief 中間表現(IR)を生成する
  */
-struct vector_t *gen_ir(struct node_t *node)
+struct vector_t *gen_ir(struct node_t *node, struct dict_t *d)
 {
 	struct vector_t *v = NULL;
 	size_t i;
 
 	v = new_vector();
 
-	switch (node->type) {
-	case ND_STATEMENT_LIST:
+	if (node->type == ND_STATEMENT_LIST) {
 		for (i = 0; i < node->statements->len; i++)
-			gen_ir_sub(v, node->statements->data[i]);
-		break;
-
-	case ND_PLUS:
-	case ND_MINUS:
-	case ND_MUL:
-	case ND_DIV:
-	case ND_NUM:
-	case ND_RETURN:
-	case ND_SEMICOLON:
-	default:
-		break;
+			gen_ir_sub(v, d, node->statements->data[i]);
 	}
 
 	return v;

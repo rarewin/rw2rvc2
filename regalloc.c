@@ -56,28 +56,27 @@ void allocate_regs(struct vector_t *irv)
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];
 
-		switch (ir->op) {
-		case IR_IMM:
+		if (ir->op == IR_IMM || ir->op == IR_STORE || ir->op == IR_LOADADDR) {
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
-			break;
-		case IR_MOV:
-		case IR_PLUS:
-		case IR_MINUS:
-		case IR_MUL:
-		case IR_DIV:
+			continue;
+		}
+
+		if (ir->op == IR_MOV || ir->op == IR_PLUS || ir->op == IR_MINUS ||
+		    ir->op == IR_MUL || ir->op == IR_DIV  || ir->op == IR_LOAD) {
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
-			break;
-		case IR_RETURN:
+			continue;
+		}
+
+		if (ir->op == IR_RETURN) {
 			ir->lhs = reg_map[ir->lhs];
-			break;
-		case IR_KILL:
+			continue;
+		}
+
+		if (ir->op == IR_KILL) {
 			release_reg(reg_map[ir->lhs]);
 			ir->op = IR_NOP;
-			break;
-		case IR_NOP:
-		default:
-			break;
+			continue;
 		}
 	}
 

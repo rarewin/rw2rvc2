@@ -5,46 +5,72 @@
 /**
  * @brief RISC-Vのアセンブラを生成する
  */
-void gen_riscv(struct vector_t *irv)
+void gen_riscv(struct vector_t *irv, struct dict_t *d)
 {
 	unsigned int i;
 	struct ir_t *ir;
 
-	printf(".section .text\n");
-	printf(".global main\n");
+	printf("	.section .text\n");
+	printf("	.global main\n");
+
+	for (i = 0; i < d->len; i++) {
+		printf("	.comm %s, 4, 4\n", (d->dict)[i].key);
+	}
+
 	printf("main:\n");
 
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];
 
-		switch (ir->op) {
-		case IR_IMM:
+		if (ir->op == IR_IMM) {
 			printf("	li	%s, %d\n", get_temp_reg_str(ir->lhs), ir->rhs);
-			break;
-		case IR_MOV:
+			continue;
+		}
+
+		if (ir->op == IR_MOV) {
 			printf("	mv	%s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
-			break;
-		case IR_RETURN:
+			continue;
+		}
+
+		if (ir->op == IR_LOADADDR) {
+			printf("	la	%s, %s\n", get_temp_reg_str(ir->lhs), ir->name);
+		}
+
+		if (ir->op == IR_RETURN) {
 			if (ir->lhs != -1)
 				printf("	mv	a0, %s\n", get_temp_reg_str(ir->lhs));
 			printf("	ret\n");
-			break;
-		case IR_PLUS:
+			continue;
+		}
+
+		if (ir->op == IR_PLUS) {
 			printf("	add	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
-			break;
-		case IR_MINUS:
+			continue;
+		}
+
+		if (ir->op == IR_MINUS) {
 			printf("	sub	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
-			break;
-		case IR_MUL:
+			continue;
+		}
+
+		if (ir->op == IR_MUL) {
 			printf("	mul	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
-			break;
-		case IR_DIV:
+			continue;
+		}
+
+		if (ir->op == IR_DIV) {
 			printf("	div	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
-			break;
-		case IR_NOP:
-		case IR_KILL:
-		default:
-			break;
+			continue;
+		}
+
+		if (ir->op == IR_STORE) {
+			printf("	sw	%s, 0(%s)\n", get_temp_reg_str(ir->rhs), get_temp_reg_str(ir->lhs));
+			continue;
+		}
+
+		if (ir->op == IR_LOAD) {
+			printf("	lw	%s, 0(%s)\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			continue;
 		}
 	}
 }

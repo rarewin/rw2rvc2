@@ -83,3 +83,68 @@ void vector_push(struct vector_t *v, void *element)
 
 	v->data[v->len++] = element;
 }
+
+
+/**
+ * @brief 辞書を新規に作成する
+ */
+struct dict_t *new_dict(void)
+{
+	const size_t ALLOCATE_SIZE = 8;
+	const size_t DICT_SIZE = 32;
+
+	static struct dict_t *dict_array = NULL;
+	static size_t index = 0;
+	static size_t size = ALLOCATE_SIZE;
+
+	struct dict_t *d;
+
+	/* 初期化 */
+	if (dict_array == NULL)
+		dict_array = (struct dict_t*)malloc(sizeof(struct dict_t) * size);
+
+	/* サイズを拡大する */
+	if (index >= size) {
+		size *= 2;
+		dict_array = (struct dict_t*)realloc(dict_array, sizeof(struct dict_t) * size);
+	}
+
+	d = &dict_array[index++];
+
+	d->len = 0;
+	d->capacity = DICT_SIZE;
+	d->dict = (struct dict_element_t*)malloc(sizeof(struct dict_element_t) * d->capacity);
+
+	return d;
+}
+
+/**
+ * @brief 辞書にデータを追加する
+ */
+void dict_append(struct dict_t *d, char *key, void *value)
+{
+	if (d->len >= d->capacity) {
+		d->capacity *= 2;
+		d->dict = (struct dict_element_t*)realloc(d->dict, sizeof(struct dict_element_t) * d->capacity);
+	}
+
+	(d->dict)[d->len].key = key;
+	(d->dict)[d->len].value = value;
+
+	d->len++;
+}
+
+/**
+ * @brief 辞書からデータを参照する
+ */
+void *dict_lookup(struct dict_t *d, char *key)
+{
+	size_t i;
+
+	for (i = 0; i < d->len; i++) {
+		if (strcmp((d->dict)[i].key, key) == 0)
+			return &(d->dict)[i];
+	}
+
+	return NULL;
+}
