@@ -56,3 +56,5 @@ test: rebuild
 	@./tools/test.sh "1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 - 10 - 9 - 8 - 7 - 6 - 5 - 4 - 3 - 2 - 1 - 0 + 0; 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 - 10 - 9 - 8 - 7 - 6 - 5 - 4 - 3 - 2 - 1 - 0 + 0; return 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10;" 55
 	@./tools/test.sh "a = 2; return a;" 2
 	@./tools/test.sh "a = 2 + 4; return a;" 6
+	@./tools/test.sh "b = 2 * 4; a = 2 + 4; return a;" 6
+	@./tools/test.sh "b = 2 * 4; a = 2 + b; return a;" 10

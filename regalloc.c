@@ -56,7 +56,7 @@ void allocate_regs(struct vector_t *irv)
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];
 
-		if (ir->op == IR_IMM || ir->op == IR_STORE || ir->op == IR_LOADADDR) {
+		if (ir->op == IR_IMM || ir->op == IR_LOADADDR) {
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 			continue;
 		}
@@ -66,6 +66,11 @@ void allocate_regs(struct vector_t *irv)
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
 			continue;
+		}
+
+		if (ir->op == IR_STORE) {
+			ir->lhs = reg_map[ir->lhs];
+			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
 		}
 
 		if (ir->op == IR_RETURN) {
