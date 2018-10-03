@@ -99,7 +99,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		}
 		vector_push(v, new_ir(IR_LOADADDR, regno++, 0, node->name));
 		vector_push(v, new_ir(IR_LOAD, regno, regno - 1, NULL));
-		vector_push(v, new_ir(IR_KILL, regno -1, 0, NULL));
+		vector_push(v, new_ir(IR_KILL, regno - 1, 0, NULL));
 		regno++;
 		return (regno - 1);
 	}

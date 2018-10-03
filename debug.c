@@ -4,10 +4,27 @@
 
 #define TRANS_ELEMENT(e)    [e] = #e
 
+
+
 /**
  * @brief debug function for tokenizer
  */
 void show_token(struct vector_t *tokens)
+{
+	unsigned int i;
+
+	for (i = 0; i < tokens->len; i++) {
+		token_type_t tt = ((struct token_t*)(tokens->data[i]))->type;
+		printf("%02d: %s(%d)\n", i, get_token_str(tt), tt);
+	}
+}
+
+/**
+ * @brief トークンタイプからトークンを表す文字列を取得する.
+ *
+ * @todo 引数チェック.
+ */
+const char *get_token_str(token_type_t token_type)
 {
 	const char *table[] = {
 		TRANS_ELEMENT(TK_PLUS),		/**< + */
@@ -27,12 +44,8 @@ void show_token(struct vector_t *tokens)
 		TRANS_ELEMENT(TK_RETURN),	/**< "return" */
 		TRANS_ELEMENT(TK_EOF),		/**< EOF */
 	};
-	unsigned int i;
 
-	for (i = 0; i < tokens->len; i++) {
-		token_type_t tt = ((struct token_t*)(tokens->data[i]))->type;
-		printf("%02d: %s\n", tt, table[tt]);
-	}
+	return table[token_type];
 }
 
 /**

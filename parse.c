@@ -21,7 +21,7 @@ static void expect_token(struct vector_t *tokens, token_type_t type)
 	} else {
 		/* 期待値と異なった場合, 止まる. */
 		error_printf("unexpect token: %s\n", t->input);
-		error_printf("expect token: %d\n", type);
+		error_printf("expect token: %s (%d)\n", get_token_str(type), type);
 		exit(1);
 	}
 }
@@ -139,7 +139,10 @@ static struct node_t *primary_expression(struct vector_t *tokens)
  */
 static struct node_t *muldiv(struct vector_t *tokens)
 {
-	struct node_t *lhs = primary_expression(tokens);
+	struct node_t *lhs;
+
+	if ((lhs = primary_expression(tokens)) == NULL)
+		return NULL;
 
 	for (;;) {
 		struct token_t *t = tokens->data[g_position];
@@ -182,10 +185,13 @@ static struct node_t *assignment_expression(struct vector_t *tokens)
 		return NULL;
 
 	t = tokens->data[g_position];
-	if (t->type != TK_EQUAL)
-		return lhs;
+	if (t->type != TK_EQUAL) {
+		g_position--;
+		return NULL;
+	}
 
 	consume_token(tokens, TK_EQUAL);
+
 	lhs = new_node(ND_ASSIGN, lhs, expression(tokens), NULL, NULL, NULL, -1);
 
 	return lhs;
@@ -204,10 +210,13 @@ static struct node_t *expression(struct vector_t *tokens)
 	struct node_t *lhs;
 	struct token_t *t;
 
-	if ((lhs = assignment_expression(tokens)) != NULL)
+	lhs = assignment_expression(tokens);
+
+	if (lhs != NULL && lhs->type == ND_ASSIGN)
 		return lhs;
 
-	lhs = muldiv(tokens);
+	if ((lhs = muldiv(tokens)) == NULL)
+		return NULL;
 
 	for (;;) {
 		t = tokens->data[g_position];

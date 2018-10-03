@@ -244,6 +244,13 @@ void *dict_lookup(struct dict_t *d, char *key);
 void show_token(struct vector_t *tokens);
 
 /**
+ * @brief トークンタイプからトークンを表す文字列を取得する.
+ * @param[in] token_type  トークンタイプ.
+ * @return トークンを表わす文字列
+ */
+const char *get_token_str(token_type_t token_type);
+
+/**
  * @brief debug function for IR
  */
 void show_ir(struct vector_t *irv);
