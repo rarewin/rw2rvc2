@@ -90,6 +90,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		vector_push(v, new_ir(IR_STORE, regno - 1, rhs, NULL));
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
+		vector_push(v, new_ir(IR_KILL, regno - 1, 0, NULL));
 	}
 
 	if (node->type == ND_IDENT) {
