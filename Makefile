@@ -62,3 +62,9 @@ test: rebuild
 	@./tools/test.sh "b = 2 * 4; a = b * 2; return a;" 16
 	@./tools/test.sh "c = 10; b = 2 * 4; a = b * 2 + c; return a;" 26
 	@./tools/test.sh "c = 10; b = 2 * 4 * c; a = b * 2 + c; return a;" 170
+
+	@./tools/fail.sh "c = ="
+	@./tools/fail.sh "return 1"
+	@./tools/fail.sh "return a;"
+	@./tools/fail.sh "b = 2 * a; return b;"
+	@./tools/fail.sh "a = 2 * a; return a;"

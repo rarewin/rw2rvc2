@@ -83,9 +83,9 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_ASSIGN) {
+		rhs = gen_ir_sub(v, d, node->rhs);
 		dict_append(d, node->lhs->name, 0);
 		lhs = gen_ir_sub(v, d, node->lhs);
-		rhs = gen_ir_sub(v, d, node->rhs);
 		vector_push(v, new_ir(IR_LOADADDR, regno++, -1, node->lhs->name));
 		vector_push(v, new_ir(IR_STORE, regno - 1, rhs, NULL));
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
