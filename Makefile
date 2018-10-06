@@ -1,27 +1,37 @@
 CFLAGS =  -Wall -Wextra -Wswitch-enum -Wswitch-enum
 CFLAGS += -MD
 
-SRCS = $(wildcard *.c)
-OBJS = $(SRCS:.c=.o)
-DEPS = $(SRCS:.c=.d)
-
 ifeq ($(DEBUG),1)
 	CFLAGS += -g -O0 -DDEBUG
+	OUTDIR = debug
 else
 	CFLAGS += -O2
+	OUTDIR = release
 endif
 
-all: rw2rvc2
+SRCS = $(wildcard src/*.c)
+OBJS = $(addprefix $(OUTDIR)/,$(subst src/,,$(SRCS:.c=.o)))
+DEPS = $(OBJS:.o=.d)
+TARGET = $(OUTDIR)/rw2rvc2
 
-rw2rvc2: $(OBJS)
+vpath %.c src
+
+all: $(TARGET)
+
+$(OUTDIR):
+	mkdir $(OUTDIR)
+
+$(TARGET): $(OBJS)
 
 -include $(DEPS)
+
+$(OUTDIR)/%.o: $(OUTDIR) %.c
+	$(CC) $(CFLAGS) -c $(word 2,$^) -o $@
 
 .PHONY: clean
 clean:
 	rm -f rw2rvc2
-	rm -f $(OBJS)
-	rm -f $(DEPS)
+	rm -rf release debug
 
 .PHONY: rebuild
 rebuild:

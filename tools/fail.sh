@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./rw2rvc2 "$1" > /dev/null 2>&1
+./release/rw2rvc2 "$1" > /dev/null 2>&1
 
 RESULT=$?
 

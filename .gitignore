@@ -1,5 +1,7 @@
 /rw2rvc2
 /tmp
+/release
+/debug
 
 /*.o
 /*.d

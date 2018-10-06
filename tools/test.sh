@@ -2,7 +2,7 @@
 
 TEMP=`tempfile`
 
-./rw2rvc2 "$1" > ${TEMP}.s
+./release/rw2rvc2 "$1" > ${TEMP}.s
 riscv64-linux-gnu-gcc -static ${TEMP}.s -o ${TEMP}
 ${TEMP}
 
