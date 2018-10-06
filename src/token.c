@@ -95,10 +95,10 @@ struct vector_t *tokenize(char *p)
 				add_token(v, TK_COLON, p);
 				break;
 			case '(':
-				add_token(v, TK_OPEN_PAREN, p);
+				add_token(v, TK_LEFT_PAREN, p);
 				break;
 			case ')':
-				add_token(v, TK_CLOSE_PAREN, p);
+				add_token(v, TK_RIGHT_PAREN, p);
 				break;
 			case '\'':
 				add_token(v, TK_SINGLE_QUOTE, p);

@@ -49,8 +49,8 @@ typedef enum {
 	TK_CHAR,		/**< 文字 */
 	TK_SEMICOLON,		/**< ; */
 	TK_COLON,		/**< : */
-	TK_OPEN_PAREN,		/**< ( */
-	TK_CLOSE_PAREN,		/**< ) */
+	TK_LEFT_PAREN,		/**< ( */
+	TK_RIGHT_PAREN,		/**< ) */
 	TK_DOUBLE_QUOTE,	/**< " */
 	TK_SINGLE_QUOTE,	/**< ' */
 	TK_IDENT,		/**< 識別子 (変数名等) */

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "rw2rvc2.h"
 
@@ -118,6 +119,14 @@ static node_type_t CONVERSION_TOKEN_TO_NODE[] = {
 static struct node_t *primary_expression(struct vector_t *tokens)
 {
 	struct token_t *t = tokens->data[g_position];
+	struct node_t *node;
+
+	if (t->type == TK_LEFT_PAREN) {
+		g_position++;
+		node = expression(tokens);
+		consume_token(tokens, TK_RIGHT_PAREN);
+		return node;
+	}
 
 	if (t->type == TK_NUM) {
 		g_position++;

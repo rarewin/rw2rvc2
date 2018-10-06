@@ -36,8 +36,8 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_STRING),	/**< 文字列 */
 		TRANS_ELEMENT(TK_CHAR),		/**< 文字 */
 		TRANS_ELEMENT(TK_SEMICOLON),	/**< ; */
-		TRANS_ELEMENT(TK_OPEN_PAREN),	/**< ( */
-		TRANS_ELEMENT(TK_CLOSE_PAREN),	/**< ) */
+		TRANS_ELEMENT(TK_LEFT_PAREN),	/**< ( */
+		TRANS_ELEMENT(TK_RIGHT_PAREN),	/**< ) */
 		TRANS_ELEMENT(TK_DOUBLE_QUOTE),	/**< " */
 		TRANS_ELEMENT(TK_SINGLE_QUOTE),	/**< ' */
 		TRANS_ELEMENT(TK_IDENT),	/**< 識別子 (変数名等) */
