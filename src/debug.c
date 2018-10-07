@@ -38,6 +38,8 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_SEMICOLON),	/**< ; */
 		TRANS_ELEMENT(TK_LEFT_PAREN),	/**< ( */
 		TRANS_ELEMENT(TK_RIGHT_PAREN),	/**< ) */
+		TRANS_ELEMENT(TK_LEFT_BRACE),	/**< { */
+		TRANS_ELEMENT(TK_RIGHT_BRACE),	/**< } */
 		TRANS_ELEMENT(TK_DOUBLE_QUOTE),	/**< " */
 		TRANS_ELEMENT(TK_SINGLE_QUOTE),	/**< ' */
 		TRANS_ELEMENT(TK_IDENT),	/**< 識別子 (変数名等) */
@@ -69,20 +71,18 @@ static void print_indent(unsigned int indent)
 void show_node(struct node_t *node, unsigned int indent)
 {
 	const char *table[] = {
-		TRANS_ELEMENT(ND_PLUS),			/**< + */
-		TRANS_ELEMENT(ND_MINUS),		/**< - */
-		TRANS_ELEMENT(ND_MUL),			/**< * */
-		TRANS_ELEMENT(ND_DIV),			/**< / */
-		TRANS_ELEMENT(ND_IDENT),		/**< 識別子 */
-		TRANS_ELEMENT(ND_CONST),		/**< numbers */
-		TRANS_ELEMENT(ND_SEMICOLON),		/**< ; */
-		TRANS_ELEMENT(ND_RETURN),		/**< "return" */
-		TRANS_ELEMENT(ND_IF),			/**< "if" */
-		TRANS_ELEMENT(ND_STATEMENT_LIST),	/**< statement list */
-		TRANS_ELEMENT(ND_ASSIGN),		/**< 代入文 */
+		TRANS_ELEMENT(ND_PLUS),		/**< + */
+		TRANS_ELEMENT(ND_MINUS),	/**< - */
+		TRANS_ELEMENT(ND_MUL),		/**< * */
+		TRANS_ELEMENT(ND_DIV),		/**< / */
+		TRANS_ELEMENT(ND_IDENT),	/**< 識別子 */
+		TRANS_ELEMENT(ND_CONST),	/**< numbers */
+		TRANS_ELEMENT(ND_SEMICOLON),	/**< ; */
+		TRANS_ELEMENT(ND_RETURN),	/**< "return" */
+		TRANS_ELEMENT(ND_IF),		/**< "if" */
+		TRANS_ELEMENT(ND_STATEMENT),	/**< 文 */
+		TRANS_ELEMENT(ND_ASSIGN),	/**< 代入文 */
 	};
-
-	size_t i;
 
 	if (node == NULL)
 		return;
@@ -90,13 +90,6 @@ void show_node(struct node_t *node, unsigned int indent)
 	print_indent(indent);
 
 	printf("%s: %d\n", table[node->type], node->value);
-
-	if (node->statements != NULL) {
-		print_indent(indent + 1);
-		color_printf(COL_GREEN, "statements:\n");
-		for (i = 0; i < node->statements->len; i++)
-			show_node(node->statements->data[i], indent + 2);
-	}
 
 	if (node->expression != NULL) {
 		print_indent(indent + 1);

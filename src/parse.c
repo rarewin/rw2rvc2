@@ -6,6 +6,7 @@
 /* static関数のプロトタイプ宣言. (循環コールのため) */
 static struct node_t *expression(struct vector_t *tokens);
 struct node_t *statement(struct vector_t *tokens);
+struct node_t *statement_list(struct vector_t *tokens);
 
 static int g_position = 0;
 
@@ -81,14 +82,12 @@ struct node_t *allocate_node(void)
  * @param[in] lhs          左辺
  * @param[in] rhs          右辺
  * @param[in] expression   式
- * @param[in] statement    文 (Vector型)
  * @param[in] name         名前
  */
 static struct node_t *new_node(node_type_t op,
 			       struct node_t *lhs,
 			       struct node_t *rhs,
 			       struct node_t *expression,
-			       struct vector_t *statements,
 			       char *name,
 			       int value)
 {
@@ -98,7 +97,6 @@ static struct node_t *new_node(node_type_t op,
 	node->lhs = lhs;
 	node->rhs = rhs;
 	node->expression = expression;
-	node->statements = statements;
 	node->name = name;
 	node->value = value;
 
@@ -140,12 +138,12 @@ static struct node_t *primary_expression(struct vector_t *tokens)
 
 	if (t->type == TK_NUM) {
 		g_position++;
-		return new_node(ND_CONST, NULL, NULL, NULL, NULL, NULL, t->value);
+		return new_node(ND_CONST, NULL, NULL, NULL, NULL, t->value);
 	}
 
 	if (t->type == TK_IDENT) {
 		g_position++;
-		return new_node(ND_IDENT, NULL, NULL, NULL, NULL, t->name, -1);
+		return new_node(ND_IDENT, NULL, NULL, NULL, t->name, -1);
 	}
 
 	return NULL;
@@ -171,7 +169,7 @@ static struct node_t *muldiv(struct vector_t *tokens)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, primary_expression(tokens), NULL, NULL, NULL, -1);
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, primary_expression(tokens), NULL, NULL, -1);
 	}
 
 	return lhs;
@@ -183,7 +181,7 @@ static struct node_t *identifier(struct vector_t *tokens)
 
 	if (t->type == TK_IDENT) {
 		g_position++;
-		return new_node(ND_IDENT, NULL, NULL, NULL, NULL, t->name, -1);
+		return new_node(ND_IDENT, NULL, NULL, NULL, t->name, -1);
 	}
 
 	return NULL;
@@ -211,7 +209,7 @@ static struct node_t *assignment_expression(struct vector_t *tokens)
 
 	consume_token(tokens, TK_EQUAL);
 
-	lhs = new_node(ND_ASSIGN, lhs, expression(tokens), NULL, NULL, NULL, -1);
+	lhs = new_node(ND_ASSIGN, lhs, expression(tokens), NULL, NULL, -1);
 
 	return lhs;
 }
@@ -245,7 +243,7 @@ static struct node_t *expression(struct vector_t *tokens)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, muldiv(tokens), NULL, NULL, NULL, -1);
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, muldiv(tokens), NULL, NULL, -1);
 	}
 
 	return lhs;
@@ -263,7 +261,7 @@ static struct node_t *keyword_return(struct vector_t *tokens)
 
 	if (t->type == TK_RETURN) {
 		g_position++;
-		e = new_node(ND_RETURN, NULL, NULL, expression(tokens), NULL, NULL, -1);
+		e = new_node(ND_RETURN, NULL, NULL, expression(tokens), NULL, -1);
 	} else {
 		return NULL;
 	}
@@ -309,7 +307,7 @@ static struct node_t *selection_statement(struct vector_t *tokens)
 	if (t->type == TK_IF) {
 		g_position++;
 		expect_token(tokens, TK_LEFT_PAREN);
-		node = new_node(ND_IF, NULL, NULL, expression(tokens), NULL, NULL, -1);
+		node = new_node(ND_IF, NULL, NULL, expression(tokens), NULL, -1);
 		expect_token(tokens, TK_RIGHT_PAREN);
 
 		if ((node->lhs = statement(tokens)) == NULL) {
@@ -338,16 +336,43 @@ static struct node_t *selection_statement(struct vector_t *tokens)
  */
 struct node_t *expression_statement(struct vector_t *tokens)
 {
-	struct node_t *node;
+	struct node_t *node = NULL;
+	struct token_t *t = tokens->data[g_position];
 
-	node = expression(tokens);
-	expect_token(tokens, TK_SEMICOLON);
+	if ((node = expression(tokens)) != NULL)
+		expect_token(tokens, TK_SEMICOLON);
+	else if (t->type == TK_SEMICOLON)
+		consume_token(tokens, TK_SEMICOLON);
+
+	return node;
+}
+
+/**
+ * @brief compound_statementをパースする
+ *
+ * compound_statement := '{' '}'
+ *                     | '{' statement_list '}'
+ *                     | '{' declaration_list '}'
+ *                     | '{' declaration_list statement_list '}'
+ *                     ;
+ */
+struct node_t *compound_statement(struct vector_t *tokens)
+{
+	struct token_t *t = tokens->data[g_position];
+	struct node_t *node = NULL;
+
+	if (t->type == TK_LEFT_BRACE) {
+		g_position++;
+		node = statement_list(tokens);
+		expect_token(tokens, TK_RIGHT_BRACE);
+	}
 
 	return node;
 }
 
 /**
  * @brief statementをパースする
+ *
  * statement := labeled_statement
  *            | compound_statement
  *            | expression_statement
@@ -360,13 +385,19 @@ struct node_t *statement(struct vector_t *tokens)
 {
 	struct node_t *node = NULL;
 
-	if ((node = jump_statement(tokens)) != NULL)
+	if ((node = compound_statement(tokens)) != NULL)
+		return node;
+
+	if ((node = expression_statement(tokens)) != NULL)
 		return node;
 
 	if ((node = selection_statement(tokens)) != NULL)
 		return node;
 
-	return expression_statement(tokens);
+	if ((node = jump_statement(tokens)) != NULL)
+		return node;
+
+	return NULL;
 }
 
 /**
@@ -379,16 +410,8 @@ struct node_t *statement_list(struct vector_t *tokens)
 	struct node_t *n = NULL;
 	struct node_t *s;
 
-	do {
-		s = statement(tokens);
-
-		if (s != NULL) {
-			if (n == NULL)
-				n = new_node(ND_STATEMENT_LIST, NULL, NULL, NULL, new_vector(), NULL, -1);
-			vector_push(n->statements, s);
-		}
-
-	} while (((struct token_t *)(tokens->data[g_position]))->type != TK_EOF);
+	if ((s = statement(tokens)) != NULL)
+		n = new_node(ND_STATEMENT, s, statement_list(tokens), NULL, NULL, -1);
 
 	return n;
 }

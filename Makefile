@@ -83,6 +83,8 @@ test: rebuild
 	@./tools/test.sh "if (2) a = 1; else a = 3; return a;" 1
 	@./tools/test.sh "if (0) a = 1; else a = 3; return a;" 3
 	@./tools/test.sh "a = 2; if (a) a = 1; else a = 3; return a;" 1
+	@./tools/test.sh "a = 2; if (a) {a = 1; return a;} else a = 3; return a;" 1
+	# @./tools/test.sh "a = 2; if (a - 2) {a = 1; return a;} else {a = 3; return a;} return a;" 3
 
 	@./tools/fail.sh "c = ="
 	@./tools/fail.sh "return 1"

@@ -51,6 +51,8 @@ typedef enum {
 	TK_COLON,		/**< : */
 	TK_LEFT_PAREN,		/**< ( */
 	TK_RIGHT_PAREN,		/**< ) */
+	TK_LEFT_BRACE,		/**< { */
+	TK_RIGHT_BRACE,		/**< } */
 	TK_DOUBLE_QUOTE,	/**< " */
 	TK_SINGLE_QUOTE,	/**< ' */
 	TK_IDENT,		/**< 識別子 (変数名等) */
@@ -75,17 +77,17 @@ typedef struct token_t {
  * @brief types of nodes
  */
 typedef enum {
-	ND_PLUS,		/**< + */
-	ND_MINUS,		/**< - */
-	ND_MUL,			/**< * */
-	ND_DIV,			/**< / */
-	ND_CONST,		/**< 定数 */
-	ND_IDENT,		/**< 識別子 */
-	ND_SEMICOLON,		/**< ; */
-	ND_RETURN,		/**< "return" */
-	ND_IF,			/**< "if" */
-	ND_STATEMENT_LIST,	/**< statement list */
-	ND_ASSIGN,		/**< 代入文 */
+	ND_PLUS,	/**< + */
+	ND_MINUS,	/**< - */
+	ND_MUL,		/**< * */
+	ND_DIV,		/**< / */
+	ND_CONST,	/**< 定数 */
+	ND_IDENT,	/**< 識別子 */
+	ND_SEMICOLON,	/**< ; */
+	ND_RETURN,	/**< "return" */
+	ND_IF,		/**< "if" */
+	ND_STATEMENT,	/**< 文 */
+	ND_ASSIGN,	/**< 代入文 */
 } node_type_t;
 
 /**
@@ -96,7 +98,6 @@ typedef struct node_t {
 	struct node_t *lhs;		/**< 左辺値 */
 	struct node_t *rhs;		/**< 右辺値 */
 	struct node_t *expression;	/**< 式 */
-	struct vector_t *statements;	/**< 文 */
 	char *name;			/**< 識別子等の名前 */
 	int value;			/**< 値 */
 } node_t;

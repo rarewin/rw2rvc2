@@ -76,7 +76,7 @@ struct vector_t *tokenize(char *p)
 		}
 
 		/* symbols */
-		if (strchr("+-*/;()'\"=", *p) != NULL) {
+		if (strchr("+-*/;(){}'\"=", *p) != NULL) {
 			switch (*p) {
 			case '+':
 				add_token(v, TK_PLUS, p);
@@ -101,6 +101,12 @@ struct vector_t *tokenize(char *p)
 				break;
 			case ')':
 				add_token(v, TK_RIGHT_PAREN, p);
+				break;
+			case '{':
+				add_token(v, TK_LEFT_BRACE, p);
+				break;
+			case '}':
+				add_token(v, TK_RIGHT_BRACE, p);
 				break;
 			case '\'':
 				add_token(v, TK_SINGLE_QUOTE, p);

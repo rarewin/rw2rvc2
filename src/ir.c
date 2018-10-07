@@ -132,6 +132,12 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		return lhs;
 	}
 
+	if (node->type == ND_STATEMENT) {
+		gen_ir_sub(v, d, node->lhs);
+		if (node->rhs != NULL)
+			gen_ir_sub(v, d, node->rhs);
+	}
+
 	return r;
 }
 
@@ -141,14 +147,9 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 struct vector_t *gen_ir(struct node_t *node, struct dict_t *d)
 {
 	struct vector_t *v = NULL;
-	size_t i;
 
 	v = new_vector();
-
-	if (node->type == ND_STATEMENT_LIST) {
-		for (i = 0; i < node->statements->len; i++)
-			gen_ir_sub(v, d, node->statements->data[i]);
-	}
+	gen_ir_sub(v, d, node);
 
 	return v;
 }
