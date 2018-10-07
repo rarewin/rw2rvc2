@@ -123,6 +123,14 @@ struct dict_t *new_dict(void)
  */
 void dict_append(struct dict_t *d, char *key, void *value)
 {
+	struct dict_element_t *e;
+
+	/* 既に辞書に存在していたらその値を使う */
+	if ((e = dict_lookup(d, key)) != NULL) {
+		e->value = value;
+		return;
+	}
+
 	if (d->len >= d->capacity) {
 		d->capacity *= 2;
 		d->dict = (struct dict_element_t*)realloc(d->dict, sizeof(struct dict_element_t) * d->capacity);
@@ -137,7 +145,7 @@ void dict_append(struct dict_t *d, char *key, void *value)
 /**
  * @brief 辞書からデータを参照する
  */
-void *dict_lookup(struct dict_t *d, char *key)
+struct dict_element_t *dict_lookup(struct dict_t *d, char *key)
 {
 	size_t i;
 

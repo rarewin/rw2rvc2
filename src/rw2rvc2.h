@@ -240,7 +240,7 @@ void dict_append(struct dict_t *d, char *key, void *value);
  * @param[in] key   キー
  * @return データが存在したら値へのポインタを、存在しなければNULLを返す
  */
-void *dict_lookup(struct dict_t *d, char *key);
+struct dict_element_t *dict_lookup(struct dict_t *d, char *key);
 
 /* debug.c */
 /**
