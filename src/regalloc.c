@@ -73,7 +73,7 @@ void allocate_regs(struct vector_t *irv)
 			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
 		}
 
-		if (ir->op == IR_RETURN) {
+		if (ir->op == IR_RETURN || ir->op == IR_BEQZ) {
 			ir->lhs = reg_map[ir->lhs];
 			continue;
 		}
