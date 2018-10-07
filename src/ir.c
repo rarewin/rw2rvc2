@@ -66,20 +66,22 @@ static struct ir_t *new_ir(ir_type_t op, int lhs, int rhs, char *name)
 static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 {
 	static int regno = 0;
+	static int label = 0;
 	int lhs, rhs;
 	int r = regno;
+	int l = label;
 
 	if (node == NULL)
 		return -1;
 
 	if (node->type == ND_RETURN) {
-		vector_push(v, new_ir(IR_RETURN, gen_ir_sub(v, d, node->expression), 0, NULL));
-		return r;
+		lhs = gen_ir_sub(v, d, node->expression);
+		vector_push(v, new_ir(IR_RETURN, lhs, 0, NULL));
+		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 	}
 
 	if (node->type == ND_CONST) {
 		vector_push(v, new_ir(IR_IMM, regno++, node->value, NULL));
-		return r;
 	}
 
 	if (node->type == ND_ASSIGN) {
@@ -103,6 +105,12 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		vector_push(v, new_ir(IR_KILL, regno - 1, 0, NULL));
 		regno++;
 		return (regno - 1);
+	}
+
+	if (node->type == ND_IF) {
+		vector_push(v, new_ir(IR_BEQZ, gen_ir_sub(v, d, node->expression), label++, NULL));
+		gen_ir_sub(v, d, node->lhs);	// then
+		vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
 	}
 
 	if (node->type == ND_PLUS || node->type == ND_MINUS ||

@@ -61,6 +61,7 @@ struct vector_t *tokenize(char *p)
 		token_type_t tkval;
 	} keywords[] = {
 		{"return", TK_RETURN},
+		{"if",     TK_IF},
 		{"goto",   TK_GOTO},
 	};
 	unsigned int i;

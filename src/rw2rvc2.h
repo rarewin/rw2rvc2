@@ -55,6 +55,7 @@ typedef enum {
 	TK_SINGLE_QUOTE,	/**< ' */
 	TK_IDENT,		/**< 識別子 (変数名等) */
 	TK_RETURN,		/**< "return" */
+	TK_IF,			/**< "if" */
 	TK_GOTO,		/**< "goto" */
 	TK_EOF,			/**< EOF */
 } token_type_t;
@@ -81,6 +82,7 @@ typedef enum {
 	ND_IDENT,		/**< 識別子 */
 	ND_SEMICOLON,		/**< ; */
 	ND_RETURN,		/**< "return" */
+	ND_IF,			/**< "if" */
 	ND_STATEMENT_LIST,	/**< statement list */
 	ND_ASSIGN,		/**< 代入文 */
 } node_type_t;
@@ -113,6 +115,8 @@ typedef enum {
 	IR_LOAD,
 	IR_STORE,
 	IR_LOADADDR,
+	IR_BEQZ,	/**< lhs がゼロならブランチする */
+	IR_LABEL,	/**< ラベルを生成 */
 	IR_NOP,
 } ir_type_t;
 

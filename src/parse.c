@@ -5,6 +5,7 @@
 
 /* static関数のプロトタイプ宣言. (循環コールのため) */
 static struct node_t *expression(struct vector_t *tokens);
+struct node_t *statement(struct vector_t *tokens);
 
 static int g_position = 0;
 
@@ -39,6 +40,15 @@ static void consume_token(struct vector_t *tokens, token_type_t type)
 	if (t->type == type) {
 		g_position++;	/* 期待値通りならインデックスを進めて戻る. */
 	}
+}
+
+/**
+ * @brief パースエラー
+ */
+static void parse_error(void)
+{
+	error_printf("parse error at index %d\n", g_position);
+	exit(1);
 }
 
 /**
@@ -284,6 +294,35 @@ static struct node_t *jump_statement(struct vector_t *tokens)
 }
 
 /**
+ * @brief selection_statementをパースする
+ *
+ * selection_statement := IF '(' expression ')' statement
+ *                      | IF '(' expression ')' statement ELSE statement
+ *                      | SWITCH '(' expression ')' statement
+ *                      ;
+ */
+static struct node_t *selection_statement(struct vector_t *tokens)
+{
+	struct token_t *t = tokens->data[g_position];
+	struct node_t *node = NULL;
+
+	if (t->type == TK_IF) {
+		g_position++;
+		expect_token(tokens, TK_LEFT_PAREN);
+		node = new_node(ND_IF, NULL, NULL, expression(tokens), NULL, NULL, -1);
+		expect_token(tokens, TK_RIGHT_PAREN);
+		if ((node->lhs = statement(tokens)) == NULL) {
+			parse_error();
+			/* NOTREACHED */
+		}
+		/* @todo else statement */
+	}
+
+	return node;
+}
+
+/**
+ * @brief statementをパースする
  * statement := labeled_statement
  *            | compound_statement
  *            | expression_statement
@@ -297,6 +336,9 @@ struct node_t *statement(struct vector_t *tokens)
 	struct node_t *node = NULL;
 
 	if ((node = jump_statement(tokens)) != NULL)
+		return node;
+
+	if ((node = selection_statement(tokens)) != NULL)
 		return node;
 
 	return expression(tokens);

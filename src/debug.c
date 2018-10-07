@@ -42,6 +42,7 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_SINGLE_QUOTE),	/**< ' */
 		TRANS_ELEMENT(TK_IDENT),	/**< 識別子 (変数名等) */
 		TRANS_ELEMENT(TK_RETURN),	/**< "return" */
+		TRANS_ELEMENT(TK_IF),		/**< "if" */
 		TRANS_ELEMENT(TK_EOF),		/**< EOF */
 	};
 
@@ -74,6 +75,7 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_CONST),		/**< numbers */
 		TRANS_ELEMENT(ND_SEMICOLON),		/**< ; */
 		TRANS_ELEMENT(ND_RETURN),		/**< "return" */
+		TRANS_ELEMENT(ND_IF),			/**< "if" */
 		TRANS_ELEMENT(ND_STATEMENT_LIST),	/**< statement list */
 		TRANS_ELEMENT(ND_ASSIGN),		/**< 代入文 */
 	};
@@ -140,6 +142,8 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_STORE),
 		TRANS_ELEMENT(IR_LOADADDR),
 		TRANS_ELEMENT(IR_NOP),
+		TRANS_ELEMENT(IR_BEQZ),		/**< lhs がゼロならブランチする */
+		TRANS_ELEMENT(IR_LABEL),	/**< ラベルを生成 */
 	};
 
 	for (i = 0; i < irv->len; i++) {

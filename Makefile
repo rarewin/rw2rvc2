@@ -77,6 +77,9 @@ test: rebuild
 	@./tools/test.sh "return (2 + 3) + 4 * 2;" 13
 	@./tools/test.sh "return (2 + 3) / 2 ;" 2
 	@./tools/test.sh "a = (2 * 3) + 4; return a;" 10
+	@./tools/test.sh "if (1) return 1; return 0;" 1
+	@./tools/test.sh "if (0) return 1; return 0;" 0
+	@./tools/test.sh "if (a = 2) return 1; return 0;" 1
 
 	@./tools/fail.sh "c = ="
 	@./tools/fail.sh "return 1"

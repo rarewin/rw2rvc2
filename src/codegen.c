@@ -72,5 +72,16 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			printf("	lw	%s, 0(%s)\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
 			continue;
 		}
+
+		if (ir->op == IR_BEQZ) {
+			printf("	beqz	%s, .L%d\n", get_temp_reg_str(ir->lhs), ir->rhs);
+			continue;
+		}
+
+		if (ir->op == IR_LABEL) {
+			printf(".L%d:\n", ir->lhs);
+			continue;
+		}
+
 	}
 }
