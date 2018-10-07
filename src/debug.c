@@ -43,6 +43,8 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_IDENT),	/**< 識別子 (変数名等) */
 		TRANS_ELEMENT(TK_RETURN),	/**< "return" */
 		TRANS_ELEMENT(TK_IF),		/**< "if" */
+		TRANS_ELEMENT(TK_ELSE),		/**< "else" */
+		TRANS_ELEMENT(TK_GOTO),		/**< "goto" */
 		TRANS_ELEMENT(TK_EOF),		/**< EOF */
 	};
 
@@ -143,6 +145,7 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_LOADADDR),
 		TRANS_ELEMENT(IR_NOP),
 		TRANS_ELEMENT(IR_BEQZ),		/**< lhs がゼロならブランチする */
+		TRANS_ELEMENT(IR_JUMP),		/**< ジャンプする */
 		TRANS_ELEMENT(IR_LABEL),	/**< ラベルを生成 */
 	};
 

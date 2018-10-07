@@ -78,6 +78,11 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			continue;
 		}
 
+		if (ir->op == IR_JUMP) {
+			printf("	j	.L%d\n", ir->lhs);
+			continue;
+		}
+
 		if (ir->op == IR_LABEL) {
 			printf(".L%d:\n", ir->lhs);
 			continue;

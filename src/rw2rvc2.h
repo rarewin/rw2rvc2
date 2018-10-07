@@ -56,6 +56,7 @@ typedef enum {
 	TK_IDENT,		/**< 識別子 (変数名等) */
 	TK_RETURN,		/**< "return" */
 	TK_IF,			/**< "if" */
+	TK_ELSE,		/**< "else" */
 	TK_GOTO,		/**< "goto" */
 	TK_EOF,			/**< EOF */
 } token_type_t;
@@ -116,6 +117,7 @@ typedef enum {
 	IR_STORE,
 	IR_LOADADDR,
 	IR_BEQZ,	/**< lhs がゼロならブランチする */
+	IR_JUMP,	/**< ジャンプする */
 	IR_LABEL,	/**< ラベルを生成 */
 	IR_NOP,
 } ir_type_t;

@@ -22,7 +22,7 @@ static void expect_token(struct vector_t *tokens, token_type_t type)
 		g_position++;	/* 期待値通りならインデックスを進めて戻る. */
 	} else {
 		/* 期待値と異なった場合, 止まる. */
-		error_printf("unexpect token: %s\n", t->input);
+		error_printf("unexpect token: %s at %d\n", t->input, g_position);
 		error_printf("expect token: %s (%d)\n", get_token_str(type), type);
 		exit(1);
 	}
@@ -285,7 +285,7 @@ static struct node_t *jump_statement(struct vector_t *tokens)
 	struct node_t *n = NULL;
 
 	if ((n = keyword_return(tokens)) != NULL) {
-		;
+		expect_token(tokens, TK_SEMICOLON);
 	} else {
 		;
 	}
@@ -311,12 +311,37 @@ static struct node_t *selection_statement(struct vector_t *tokens)
 		expect_token(tokens, TK_LEFT_PAREN);
 		node = new_node(ND_IF, NULL, NULL, expression(tokens), NULL, NULL, -1);
 		expect_token(tokens, TK_RIGHT_PAREN);
+
 		if ((node->lhs = statement(tokens)) == NULL) {
 			parse_error();
 			/* NOTREACHED */
 		}
-		/* @todo else statement */
+		t = tokens->data[g_position];
+		if (t->type == TK_ELSE) {
+			g_position++;
+			if ((node->rhs = statement(tokens)) == NULL) {
+				parse_error();
+				/* NOTREACHED */
+			}
+		}
+
 	}
+
+	return node;
+}
+
+/**
+ * @brief expression_statementをパースする
+ * expression_statement := ';'
+ *                       | expression ';'
+ *                       ;
+ */
+struct node_t *expression_statement(struct vector_t *tokens)
+{
+	struct node_t *node;
+
+	node = expression(tokens);
+	expect_token(tokens, TK_SEMICOLON);
 
 	return node;
 }
@@ -341,13 +366,13 @@ struct node_t *statement(struct vector_t *tokens)
 	if ((node = selection_statement(tokens)) != NULL)
 		return node;
 
-	return expression(tokens);
+	return expression_statement(tokens);
 }
 
 /**
  * statement_list := statement
  *                 | statement_list statement
- *                ;
+ *                 ;
  */
 struct node_t *statement_list(struct vector_t *tokens)
 {
@@ -363,7 +388,6 @@ struct node_t *statement_list(struct vector_t *tokens)
 			vector_push(n->statements, s);
 		}
 
-		expect_token(tokens, TK_SEMICOLON);
 	} while (((struct token_t *)(tokens->data[g_position]))->type != TK_EOF);
 
 	return n;

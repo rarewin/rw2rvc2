@@ -110,7 +110,16 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	if (node->type == ND_IF) {
 		vector_push(v, new_ir(IR_BEQZ, gen_ir_sub(v, d, node->expression), label++, NULL));
 		gen_ir_sub(v, d, node->lhs);	// then
-		vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
+
+		if (node->rhs != NULL) {
+			int l2 = label++;
+			vector_push(v, new_ir(IR_JUMP, l2, 0, NULL));
+			vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
+			gen_ir_sub(v, d, node->rhs);	// else
+			vector_push(v, new_ir(IR_LABEL, l2, 0, NULL));
+		} else {
+			vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
+		}
 	}
 
 	if (node->type == ND_PLUS || node->type == ND_MINUS ||
