@@ -64,6 +64,7 @@ struct vector_t *tokenize(char *p)
 		{"if",     TK_IF},
 		{"else",   TK_ELSE},
 		{"goto",   TK_GOTO},
+		{"int",    TK_INT},
 	};
 	unsigned int i;
 
@@ -140,7 +141,8 @@ struct vector_t *tokenize(char *p)
 			/* 予約語かどうかの判定 */
 			for (i = 0; i < (sizeof(keywords) / sizeof(keywords[0])); i++) {
 				if (strncmp(keywords[i].word, p, len) == 0) {
-					add_token(v, keywords[i].tkval, p);	/* 予約語だった */
+					t = add_token(v, keywords[i].tkval, p);	/* 予約語だった */
+					t->name = keywords[i].word;
 					p += len;
 					break;
 				}

@@ -60,6 +60,7 @@ typedef enum {
 	TK_IF,			/**< "if" */
 	TK_ELSE,		/**< "else" */
 	TK_GOTO,		/**< "goto" */
+	TK_INT,			/**< "int" */
 	TK_EOF,			/**< EOF */
 } token_type_t;
 
@@ -88,6 +89,10 @@ typedef enum {
 	ND_IF,		/**< "if" */
 	ND_STATEMENT,	/**< 文 */
 	ND_ASSIGN,	/**< 代入文 */
+	ND_TYPE,	/**< 型名 */
+	ND_FUNC_DEF,	/**< 関数定義 */
+	ND_FUNC_CALL,	/**< 関数コール */
+	ND_PARAM,	/**< 関数パラメータ */
 } node_type_t;
 
 /**
@@ -120,6 +125,7 @@ typedef enum {
 	IR_BEQZ,	/**< lhs がゼロならブランチする */
 	IR_JUMP,	/**< ジャンプする */
 	IR_LABEL,	/**< ラベルを生成 */
+	IR_FUNC_DEF,	/**< 関数定義 */
 	IR_NOP,
 } ir_type_t;
 

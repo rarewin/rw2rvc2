@@ -4,8 +4,6 @@
 
 #define TRANS_ELEMENT(e)    [e] = #e
 
-
-
 /**
  * @brief debug function for tokenizer
  */
@@ -47,6 +45,7 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_IF),		/**< "if" */
 		TRANS_ELEMENT(TK_ELSE),		/**< "else" */
 		TRANS_ELEMENT(TK_GOTO),		/**< "goto" */
+		TRANS_ELEMENT(TK_INT),		/**< "int" */
 		TRANS_ELEMENT(TK_EOF),		/**< EOF */
 	};
 
@@ -82,6 +81,10 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_IF),		/**< "if" */
 		TRANS_ELEMENT(ND_STATEMENT),	/**< 文 */
 		TRANS_ELEMENT(ND_ASSIGN),	/**< 代入文 */
+		TRANS_ELEMENT(ND_TYPE),		/**< 型名 */
+		TRANS_ELEMENT(ND_FUNC_DEF),	/**< 関数定義 */
+		TRANS_ELEMENT(ND_FUNC_CALL),	/**< 関数コール */
+		TRANS_ELEMENT(ND_PARAM),	/**< 関数パラメータ */
 	};
 
 	if (node == NULL)
@@ -140,6 +143,7 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_BEQZ),		/**< lhs がゼロならブランチする */
 		TRANS_ELEMENT(IR_JUMP),		/**< ジャンプする */
 		TRANS_ELEMENT(IR_LABEL),	/**< ラベルを生成 */
+		TRANS_ELEMENT(IR_FUNC_DEF),	/**< 関数定義 */
 	};
 
 	for (i = 0; i < irv->len; i++) {

@@ -10,17 +10,20 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 	unsigned int i;
 	struct ir_t *ir;
 
-	printf("	.section .text\n");
-	printf("	.global main\n");
-
 	for (i = 0; i < d->len; i++) {
 		printf("	.comm %s, 4, 4\n", (d->dict)[i].key);
 	}
 
-	printf("main:\n");
-
 	for (i = 0; i < irv->len; i++) {
+
 		ir = irv->data[i];
+
+		if (ir->op == IR_FUNC_DEF) {
+			printf("	.section .text\n");
+			printf("	.global %s\n", ir->name);
+			printf("	.type %s, @function\n", ir->name);
+			printf("%s:\n", ir->name);
+		}
 
 		if (ir->op == IR_IMM) {
 			printf("	li	%s, %d\n", get_temp_reg_str(ir->lhs), ir->rhs);

@@ -7,6 +7,8 @@
 static struct node_t *expression(struct vector_t *tokens);
 struct node_t *statement(struct vector_t *tokens);
 struct node_t *statement_list(struct vector_t *tokens);
+struct node_t *declarator(struct vector_t *tokens);
+struct node_t *declaration_specifiers(struct vector_t *tokens);
 
 static int g_position = 0;
 
@@ -38,9 +40,8 @@ static void consume_token(struct vector_t *tokens, token_type_t type)
 {
 	struct token_t *t = tokens->data[g_position];
 
-	if (t->type == type) {
+	if (t->type == type)
 		g_position++;	/* 期待値通りならインデックスを進めて戻る. */
-	}
 }
 
 /**
@@ -417,9 +418,180 @@ struct node_t *statement_list(struct vector_t *tokens)
 }
 
 /**
+ * @brief parameter_declarationのパーサ
+ *
+ * parameter_declaration := declaration_specifiers declarator
+ *                        | declaration_specifiers abstract_declarator
+ *                        | declaration_specifiers
+ *                        ;
+ */
+static node_t *parameter_declaration(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+
+	lhs = declaration_specifiers(tokens);
+	return new_node(ND_PARAM, lhs, declarator(tokens), NULL, NULL, -1);
+}
+
+/**
+ * @brief parameter_listのパーサ
+ * parameter_list := parameter_declaration
+ *                 | parameter_list ',' parameter_declaration
+ *                 ;
+ */
+static node_t *parameter_list(struct vector_t *tokens)
+{
+	return parameter_declaration(tokens);
+}
+
+/**
+ * @brief parameter_type_listのパーサ
+ *
+ * parameter_type_list := parameter_list
+ *                      | parameter_list ',' ELLIPSIS
+ */
+struct node_t *parameter_type_list(struct vector_t *tokens)
+{
+	return parameter_list(tokens);
+}
+
+/**
+ * @brief direct_declaratorのパーサ
+ *
+ * direct_declarator := IDENTIFIER
+ *                    | '(' declarator ')'
+ *                    | direct_declarator '[' constant_expression ']'
+ *                    | direct_declarator '[' ']'
+ *                    | direct_declarator '(' parameter_type_list ')'
+ *                    | direct_declarator '(' identifier_list ')'
+ *                    | direct_declarator '(' ')'
+ *                    ;
+ */
+struct node_t *direct_declarator(struct vector_t *tokens)
+{
+	struct token_t *t;
+	struct node_t *lhs;
+
+	if ((lhs = identifier(tokens)) != NULL) {
+
+		t = tokens->data[g_position];
+
+		if (t->type == TK_LEFT_PAREN) {
+			consume_token(tokens, TK_LEFT_PAREN);
+			// lhs = parameter_type_list(tokens);
+			expect_token(tokens, TK_RIGHT_PAREN);
+		}
+
+		return lhs;
+	}
+
+	return NULL;
+}
+
+/**
+ * @brief declaratorのパーサ
+ *
+ * declarator := pointer direct_declarator
+ *             | direct_declarator
+ *             ;
+ */
+struct node_t *declarator(struct vector_t *tokens)
+{
+	return direct_declarator(tokens);
+}
+
+/**
+ * @brief type_specifierのパーサ
+ *
+ * type_specifier := VOID
+ *                 | CHAR
+ *                 | SHORT
+ *                 | INT
+ *                 | LONG
+ *                 | FLOAT
+ *                 | DOUBLE
+ *                 | SIGNED
+ *                 | UNSIGNED
+ *                 | struct_or_union_specifier
+ *                 | enum_specifier
+ *                 | TYPE_NAME
+ *                 ;
+ */
+struct node_t *type_specifier(struct vector_t *tokens)
+{
+	struct token_t *t = tokens->data[g_position];
+
+	if (t->type == TK_INT) {
+		g_position++;
+		return new_node(ND_TYPE, NULL, NULL, NULL, t->name, -1);
+	}
+
+	return NULL;
+}
+
+/**
+ * @brief declaration_specifiersのパーサ
+ *
+ * declaration_specifiers := storage_class_specifier
+ *                         | storage_class_specifier declaration_specifiers
+ *                         | type_specifier
+ *                         | type_specifier declaration_specifiers
+ *                         | type_qualifier
+ *                         | type_qualifier declaration_specifiers
+ *                         ;
+ */
+struct node_t *declaration_specifiers(struct vector_t *tokens)
+{
+	return type_specifier(tokens);
+}
+
+/**
+ * @brief function_definitionのパーサ
+ *
+ * function_definition := declaration_specifiers declarator declaration_list compound_statement
+ *                      | declaration_specifiers declarator compound_statement
+ *                      | declarator declaration_list compound_statement
+ *                      | declarator compound_statement
+ *                      ;
+ */
+struct node_t *function_definition(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+
+	lhs = declaration_specifiers(tokens);
+	lhs->lhs = declarator(tokens);
+
+	return new_node(ND_FUNC_DEF, lhs, compound_statement(tokens), NULL, NULL, -1);
+}
+
+/**
+ * @brief external_declarationのパーサ
+ *
+ * external_declaration := function_definition
+ *                       | declaration
+ *                       ;
+ */
+struct node_t *external_declaration(struct vector_t *tokens)
+{
+	return function_definition(tokens);
+}
+
+/**
+ * @brief translation_unitのパーサ
+ *
+ * translation_unit := external_declaration
+ *                   | translation_unit external_declaration
+ *                   ;
+ */
+struct node_t *translation_unit(struct vector_t *tokens)
+{
+	return external_declaration(tokens);
+}
+
+/**
  * @brief main function of parser
  */
 struct node_t *parse(struct vector_t *tokens)
 {
-	return statement_list(tokens);
+	return translation_unit(tokens); // start point
 }
