@@ -558,10 +558,12 @@ struct node_t *function_definition(struct vector_t *tokens)
 {
 	struct node_t *lhs;
 
-	lhs = declaration_specifiers(tokens);
-	lhs->lhs = declarator(tokens);
+	if ((lhs = declaration_specifiers(tokens)) != NULL) {
+		lhs->lhs = declarator(tokens);
+		return new_node(ND_FUNC_DEF, lhs, compound_statement(tokens), NULL, NULL, -1);
+	}
 
-	return new_node(ND_FUNC_DEF, lhs, compound_statement(tokens), NULL, NULL, -1);
+	return lhs;
 }
 
 /**
@@ -593,5 +595,11 @@ struct node_t *translation_unit(struct vector_t *tokens)
  */
 struct node_t *parse(struct vector_t *tokens)
 {
-	return translation_unit(tokens); // start point
+	struct node_t *lhs = translation_unit(tokens); // start point
+
+	if (lhs == NULL) {
+		parse_error();
+	}
+
+	return lhs;
 }
