@@ -139,11 +139,12 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_LOAD),
 		TRANS_ELEMENT(IR_STORE),
 		TRANS_ELEMENT(IR_LOADADDR),
-		TRANS_ELEMENT(IR_NOP),
 		TRANS_ELEMENT(IR_BEQZ),		/**< lhs がゼロならブランチする */
 		TRANS_ELEMENT(IR_JUMP),		/**< ジャンプする */
 		TRANS_ELEMENT(IR_LABEL),	/**< ラベルを生成 */
 		TRANS_ELEMENT(IR_FUNC_DEF),	/**< 関数定義 */
+		TRANS_ELEMENT(IR_FUNC_END),	/**< 関数定義終端 */
+		TRANS_ELEMENT(IR_NOP),
 	};
 
 	for (i = 0; i < irv->len; i++) {
