@@ -93,6 +93,7 @@ typedef enum {
 	ND_FUNC_DEF,	/**< 関数定義 */
 	ND_FUNC_CALL,	/**< 関数コール */
 	ND_PARAM,	/**< 関数パラメータ */
+	ND_DECLARATION,	/**< 宣言文 */
 } node_type_t;
 
 /**

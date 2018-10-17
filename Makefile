@@ -91,6 +91,8 @@ test: rebuild
 	@./tools/test.sh "int main() {a = 2; if (a - 2) {a = 1; return a;} else {a = 3; return a;} return a;}" 3
 
 	@./tools/test.sh "int main() {return 0;}" 0
+	@./tools/test.sh "int main() {return 0;} int hoge() {return 1;}" 0
+	@./tools/test.sh "int hoge() {return 0;} int main() {return 1;}" 1
 
 	@./tools/fail.sh "{c = ="
 	@./tools/fail.sh "{return 1"

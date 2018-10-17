@@ -587,7 +587,12 @@ struct node_t *external_declaration(struct vector_t *tokens)
  */
 struct node_t *translation_unit(struct vector_t *tokens)
 {
-	return external_declaration(tokens);
+	struct node_t *lhs;
+
+	if ((lhs = external_declaration(tokens)) != NULL)
+		return new_node(ND_DECLARATION, lhs, translation_unit(tokens), NULL, NULL, -1);
+
+	return NULL;
 }
 
 /**

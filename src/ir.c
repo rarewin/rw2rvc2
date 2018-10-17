@@ -74,6 +74,11 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	if (node == NULL)
 		return -1;
 
+	if (node->type == ND_DECLARATION) {
+		gen_ir_sub(v, d, node->lhs);
+		gen_ir_sub(v, d, node->rhs);
+	}
+
 	if (node->type == ND_RETURN) {
 		lhs = gen_ir_sub(v, d, node->expression);
 		vector_push(v, new_ir(IR_RETURN, lhs, 0, NULL));

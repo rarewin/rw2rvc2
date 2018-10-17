@@ -85,6 +85,7 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_FUNC_DEF),	/**< 関数定義 */
 		TRANS_ELEMENT(ND_FUNC_CALL),	/**< 関数コール */
 		TRANS_ELEMENT(ND_PARAM),	/**< 関数パラメータ */
+		TRANS_ELEMENT(ND_DECLARATION),	/**< 宣言文 */
 	};
 
 	if (node == NULL)
