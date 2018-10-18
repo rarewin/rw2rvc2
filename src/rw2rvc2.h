@@ -43,6 +43,7 @@ typedef enum {
 	TK_MINUS,		/**< - */
 	TK_MUL,			/**< * */
 	TK_DIV,			/**< / */
+	TK_MOD,			/**< % */
 	TK_EQUAL,		/**< = */
 	TK_NUM,			/**< 数値  */
 	TK_STRING,		/**< 文字列 */
@@ -82,6 +83,7 @@ typedef enum {
 	ND_MINUS,	/**< - */
 	ND_MUL,		/**< * */
 	ND_DIV,		/**< / */
+	ND_MOD,		/**< % */
 	ND_CONST,	/**< 定数 */
 	ND_IDENT,	/**< 識別子 */
 	ND_SEMICOLON,	/**< ; */
@@ -116,6 +118,7 @@ typedef enum {
 	IR_MINUS,
 	IR_MUL,
 	IR_DIV,
+	IR_MOD,		/**< 剰余を求める a0 % a1 */
 	IR_RETURN,
 	IR_IMM,
 	IR_MOV,

@@ -4,10 +4,11 @@
  * @brief conversion table for node type to IR type
  */
 static node_type_t CONVERSION_NODE_TO_IR[] = {
-	[ND_PLUS]  = IR_PLUS,
-	[ND_MINUS] = IR_MINUS,
-	[ND_MUL] = IR_MUL,
-	[ND_DIV] = IR_DIV,
+	[ND_PLUS]   = IR_PLUS,
+	[ND_MINUS]  = IR_MINUS,
+	[ND_MUL]    = IR_MUL,
+	[ND_DIV]    = IR_DIV,
+	[ND_MOD]    = IR_MOD,
 	[ND_RETURN] = IR_RETURN,
 };
 
@@ -128,7 +129,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_PLUS || node->type == ND_MINUS ||
-	    node->type == ND_MUL  || node->type == ND_DIV) {
+	    node->type == ND_MUL  || node->type == ND_DIV || node->type == ND_MOD) {
 		lhs = gen_ir_sub(v, d, node->lhs);
 		rhs = gen_ir_sub(v, d, node->rhs);
 

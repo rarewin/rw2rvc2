@@ -29,6 +29,7 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_MINUS),	/**< - */
 		TRANS_ELEMENT(TK_MUL),		/**< * */
 		TRANS_ELEMENT(TK_DIV),		/**< / */
+		TRANS_ELEMENT(TK_MOD),		/**< % */
 		TRANS_ELEMENT(TK_NUM),		/**< 数値  */
 		TRANS_ELEMENT(TK_EQUAL),	/**< = */
 		TRANS_ELEMENT(TK_STRING),	/**< 文字列 */
@@ -74,6 +75,7 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_MINUS),	/**< - */
 		TRANS_ELEMENT(ND_MUL),		/**< * */
 		TRANS_ELEMENT(ND_DIV),		/**< / */
+		TRANS_ELEMENT(ND_MOD),		/**< % */
 		TRANS_ELEMENT(ND_IDENT),	/**< 識別子 */
 		TRANS_ELEMENT(ND_CONST),	/**< numbers */
 		TRANS_ELEMENT(ND_SEMICOLON),	/**< ; */
@@ -133,6 +135,7 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_MINUS),
 		TRANS_ELEMENT(IR_MUL),
 		TRANS_ELEMENT(IR_DIV),
+		TRANS_ELEMENT(IR_MOD),		/**< 剰余を求める a0 % a1 */
 		TRANS_ELEMENT(IR_IMM),
 		TRANS_ELEMENT(IR_MOV),
 		TRANS_ELEMENT(IR_RETURN),

@@ -23,11 +23,13 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			printf("	.global %s\n", ir->name);
 			printf("	.type %s, @function\n", ir->name);
 			printf("%s:\n", ir->name);
+			continue;
 		}
 
 		if (ir->op == IR_FUNC_END) {
 			printf("	.size %s, . - %s\n", ir->name, ir->name);
 			printf("\n");
+			continue;
 		}
 
 		if (ir->op == IR_IMM) {
@@ -42,6 +44,7 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 
 		if (ir->op == IR_LOADADDR) {
 			printf("	la	%s, %s\n", get_temp_reg_str(ir->lhs), ir->name);
+			continue;
 		}
 
 		if (ir->op == IR_RETURN) {
@@ -68,6 +71,11 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 
 		if (ir->op == IR_DIV) {
 			printf("	div	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			continue;
+		}
+
+		if (ir->op == IR_MOD) {
+			printf("	rem	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
 			continue;
 		}
 

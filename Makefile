@@ -57,10 +57,13 @@ test: rebuild
 	@./tools/test.sh "int main() {return 1 * 2;}" 2
 	@./tools/test.sh "int main() {return 1 + 1 * 2;}" 3
 	@./tools/test.sh "int main() {return 4 * 3 + 1 * 2;}" 14
+	@./tools/test.sh "int main() {return 4 % 3 + 1 % 2;}" 2
 	@./tools/test.sh "int main() {return 4 / 2;}" 2
 	@./tools/test.sh "int main() {return 5 / 2;}" 2
 	@./tools/test.sh "int main() {return 4 * 3 / 4;}" 3
+	@./tools/test.sh "int main() {return 11 % 4;}" 3
 	@./tools/test.sh "int main() {return 10 / 3 * 3;}" 9
+	@./tools/test.sh "int main() {return 10 % 3 * 3;}" 3
 	@./tools/test.sh "int main() {1 + 2; return 10 / 3 * 3;}" 9
 	@./tools/test.sh "int main() {1 + 2; 1 + 2; 1 + 2; 1 + 2; 1 + 2; 1 + 2; 1 + 2; return 10 / 3 * 3;}" 9
 	@./tools/test.sh "int main() {1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 - 10 - 9 - 8 - 7 - 6 - 5 - 4 - 3 - 2 - 1 - 0 + 0; 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 - 10 - 9 - 8 - 7 - 6 - 5 - 4 - 3 - 2 - 1 - 0 + 0; return 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10;}" 55
@@ -86,6 +89,8 @@ test: rebuild
 	@./tools/test.sh "int main() {a = 2; if (a) a = 1; else a = 3; return a;}" 1
 	@./tools/test.sh "int main() {a = 2; if (a) {a = 1; return a;} else a = 3; return a;}" 1
 	@./tools/test.sh "int main() {if (2 - 2) return 1; return 0;}" 0
+	@./tools/test.sh "int main() {a = 6; if (a % 3) return 1; return 0;}" 0
+	@./tools/test.sh "int main() {a = 8; if (a % 3) return 1; return 0;}" 1
 	@./tools/test.sh "int main() {a = 2; if (a - 2) return 1; return 0;}" 0
 	@./tools/test.sh "int main() {a = 2; if (a - 2) {a = 1; return a;} else {a = 3; return a;} return a;}" 3
 	@./tools/test.sh "int main() {a = 2; if (a - 2) {a = 1; return a;} else {a = 3; return a;} return a;}" 3

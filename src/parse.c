@@ -112,6 +112,7 @@ static node_type_t CONVERSION_TOKEN_TO_NODE[] = {
 	[TK_MINUS] = ND_MINUS,
 	[TK_MUL]   = ND_MUL,
 	[TK_DIV]   = ND_DIV,
+	[TK_MOD]   = ND_MOD,
 	[TK_NUM]   = ND_CONST,
 	[TK_RETURN] = ND_RETURN,
 };
@@ -154,8 +155,14 @@ static struct node_t *primary_expression(struct vector_t *tokens)
  * @brief 乗除算
  * @param[in] tokens
  * @return
+ *
+ * multiplicative_expression := unary_expression
+ *                           | multiplicative_expression '*' unary_expression
+ *                           | multiplicative_expression '/' unary_expression
+ *                           | multiplicative_expression '%' unary_expression
+ *                           ;
  */
-static struct node_t *muldiv(struct vector_t *tokens)
+static struct node_t *multiplicative_expression(struct vector_t *tokens)
 {
 	struct node_t *lhs;
 
@@ -166,7 +173,7 @@ static struct node_t *muldiv(struct vector_t *tokens)
 		struct token_t *t = tokens->data[g_position];
 		token_type_t op = t->type;
 
-		if (op != TK_MUL && op != TK_DIV)
+		if (op != TK_MUL && op != TK_DIV && op != TK_MOD)
 			break;
 
 		g_position++;
@@ -192,7 +199,7 @@ static struct node_t *identifier(struct vector_t *tokens)
  * @brief assignment expression
  * assignment_expression := conditional_expression
  *                        | unary_expression assignment_operator assignment_expression
- *                          ;
+ *                        ;
  */
 static struct node_t *assignment_expression(struct vector_t *tokens)
 {
@@ -233,7 +240,7 @@ static struct node_t *expression(struct vector_t *tokens)
 	if (lhs != NULL && lhs->type == ND_ASSIGN)
 		return lhs;
 
-	if ((lhs = muldiv(tokens)) == NULL)
+	if ((lhs = multiplicative_expression(tokens)) == NULL)
 		return NULL;
 
 	for (;;) {
@@ -244,7 +251,7 @@ static struct node_t *expression(struct vector_t *tokens)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, muldiv(tokens), NULL, NULL, -1);
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, multiplicative_expression(tokens), NULL, NULL, -1);
 	}
 
 	return lhs;

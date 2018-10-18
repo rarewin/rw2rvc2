@@ -62,7 +62,8 @@ void allocate_regs(struct vector_t *irv)
 		}
 
 		if (ir->op == IR_MOV || ir->op == IR_PLUS || ir->op == IR_MINUS ||
-		    ir->op == IR_MUL || ir->op == IR_DIV  || ir->op == IR_LOAD) {
+		    ir->op == IR_MUL || ir->op == IR_DIV  || ir->op == IR_MOD   ||
+		    ir->op == IR_LOAD) {
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
 			continue;
