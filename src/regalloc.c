@@ -56,7 +56,7 @@ void allocate_regs(struct vector_t *irv)
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];
 
-		if (ir->op == IR_IMM || ir->op == IR_LOADADDR) {
+		if (ir->op == IR_IMM || ir->op == IR_LOADADDR || ir->op == IR_FUNC_CALL) {
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 			continue;
 		}

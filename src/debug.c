@@ -147,6 +147,7 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_JUMP),		/**< ジャンプする */
 		TRANS_ELEMENT(IR_LABEL),	/**< ラベルを生成 */
 		TRANS_ELEMENT(IR_FUNC_DEF),	/**< 関数定義 */
+		TRANS_ELEMENT(IR_FUNC_CALL),	/**< 関数呼び出し */
 		TRANS_ELEMENT(IR_FUNC_END),	/**< 関数定義終端 */
 		TRANS_ELEMENT(IR_NOP),
 	};

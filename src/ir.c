@@ -149,6 +149,10 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		vector_push(v, new_ir(IR_FUNC_END, gen_ir_sub(v, d, node->rhs), -1, node->lhs->lhs->name));
 	}
 
+	if (node->type == ND_FUNC_CALL) {
+		vector_push(v, new_ir(IR_FUNC_CALL, regno++, -1, node->name));
+	}
+
 	return r;
 }
 

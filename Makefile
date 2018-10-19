@@ -99,6 +99,11 @@ test: rebuild
 	@./tools/test.sh "int main() {return 0;} int hoge() {return 1;}" 0
 	@./tools/test.sh "int hoge() {return 0;} int main() {return 1;}" 1
 
+	@./tools/test.sh "int hoge() {return 0;} int main() {return hoge();}" 0
+	@./tools/test.sh "int hoge() {return 10;} int main() {return hoge();}" 10
+	@./tools/test.sh "int hoge() {return 10;} int main() {return hoge() * hoge();}" 100
+	@./tools/test.sh "int hoge() {return 10;} int main() {return hoge() + hoge() * hoge();}" 110
+
 	@./tools/fail.sh "{c = ="
 	@./tools/fail.sh "{return 1"
 	@./tools/fail.sh "{return a;}"

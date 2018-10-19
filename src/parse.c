@@ -152,6 +152,53 @@ static struct node_t *primary_expression(struct vector_t *tokens)
 }
 
 /**
+ * @brief postfix_expression
+ *
+ * postfix_expression := primary_expression
+ *                     | postfix_expression '[' expression ']'
+ *                     | postfix_expression '(' ')'
+ *                     | postfix_expression '(' argument_expression_list ')'
+ *                     | postfix_expression '.' IDENTIFIER
+ *                     | postfix_expression PTR_OP IDENTIFIER
+ *                     | postfix_expression INC_OP
+ *                     | postfix_expression DEC_OP
+ *                     ;
+ */
+static struct node_t *postfix_expression(struct vector_t *tokens)
+{
+	struct node_t *n;
+	struct token_t *t;
+
+	n = primary_expression(tokens);
+
+	t = tokens->data[g_position];
+
+	if (t->type == TK_LEFT_PAREN) {
+		consume_token(tokens, TK_LEFT_PAREN);
+		n = new_node(ND_FUNC_CALL, n, NULL, NULL, n->name, -1);
+		expect_token(tokens, TK_RIGHT_PAREN);
+	}
+
+	return n;
+}
+
+/**
+ * @brief unary_expression
+ *
+ * unary_expression := postfix_expression
+ *                   | INC_OP unary_expression
+ *                   | DEC_OP unary_expression
+ *                   | unary_operator cast_expression
+ *                   | SIZEOF unary_expression
+ *                   | SIZEOF '(' type_name ')'
+ *                   ;
+ */
+static struct node_t *unary_expression(struct vector_t *tokens)
+{
+	return postfix_expression(tokens);
+}
+
+/**
  * @brief 乗除算
  * @param[in] tokens
  * @return
@@ -166,7 +213,7 @@ static struct node_t *multiplicative_expression(struct vector_t *tokens)
 {
 	struct node_t *lhs;
 
-	if ((lhs = primary_expression(tokens)) == NULL)
+	if ((lhs = unary_expression(tokens)) == NULL)
 		return NULL;
 
 	for (;;) {
@@ -177,7 +224,7 @@ static struct node_t *multiplicative_expression(struct vector_t *tokens)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, primary_expression(tokens), NULL, NULL, -1);
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, unary_expression(tokens), NULL, NULL, -1);
 	}
 
 	return lhs;

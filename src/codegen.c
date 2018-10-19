@@ -26,6 +26,16 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			continue;
 		}
 
+		if (ir->op == IR_FUNC_CALL) {
+			printf("	addi	sp, sp, -8\n");
+			printf("	sd	ra, 0(sp)\n");
+			printf("	call	%s\n", ir->name);
+			printf("	ld	ra, 0(sp)\n");
+			printf("	addi	sp, sp, 8\n");
+			printf("	mv	%s, a0\n", get_temp_reg_str(ir->lhs));
+			continue;
+		}
+
 		if (ir->op == IR_FUNC_END) {
 			printf("	.size %s, . - %s\n", ir->name, ir->name);
 			printf("\n");
