@@ -8,6 +8,7 @@
 void gen_riscv(struct vector_t *irv, struct dict_t *d)
 {
 	unsigned int i;
+	int j;
 	struct ir_t *ir;
 
 	for (i = 0; i < d->len; i++) {
@@ -27,11 +28,23 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 		}
 
 		if (ir->op == IR_FUNC_CALL) {
-			printf("	addi	sp, sp, -8\n");
+			struct using_regs_list_t *using_regs;
+
+			using_regs = get_using_regs(ir->rhs);
+
+			printf("	addi	sp, sp, -%d\n", using_regs->num * 8 + 8);
 			printf("	sd	ra, 0(sp)\n");
+
+			for (j = 0; j < using_regs->num; j++)
+				printf("	sd	%s, %d(sp)\n", get_temp_reg_str(using_regs->list[j]), j * 8 + 8);
+
 			printf("	call	%s\n", ir->name);
+
+			for (j = using_regs->num - 1; j >= 0 ; j--)
+				printf("	ld	%s, %d(sp)\n", get_temp_reg_str(using_regs->list[j]), j * 8 + 8);
+
 			printf("	ld	ra, 0(sp)\n");
-			printf("	addi	sp, sp, 8\n");
+			printf("	addi	sp, sp, %d\n", using_regs->num * 8 + 8);
 			printf("	mv	%s, a0\n", get_temp_reg_str(ir->lhs));
 			continue;
 		}

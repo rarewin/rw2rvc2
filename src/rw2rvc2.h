@@ -180,12 +180,26 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d);
 
 
 /* regalloc.c */
+#define NUM_OF_TEMP_REGS  14  // = sizeof(TEMP_REGS) / sizeof(TEMP_REGS[0]) - 1
+
+typedef struct using_regs_list_t {
+	int num;
+	int list[NUM_OF_TEMP_REGS];
+} using_regs_list_t;
+
 /**
  * @brief get a temporary register's index
  * @param[in] index for a temporary
  * @return string if the register
  */
 char *get_temp_reg_str(int index);
+
+/**
+ * @brief 使用中レジスタリストを取得する
+ * @note 複数回コールした場合, リストは最後の結果で上書かれます
+ * @return 使用中のレジスタの番号のリスト
+ */
+struct using_regs_list_t *get_using_regs(int index);
 
 /**
  * @brief allocate register

@@ -103,6 +103,8 @@ test: rebuild
 	@./tools/test.sh "int hoge() {return 10;} int main() {return hoge();}" 10
 	@./tools/test.sh "int hoge() {return 10;} int main() {return hoge() * hoge();}" 100
 	@./tools/test.sh "int hoge() {return 10;} int main() {return hoge() + hoge() * hoge();}" 110
+	@./tools/test.sh "int fuga() {return 8;} int hoge() {return 10;} int main() {return fuga() * hoge() + hoge() * hoge();}" 180
+	@./tools/test.sh "int moge() {return fuga() + 3;} int fuga() {return 8;} int hoge() {return 3;} int main() {return fuga() * hoge() + hoge() * moge();}" 57
 
 	@./tools/fail.sh "{c = ="
 	@./tools/fail.sh "{return 1"

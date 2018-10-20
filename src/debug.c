@@ -129,6 +129,8 @@ void show_ir(struct vector_t *irv)
 {
 	struct ir_t *ir;
 	unsigned int i;
+	int j;
+	struct using_regs_list_t *using_regs;
 
 	const char *OP2STR[] = {
 		TRANS_ELEMENT(IR_PLUS),
@@ -156,5 +158,14 @@ void show_ir(struct vector_t *irv)
 		ir = irv->data[i];
 		printf("%s(%d) %d %d %s\n",
 		       OP2STR[ir->op], ir->op, ir->lhs, ir->rhs, ir->name);
+
+		if (ir->op == IR_FUNC_CALL && (using_regs = get_using_regs(ir->rhs)) != NULL) {
+			printf("  regs: ");
+
+			for (j = 0; j < using_regs->num; j++)
+				printf("%s ", get_temp_reg_str(using_regs->list[j]));
+
+			printf("\n");
+		}
 	}
 }
