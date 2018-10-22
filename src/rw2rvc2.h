@@ -63,6 +63,7 @@ typedef enum {
 	TK_GOTO,		/**< "goto" */
 	TK_INT,			/**< "int" */
 	TK_EOF,			/**< EOF */
+	TK_INVALID,		/**< 不正な値(関数のエラー用) */
 } token_type_t;
 
 /**

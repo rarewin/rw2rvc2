@@ -49,6 +49,43 @@ struct token_t *add_token(struct vector_t *v, token_type_t type, char *input)
 }
 
 /**
+ * @brief 文字 @p s をトークンタイプに変換する
+ * @param[in]  p   文字
+ * @return トークンタイプ(TK_XXX)。ただし、変換できなかった場合はTK_INVALIDを返す.
+ */
+static token_type_t get_token_type_of_symbol(char s)
+{
+	const struct symbol_t {
+		char s;
+		token_type_t tkval;
+	} symbols[] = {
+		{'+', TK_PLUS},
+		{'-', TK_MINUS},
+		{'*', TK_MUL},
+		{'/', TK_DIV},
+		{'%', TK_MOD},
+		{';', TK_SEMICOLON},
+		{':', TK_COLON},
+		{'(', TK_LEFT_PAREN},
+		{')', TK_RIGHT_PAREN},
+		{'{', TK_LEFT_BRACE},
+		{'}', TK_RIGHT_BRACE},
+		{'\'', TK_SINGLE_QUOTE},
+		{'"', TK_DOUBLE_QUOTE},
+		{'=', TK_EQUAL},
+	};
+	unsigned int i;
+
+	/* テーブル参照 */
+	for (i = 0; i < sizeof(symbols) / sizeof(symbols[0]); i++) {
+		if (symbols[i].s == s)
+			return symbols[i].tkval;
+	}
+
+	return TK_INVALID;
+}
+
+/**
  * @brief トークナイザー メイン
  * @param[in] p  入力文字列へのポインタ
  */
@@ -78,52 +115,7 @@ struct vector_t *tokenize(char *p)
 
 		/* symbols */
 		if (strchr("+-*/%;(){}'\"=", *p) != NULL) {
-			switch (*p) {
-			case '+':
-				add_token(v, TK_PLUS, p);
-				break;
-			case '-':
-				add_token(v, TK_MINUS, p);
-				break;
-			case '*':
-				add_token(v, TK_MUL, p);
-				break;
-			case '/':
-				add_token(v, TK_DIV, p);
-				break;
-			case '%':
-				add_token(v, TK_MOD, p);
-				break;
-			case ';':
-				add_token(v, TK_SEMICOLON, p);
-				break;
-			case ':':
-				add_token(v, TK_COLON, p);
-				break;
-			case '(':
-				add_token(v, TK_LEFT_PAREN, p);
-				break;
-			case ')':
-				add_token(v, TK_RIGHT_PAREN, p);
-				break;
-			case '{':
-				add_token(v, TK_LEFT_BRACE, p);
-				break;
-			case '}':
-				add_token(v, TK_RIGHT_BRACE, p);
-				break;
-			case '\'':
-				add_token(v, TK_SINGLE_QUOTE, p);
-				break;
-			case '"':
-				add_token(v, TK_DOUBLE_QUOTE, p);
-				break;
-			case '=':
-				add_token(v, TK_EQUAL, p);
-				break;
-			default:
-				break;
-			}
+			add_token(v, get_token_type_of_symbol(*p), p);
 			p++;
 			continue;
 		}
