@@ -49,8 +49,36 @@ struct token_t *add_token(struct vector_t *v, token_type_t type, char *input)
 }
 
 /**
- * @brief 文字 @p s をトークンタイプに変換する
+ * @brief assignment operation @p p をトークンタイプに変換する
  * @param[in]  p   文字
+ * @return トークンタイプ(TK_XXX)。ただし、変換できなかった場合はTK_INVALIDを返す.
+ */
+static token_type_t get_token_type_of_assignment_operator(char *p)
+{
+	const struct assignemnt_operator_t {
+		char *s;
+		token_type_t tkval;
+	} assignment_operators[] = {
+		{"*=", TK_MUL_ASSIGN},
+		{"/=", TK_DIV_ASSIGN},
+		{"%=", TK_MOD_ASSIGN},
+		{"+=", TK_ADD_ASSIGN},
+		{"-=", TK_SUB_ASSIGN},
+	};
+	unsigned int i;
+
+	/* テーブル参照 */
+	for (i = 0; i < sizeof(assignment_operators) / sizeof(assignment_operators[0]); i++) {
+		if (strncmp(p, assignment_operators[i].s, 2) == 0)
+			return assignment_operators[i].tkval;
+	}
+
+	return TK_INVALID;
+}
+
+/**
+ * @brief 文字 @p s をトークンタイプに変換する
+ * @param[in]  s   文字
  * @return トークンタイプ(TK_XXX)。ただし、変換できなかった場合はTK_INVALIDを返す.
  */
 static token_type_t get_token_type_of_symbol(char s)
@@ -115,6 +143,14 @@ struct vector_t *tokenize(char *p)
 
 		/* symbols */
 		if (strchr("+-*/%;(){}'\"=", *p) != NULL) {
+
+			/* assignment operator */
+			if (strchr("+-*/%", *p) != NULL && *(p + 1) == '=') {
+				add_token(v, get_token_type_of_assignment_operator(p), p);
+				p += 2;
+				continue;
+			}
+
 			add_token(v, get_token_type_of_symbol(*p), p);
 			p++;
 			continue;

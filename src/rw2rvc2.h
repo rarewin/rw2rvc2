@@ -45,6 +45,11 @@ typedef enum {
 	TK_DIV,			/**< / */
 	TK_MOD,			/**< % */
 	TK_EQUAL,		/**< = */
+	TK_MUL_ASSIGN,		/**< *= */
+	TK_DIV_ASSIGN,		/**< /= */
+	TK_MOD_ASSIGN,		/**< %= */
+	TK_ADD_ASSIGN,		/**< += */
+	TK_SUB_ASSIGN,		/**< -= */
 	TK_NUM,			/**< 数値  */
 	TK_STRING,		/**< 文字列 */
 	TK_CHAR,		/**< 文字 */

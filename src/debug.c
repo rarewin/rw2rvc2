@@ -32,6 +32,11 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_MOD),		/**< % */
 		TRANS_ELEMENT(TK_NUM),		/**< 数値  */
 		TRANS_ELEMENT(TK_EQUAL),	/**< = */
+		TRANS_ELEMENT(TK_MUL_ASSIGN),	/**< *= */
+		TRANS_ELEMENT(TK_DIV_ASSIGN),	/**< /= */
+		TRANS_ELEMENT(TK_MOD_ASSIGN),	/**< %= */
+		TRANS_ELEMENT(TK_ADD_ASSIGN),	/**< += */
+		TRANS_ELEMENT(TK_SUB_ASSIGN),	/**< -= */
 		TRANS_ELEMENT(TK_STRING),	/**< 文字列 */
 		TRANS_ELEMENT(TK_CHAR),		/**< 文字 */
 		TRANS_ELEMENT(TK_SEMICOLON),	/**< ; */
