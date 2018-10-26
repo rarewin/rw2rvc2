@@ -106,6 +106,13 @@ test: rebuild
 	@./tools/test.sh "int fuga() {return 8;} int hoge() {return 10;} int main() {return fuga() * hoge() + hoge() * hoge();}" 180
 	@./tools/test.sh "int moge() {return fuga() + 3;} int fuga() {return 8;} int hoge() {return 3;} int main() {return fuga() * hoge() + hoge() * moge();}" 57
 
+	@./tools/test.sh "int main() {a = 5; a *= 2; return a;}" 10
+	@./tools/test.sh "int main() {a = 15; a /= 4; return a;}" 3
+	@./tools/test.sh "int main() {a = 15; a %= 4; return a;}" 3
+	@./tools/test.sh "int main() {a = 15; a += 4; return a;}" 19
+	@./tools/test.sh "int main() {a = 15; a -= 4; return a;}" 11
+	@./tools/test.sh "int main() {a = 15; b = 2; a *= b; b -= a; a += (a + b); return a;}" 32
+
 	@./tools/fail.sh "{c = ="
 	@./tools/fail.sh "{return 1"
 	@./tools/fail.sh "{return a;}"

@@ -243,6 +243,18 @@ static struct node_t *identifier(struct vector_t *tokens)
 }
 
 /**
+ * @brief assignment_operatorかどうか判断する
+ * @param[in]  type  トークンタイプ
+ * @return   true or false
+ */
+static inline bool is_assignment_operator(token_type_t type)
+{
+	return ((type == TK_EQUAL || type == TK_MUL_ASSIGN ||
+		 type == TK_DIV_ASSIGN || type == TK_MOD_ASSIGN ||
+		 type == TK_ADD_ASSIGN || type == TK_SUB_ASSIGN)) ? true : false;
+}
+
+/**
  * @brief assignment expression
  * assignment_expression := conditional_expression
  *                        | unary_expression assignment_operator assignment_expression
@@ -250,21 +262,37 @@ static struct node_t *identifier(struct vector_t *tokens)
  */
 static struct node_t *assignment_expression(struct vector_t *tokens)
 {
-	struct node_t *lhs;
+	struct node_t *lhs, *rhs;
 	struct token_t *t;
 
-	if ((lhs = identifier(tokens)) == NULL)
+	if ((lhs = identifier(tokens)) == NULL)  // ?
 		return NULL;
 
 	t = tokens->data[g_position];
-	if (t->type != TK_EQUAL) {
+
+	/* assgienment operator */
+	if (!is_assignment_operator(t->type)) {
 		g_position--;
 		return NULL;
 	}
 
-	consume_token(tokens, TK_EQUAL);
+	consume_token(tokens, t->type);
 
-	lhs = new_node(ND_ASSIGN, lhs, expression(tokens), NULL, NULL, -1);
+	if (t->type == TK_MUL_ASSIGN) {
+		rhs = new_node(ND_MUL, lhs, expression(tokens), NULL, NULL, -1);
+	} else if (t->type == TK_DIV_ASSIGN) {
+		rhs = new_node(ND_DIV, lhs, expression(tokens), NULL, NULL, -1);
+	} else if (t->type == TK_MOD_ASSIGN) {
+		rhs = new_node(ND_MOD, lhs, expression(tokens), NULL, NULL, -1);
+	} else if (t->type == TK_ADD_ASSIGN) {
+		rhs = new_node(ND_PLUS, lhs, expression(tokens), NULL, NULL, -1);
+	} else if (t->type == TK_SUB_ASSIGN) {
+		rhs = new_node(ND_MINUS, lhs, expression(tokens), NULL, NULL, -1);
+	} else {
+		rhs = expression(tokens);
+	}
+
+	lhs = new_node(ND_ASSIGN, lhs, rhs, NULL, NULL, -1);
 
 	return lhs;
 }
