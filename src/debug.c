@@ -30,13 +30,15 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_MUL),		/**< * */
 		TRANS_ELEMENT(TK_DIV),		/**< / */
 		TRANS_ELEMENT(TK_MOD),		/**< % */
-		TRANS_ELEMENT(TK_NUM),		/**< 数値  */
 		TRANS_ELEMENT(TK_EQUAL),	/**< = */
+		TRANS_ELEMENT(TK_OR),		/**< | */
 		TRANS_ELEMENT(TK_MUL_ASSIGN),	/**< *= */
 		TRANS_ELEMENT(TK_DIV_ASSIGN),	/**< /= */
 		TRANS_ELEMENT(TK_MOD_ASSIGN),	/**< %= */
 		TRANS_ELEMENT(TK_ADD_ASSIGN),	/**< += */
 		TRANS_ELEMENT(TK_SUB_ASSIGN),	/**< -= */
+		TRANS_ELEMENT(TK_OR_OP),	/**< || */
+		TRANS_ELEMENT(TK_NUM),		/**< 数値  */
 		TRANS_ELEMENT(TK_STRING),	/**< 文字列 */
 		TRANS_ELEMENT(TK_CHAR),		/**< 文字 */
 		TRANS_ELEMENT(TK_SEMICOLON),	/**< ; */
@@ -90,6 +92,7 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_STATEMENT),	/**< 文 */
 		TRANS_ELEMENT(ND_EXPRESSION),	/**< 式 */
 		TRANS_ELEMENT(ND_ASSIGN),	/**< 代入文 */
+		TRANS_ELEMENT(ND_OR_OP),	/**< OR */
 		TRANS_ELEMENT(ND_TYPE),		/**< 型名 */
 		TRANS_ELEMENT(ND_FUNC_DEF),	/**< 関数定義 */
 		TRANS_ELEMENT(ND_FUNC_CALL),	/**< 関数コール */
@@ -141,6 +144,7 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_MOD),		/**< 剰余を求める a0 % a1 */
 		TRANS_ELEMENT(IR_IMM),
 		TRANS_ELEMENT(IR_MOV),
+		TRANS_ELEMENT(IR_OR),		/**< 論理和 */
 		TRANS_ELEMENT(IR_RETURN),
 		TRANS_ELEMENT(IR_KILL),
 		TRANS_ELEMENT(IR_LOAD),

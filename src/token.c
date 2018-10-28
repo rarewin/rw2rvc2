@@ -101,6 +101,7 @@ static token_type_t get_token_type_of_symbol(char s)
 		{'\'', TK_SINGLE_QUOTE},
 		{'"', TK_DOUBLE_QUOTE},
 		{'=', TK_EQUAL},
+		{'|', TK_OR},
 	};
 	unsigned int i;
 
@@ -131,6 +132,12 @@ struct vector_t *tokenize(char *p)
 		{"goto",   TK_GOTO},
 		{"int",    TK_INT},
 	};
+	const struct multibytes_operation_t {
+		char *word;
+		token_type_t tkval;
+	} multibytes_operations[] = {
+		{"||", TK_OR_OP},
+	};
 	unsigned int i;
 
 	while (*p) {
@@ -142,12 +149,27 @@ struct vector_t *tokenize(char *p)
 		}
 
 		/* symbols */
-		if (strchr("+-*/%;(){}'\"=", *p) != NULL) {
+		if (strchr("+-*/%;(){}'\"=|", *p) != NULL) {
 
 			/* assignment operator */
 			if (strchr("+-*/%", *p) != NULL && *(p + 1) == '=') {
 				add_token(v, get_token_type_of_assignment_operator(p), p);
 				p += 2;
+				continue;
+			}
+
+			/* check if multibytes operations */
+			for (i = 0; i < (sizeof(multibytes_operations) / sizeof(multibytes_operations[0])); i++) {
+				size_t len = strlen(multibytes_operations[i].word);
+
+				if (strncmp(multibytes_operations[i].word, p, len) == 0) {
+					add_token(v, multibytes_operations[i].tkval, p);
+					p += len;
+					break;
+				}
+			}
+
+			if (i != (sizeof(multibytes_operations) / sizeof(multibytes_operations[0]))) {
 				continue;
 			}
 

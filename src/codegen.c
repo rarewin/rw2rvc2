@@ -102,6 +102,11 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			continue;
 		}
 
+		if (ir->op == IR_OR) {
+			printf("	or	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			continue;
+		}
+
 		if (ir->op == IR_STORE) {
 			printf("	sw	%s, 0(%s)\n", get_temp_reg_str(ir->rhs), get_temp_reg_str(ir->lhs));
 			continue;

@@ -228,6 +228,36 @@ static struct node_t *multiplicative_expression(struct vector_t *tokens)
 	return lhs;
 }
 
+/**
+ * @brief additive_expression
+ *
+ * additive_expression := multiplicative_expression
+ *                      | additive_expression '+' multiplicative_expression
+ *                      | additive_expression '-' multiplicative_expression
+ *                      ;
+ */
+static struct node_t *additive_expression(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct token_t *t;
+
+	if ((lhs = multiplicative_expression(tokens)) == NULL)
+		return NULL;
+
+	for (;;) {
+		t = tokens->data[g_position];
+		token_type_t op = t->type;
+
+		if (op != TK_PLUS && op != TK_MINUS)
+			break;
+
+		g_position++;
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, multiplicative_expression(tokens), NULL, -1);
+	}
+
+	return lhs;
+}
+
 static struct node_t *identifier(struct vector_t *tokens)
 {
 	struct token_t *t = tokens->data[g_position];
@@ -239,6 +269,44 @@ static struct node_t *identifier(struct vector_t *tokens)
 
 	return NULL;
 }
+
+/**
+ * @brief logical_or_expression
+ *
+ * logical_or_expression := logical_and_expression
+ *                        | logical_or_expression OR_OP logical_and_expression
+ *                        ;
+ */
+static struct node_t *logical_or_expression(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct token_t *t;
+
+	lhs = additive_expression(tokens);		// TODO: temporary
+
+	t = tokens->data[g_position];
+
+	if (t->type == TK_OR_OP) {
+		consume_token(tokens, TK_OR_OP);
+		lhs = new_node(ND_OR_OP, lhs, additive_expression(tokens)/* TODO */, NULL, -1);
+	}
+
+	return lhs;
+}
+
+
+/**
+ * @brief conditional_expression
+ *
+ * conditional_expression := logical_or_expression
+ *                         | logical_or_expression '?' expression ':' conditional_expression
+ *                         ;
+ */
+static struct node_t *conditional_expression(struct vector_t *tokens)
+{
+	return logical_or_expression(tokens);
+}
+
 
 /**
  * @brief assignment_operatorかどうか判断する
@@ -262,35 +330,39 @@ static struct node_t *assignment_expression(struct vector_t *tokens)
 {
 	struct node_t *lhs, *rhs;
 	struct token_t *t;
+	int pos = g_position;
 
-	if ((lhs = identifier(tokens)) == NULL)  // ?
-		return NULL;
+	if ((lhs = unary_expression(tokens)) != NULL) {
 
-	t = tokens->data[g_position];
+		t = tokens->data[g_position];
 
-	/* assgienment operator */
-	if (!is_assignment_operator(t->type)) {
-		g_position--;
-		return NULL;
+		/* assgienment operator */
+		if (!is_assignment_operator(t->type)) {
+			g_position = pos;
+			lhs = NULL;
+		} else {
+			consume_token(tokens, t->type);
+
+			if (t->type == TK_MUL_ASSIGN) {
+				rhs = new_node(ND_MUL, lhs, expression(tokens), NULL, -1);
+			} else if (t->type == TK_DIV_ASSIGN) {
+				rhs = new_node(ND_DIV, lhs, expression(tokens), NULL, -1);
+			} else if (t->type == TK_MOD_ASSIGN) {
+				rhs = new_node(ND_MOD, lhs, expression(tokens), NULL, -1);
+			} else if (t->type == TK_ADD_ASSIGN) {
+				rhs = new_node(ND_PLUS, lhs, expression(tokens), NULL, -1);
+			} else if (t->type == TK_SUB_ASSIGN) {
+				rhs = new_node(ND_MINUS, lhs, expression(tokens), NULL, -1);
+			} else {
+				rhs = expression(tokens);
+			}
+
+			lhs = new_node(ND_ASSIGN, lhs, rhs, NULL, -1);
+		}
 	}
 
-	consume_token(tokens, t->type);
-
-	if (t->type == TK_MUL_ASSIGN) {
-		rhs = new_node(ND_MUL, lhs, expression(tokens), NULL, -1);
-	} else if (t->type == TK_DIV_ASSIGN) {
-		rhs = new_node(ND_DIV, lhs, expression(tokens), NULL, -1);
-	} else if (t->type == TK_MOD_ASSIGN) {
-		rhs = new_node(ND_MOD, lhs, expression(tokens), NULL, -1);
-	} else if (t->type == TK_ADD_ASSIGN) {
-		rhs = new_node(ND_PLUS, lhs, expression(tokens), NULL, -1);
-	} else if (t->type == TK_SUB_ASSIGN) {
-		rhs = new_node(ND_MINUS, lhs, expression(tokens), NULL, -1);
-	} else {
-		rhs = expression(tokens);
-	}
-
-	lhs = new_node(ND_ASSIGN, lhs, rhs, NULL, -1);
+	if (lhs == NULL)
+		lhs = conditional_expression(tokens);
 
 	return lhs;
 }
@@ -306,26 +378,9 @@ static struct node_t *assignment_expression(struct vector_t *tokens)
 static struct node_t *expression(struct vector_t *tokens)
 {
 	struct node_t *lhs;
-	struct token_t *t;
 
-	lhs = assignment_expression(tokens);
-
-	if (lhs != NULL && lhs->type == ND_ASSIGN)
-		return lhs;
-
-	if ((lhs = multiplicative_expression(tokens)) == NULL)
+	if ((lhs = assignment_expression(tokens)) == NULL)
 		return NULL;
-
-	for (;;) {
-		t = tokens->data[g_position];
-		token_type_t op = t->type;
-
-		if (op != TK_PLUS && op != TK_MINUS)
-			break;
-
-		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, multiplicative_expression(tokens), NULL, -1);
-	}
 
 	lhs = new_node(ND_EXPRESSION, lhs, NULL, NULL, -1);
 

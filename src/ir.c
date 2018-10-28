@@ -10,6 +10,7 @@ static node_type_t CONVERSION_NODE_TO_IR[] = {
 	[ND_DIV]    = IR_DIV,
 	[ND_MOD]    = IR_MOD,
 	[ND_RETURN] = IR_RETURN,
+	[ND_OR_OP]  = IR_OR,
 };
 
 /**
@@ -135,7 +136,8 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_PLUS || node->type == ND_MINUS ||
-	    node->type == ND_MUL  || node->type == ND_DIV || node->type == ND_MOD) {
+	    node->type == ND_MUL  || node->type == ND_DIV || node->type == ND_MOD ||
+	    node->type == ND_OR_OP) {
 		lhs = gen_ir_sub(v, d, node->lhs);
 		rhs = gen_ir_sub(v, d, node->rhs);
 
