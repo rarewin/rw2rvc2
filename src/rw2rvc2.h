@@ -97,6 +97,7 @@ typedef enum {
 	ND_IF,		/**< "if" */
 	ND_THEN_ELSE,	/**< then-else */
 	ND_STATEMENT,	/**< 文 */
+	ND_EXPRESSION,	/**< 式 */
 	ND_ASSIGN,	/**< 代入文 */
 	ND_TYPE,	/**< 型名 */
 	ND_FUNC_DEF,	/**< 関数定義 */

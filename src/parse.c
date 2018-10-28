@@ -327,6 +327,8 @@ static struct node_t *expression(struct vector_t *tokens)
 		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, multiplicative_expression(tokens), NULL, -1);
 	}
 
+	lhs = new_node(ND_EXPRESSION, lhs, NULL, NULL, -1);
+
 	return lhs;
 }
 

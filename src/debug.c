@@ -88,6 +88,7 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_IF),		/**< "if" */
 		TRANS_ELEMENT(ND_THEN_ELSE),	/**< then-else */
 		TRANS_ELEMENT(ND_STATEMENT),	/**< 文 */
+		TRANS_ELEMENT(ND_EXPRESSION),	/**< 式 */
 		TRANS_ELEMENT(ND_ASSIGN),	/**< 代入文 */
 		TRANS_ELEMENT(ND_TYPE),		/**< 型名 */
 		TRANS_ELEMENT(ND_FUNC_DEF),	/**< 関数定義 */
