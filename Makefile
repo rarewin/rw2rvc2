@@ -115,6 +115,9 @@ test: rebuild
 
 	@./tools/test.sh "int main() {if (1 || 0) {return 0;} else {return 1;} }" 0
 	@./tools/test.sh "int main() {if (0 || 0) {return 0;} else {return 1;} }" 1
+	@./tools/test.sh "int main() {if (1 && 0) {return 0;} else {return 1;} }" 1
+	@./tools/test.sh "int main() {if (0 && 0) {return 0;} else {return 1;} }" 1
+	@./tools/test.sh "int main() {if (1 && 1) {return 0;} else {return 1;} }" 0
 #	@./tools/test.sh "int main() {a = 15; if (a == 15) {return 0;} else {return 1;} }" 0
 #	@./tools/test.sh "int main() {a = 15; if (a != 15) {return 0;} else {return 1;} }" 1
 

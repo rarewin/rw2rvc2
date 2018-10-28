@@ -137,6 +137,7 @@ struct vector_t *tokenize(char *p)
 		token_type_t tkval;
 	} multibytes_operations[] = {
 		{"||", TK_OR_OP},
+		{"&&", TK_AND_OP},
 	};
 	unsigned int i;
 
@@ -149,7 +150,7 @@ struct vector_t *tokenize(char *p)
 		}
 
 		/* symbols */
-		if (strchr("+-*/%;(){}'\"=|", *p) != NULL) {
+		if (strchr("+-*/%;(){}'\"=|&", *p) != NULL) {
 
 			/* assignment operator */
 			if (strchr("+-*/%", *p) != NULL && *(p + 1) == '=') {

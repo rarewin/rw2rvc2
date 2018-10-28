@@ -271,6 +271,30 @@ static struct node_t *identifier(struct vector_t *tokens)
 }
 
 /**
+ * @brief logical_and_expression
+ *
+ * logical_and_expression := inclusive_or_expression
+ *                         | logical_and_expression AND_OP inclusive_or_expression
+ *                         ;
+ */
+static struct node_t *logical_and_expression(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct token_t *t;
+
+	lhs = additive_expression(tokens);		// TODO: temporary
+
+	t = tokens->data[g_position];
+
+	if (t->type == TK_AND_OP) {
+		consume_token(tokens, TK_AND_OP);
+		lhs = new_node(ND_AND_OP, lhs, additive_expression(tokens)/* TODO */, NULL, -1);
+	}
+
+	return lhs;
+}
+
+/**
  * @brief logical_or_expression
  *
  * logical_or_expression := logical_and_expression
@@ -282,13 +306,13 @@ static struct node_t *logical_or_expression(struct vector_t *tokens)
 	struct node_t *lhs;
 	struct token_t *t;
 
-	lhs = additive_expression(tokens);		// TODO: temporary
+	lhs = logical_and_expression(tokens);
 
 	t = tokens->data[g_position];
 
 	if (t->type == TK_OR_OP) {
 		consume_token(tokens, TK_OR_OP);
-		lhs = new_node(ND_OR_OP, lhs, additive_expression(tokens)/* TODO */, NULL, -1);
+		lhs = new_node(ND_OR_OP, lhs, logical_and_expression(tokens), NULL, -1);
 	}
 
 	return lhs;

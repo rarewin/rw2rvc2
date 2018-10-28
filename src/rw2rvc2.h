@@ -46,12 +46,14 @@ typedef enum {
 	TK_MOD,			/**< % */
 	TK_EQUAL,		/**< = */
 	TK_OR,			/**< | */
+	TK_AND,			/**< & */
 	TK_MUL_ASSIGN,		/**< *= */
 	TK_DIV_ASSIGN,		/**< /= */
 	TK_MOD_ASSIGN,		/**< %= */
 	TK_ADD_ASSIGN,		/**< += */
 	TK_SUB_ASSIGN,		/**< -= */
 	TK_OR_OP,		/**< || */
+	TK_AND_OP,		/**< && */
 	TK_NUM,			/**< 数値  */
 	TK_STRING,		/**< 文字列 */
 	TK_CHAR,		/**< 文字 */
@@ -102,6 +104,7 @@ typedef enum {
 	ND_EXPRESSION,	/**< 式 */
 	ND_ASSIGN,	/**< 代入文 */
 	ND_OR_OP,	/**< OR */
+	ND_AND_OP,	/**< AND */
 	ND_TYPE,	/**< 型名 */
 	ND_FUNC_DEF,	/**< 関数定義 */
 	ND_FUNC_CALL,	/**< 関数コール */
@@ -130,6 +133,7 @@ typedef enum {
 	IR_DIV,
 	IR_MOD,		/**< 剰余を求める a0 % a1 */
 	IR_OR,		/**< 論理和 */
+	IR_NOT,		/**< 論理否定 */
 	IR_RETURN,
 	IR_IMM,
 	IR_MOV,
