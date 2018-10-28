@@ -86,6 +86,7 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_SEMICOLON),	/**< ; */
 		TRANS_ELEMENT(ND_RETURN),	/**< "return" */
 		TRANS_ELEMENT(ND_IF),		/**< "if" */
+		TRANS_ELEMENT(ND_THEN_ELSE),	/**< then-else */
 		TRANS_ELEMENT(ND_STATEMENT),	/**< 文 */
 		TRANS_ELEMENT(ND_ASSIGN),	/**< 代入文 */
 		TRANS_ELEMENT(ND_TYPE),		/**< 型名 */
@@ -101,12 +102,6 @@ void show_node(struct node_t *node, unsigned int indent)
 	print_indent(indent);
 
 	printf("%s: %d\n", table[node->type], node->value);
-
-	if (node->expression != NULL) {
-		print_indent(indent + 1);
-		color_printf(COL_GREEN, "expression:\n");
-		show_node(node->expression, indent + 2);
-	}
 
 	if (node->name != NULL) {
 		print_indent(indent + 1);

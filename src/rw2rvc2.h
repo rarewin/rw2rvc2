@@ -95,6 +95,7 @@ typedef enum {
 	ND_SEMICOLON,	/**< ; */
 	ND_RETURN,	/**< "return" */
 	ND_IF,		/**< "if" */
+	ND_THEN_ELSE,	/**< then-else */
 	ND_STATEMENT,	/**< 文 */
 	ND_ASSIGN,	/**< 代入文 */
 	ND_TYPE,	/**< 型名 */
@@ -111,7 +112,6 @@ typedef struct node_t {
 	node_type_t type;		/**< タイプ (ND_XXXX) */
 	struct node_t *lhs;		/**< 左辺値 */
 	struct node_t *rhs;		/**< 右辺値 */
-	struct node_t *expression;	/**< 式 */
 	char *name;			/**< 識別子等の名前 */
 	int value;			/**< 値 */
 } node_t;

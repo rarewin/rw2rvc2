@@ -88,7 +88,6 @@ struct node_t *allocate_node(void)
 static struct node_t *new_node(node_type_t op,
 			       struct node_t *lhs,
 			       struct node_t *rhs,
-			       struct node_t *expression,
 			       char *name,
 			       int value)
 {
@@ -97,7 +96,6 @@ static struct node_t *new_node(node_type_t op,
 	node->type = op;
 	node->lhs = lhs;
 	node->rhs = rhs;
-	node->expression = expression;
 	node->name = name;
 	node->value = value;
 
@@ -140,12 +138,12 @@ static struct node_t *primary_expression(struct vector_t *tokens)
 
 	if (t->type == TK_NUM) {
 		g_position++;
-		return new_node(ND_CONST, NULL, NULL, NULL, NULL, t->value);
+		return new_node(ND_CONST, NULL, NULL, NULL, t->value);
 	}
 
 	if (t->type == TK_IDENT) {
 		g_position++;
-		return new_node(ND_IDENT, NULL, NULL, NULL, t->name, -1);
+		return new_node(ND_IDENT, NULL, NULL, t->name, -1);
 	}
 
 	return NULL;
@@ -175,7 +173,7 @@ static struct node_t *postfix_expression(struct vector_t *tokens)
 
 	if (t->type == TK_LEFT_PAREN) {
 		consume_token(tokens, TK_LEFT_PAREN);
-		n = new_node(ND_FUNC_CALL, n, NULL, NULL, n->name, -1);
+		n = new_node(ND_FUNC_CALL, n, NULL, n->name, -1);
 		expect_token(tokens, TK_RIGHT_PAREN);
 	}
 
@@ -224,7 +222,7 @@ static struct node_t *multiplicative_expression(struct vector_t *tokens)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, unary_expression(tokens), NULL, NULL, -1);
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, unary_expression(tokens), NULL, -1);
 	}
 
 	return lhs;
@@ -236,7 +234,7 @@ static struct node_t *identifier(struct vector_t *tokens)
 
 	if (t->type == TK_IDENT) {
 		g_position++;
-		return new_node(ND_IDENT, NULL, NULL, NULL, t->name, -1);
+		return new_node(ND_IDENT, NULL, NULL, t->name, -1);
 	}
 
 	return NULL;
@@ -279,20 +277,20 @@ static struct node_t *assignment_expression(struct vector_t *tokens)
 	consume_token(tokens, t->type);
 
 	if (t->type == TK_MUL_ASSIGN) {
-		rhs = new_node(ND_MUL, lhs, expression(tokens), NULL, NULL, -1);
+		rhs = new_node(ND_MUL, lhs, expression(tokens), NULL, -1);
 	} else if (t->type == TK_DIV_ASSIGN) {
-		rhs = new_node(ND_DIV, lhs, expression(tokens), NULL, NULL, -1);
+		rhs = new_node(ND_DIV, lhs, expression(tokens), NULL, -1);
 	} else if (t->type == TK_MOD_ASSIGN) {
-		rhs = new_node(ND_MOD, lhs, expression(tokens), NULL, NULL, -1);
+		rhs = new_node(ND_MOD, lhs, expression(tokens), NULL, -1);
 	} else if (t->type == TK_ADD_ASSIGN) {
-		rhs = new_node(ND_PLUS, lhs, expression(tokens), NULL, NULL, -1);
+		rhs = new_node(ND_PLUS, lhs, expression(tokens), NULL, -1);
 	} else if (t->type == TK_SUB_ASSIGN) {
-		rhs = new_node(ND_MINUS, lhs, expression(tokens), NULL, NULL, -1);
+		rhs = new_node(ND_MINUS, lhs, expression(tokens), NULL, -1);
 	} else {
 		rhs = expression(tokens);
 	}
 
-	lhs = new_node(ND_ASSIGN, lhs, rhs, NULL, NULL, -1);
+	lhs = new_node(ND_ASSIGN, lhs, rhs, NULL, -1);
 
 	return lhs;
 }
@@ -326,7 +324,7 @@ static struct node_t *expression(struct vector_t *tokens)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, multiplicative_expression(tokens), NULL, NULL, -1);
+		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, multiplicative_expression(tokens), NULL, -1);
 	}
 
 	return lhs;
@@ -344,7 +342,7 @@ static struct node_t *keyword_return(struct vector_t *tokens)
 
 	if (t->type == TK_RETURN) {
 		g_position++;
-		e = new_node(ND_RETURN, NULL, NULL, expression(tokens), NULL, -1);
+		e = new_node(ND_RETURN, expression(tokens), NULL, NULL, -1);
 	} else {
 		return NULL;
 	}
@@ -390,22 +388,24 @@ static struct node_t *selection_statement(struct vector_t *tokens)
 	if (t->type == TK_IF) {
 		g_position++;
 		expect_token(tokens, TK_LEFT_PAREN);
-		node = new_node(ND_IF, NULL, NULL, expression(tokens), NULL, -1);
+		node = new_node(ND_IF, expression(tokens), NULL, NULL, -1);
 		expect_token(tokens, TK_RIGHT_PAREN);
 
-		if ((node->lhs = statement(tokens)) == NULL) {
+		node->rhs = new_node(ND_THEN_ELSE, statement(tokens), NULL, NULL, -1);
+
+		if (node->rhs == NULL) {
 			parse_error();
 			/* NOTREACHED */
 		}
+
 		t = tokens->data[g_position];
 		if (t->type == TK_ELSE) {
 			g_position++;
-			if ((node->rhs = statement(tokens)) == NULL) {
+			if ((node->rhs->rhs = statement(tokens)) == NULL) {
 				parse_error();
 				/* NOTREACHED */
 			}
 		}
-
 	}
 
 	return node;
@@ -494,7 +494,7 @@ struct node_t *statement_list(struct vector_t *tokens)
 	struct node_t *s;
 
 	if ((s = statement(tokens)) != NULL)
-		n = new_node(ND_STATEMENT, s, statement_list(tokens), NULL, NULL, -1);
+		n = new_node(ND_STATEMENT, s, statement_list(tokens), NULL, -1);
 
 	return n;
 }
@@ -512,7 +512,7 @@ static node_t *parameter_declaration(struct vector_t *tokens)
 	struct node_t *lhs;
 
 	lhs = declaration_specifiers(tokens);
-	return new_node(ND_PARAM, lhs, declarator(tokens), NULL, NULL, -1);
+	return new_node(ND_PARAM, lhs, declarator(tokens), NULL, -1);
 }
 
 /**
@@ -605,7 +605,7 @@ struct node_t *type_specifier(struct vector_t *tokens)
 
 	if (t->type == TK_INT) {
 		g_position++;
-		return new_node(ND_TYPE, NULL, NULL, NULL, t->name, -1);
+		return new_node(ND_TYPE, NULL, NULL, t->name, -1);
 	}
 
 	return NULL;
@@ -642,7 +642,7 @@ struct node_t *function_definition(struct vector_t *tokens)
 
 	if ((lhs = declaration_specifiers(tokens)) != NULL) {
 		lhs->lhs = declarator(tokens);
-		return new_node(ND_FUNC_DEF, lhs, compound_statement(tokens), NULL, NULL, -1);
+		return new_node(ND_FUNC_DEF, lhs, compound_statement(tokens), NULL, -1);
 	}
 
 	return lhs;
@@ -672,7 +672,7 @@ struct node_t *translation_unit(struct vector_t *tokens)
 	struct node_t *lhs;
 
 	if ((lhs = external_declaration(tokens)) != NULL)
-		return new_node(ND_DECLARATION, lhs, translation_unit(tokens), NULL, NULL, -1);
+		return new_node(ND_DECLARATION, lhs, translation_unit(tokens), NULL, -1);
 
 	return NULL;
 }
