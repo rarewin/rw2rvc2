@@ -101,7 +101,11 @@ static token_type_t get_token_type_of_symbol(char s)
 		{'\'', TK_SINGLE_QUOTE},
 		{'"', TK_DOUBLE_QUOTE},
 		{'=', TK_EQUAL},
+		{'&', TK_AND},
 		{'|', TK_OR},
+		{'^', TK_XOR},
+		{'!', TK_NOT},
+		{'~', TK_INV},
 	};
 	unsigned int i;
 
@@ -138,6 +142,8 @@ struct vector_t *tokenize(char *p)
 	} multibytes_operations[] = {
 		{"||", TK_OR_OP},
 		{"&&", TK_AND_OP},
+		{"==", TK_EQ_OP},
+		{"!=", TK_NE_OP},
 	};
 	unsigned int i;
 
@@ -150,7 +156,7 @@ struct vector_t *tokenize(char *p)
 		}
 
 		/* symbols */
-		if (strchr("+-*/%;(){}'\"=|&", *p) != NULL) {
+		if (strchr("+-*/%;(){}'\"=|&^!~", *p) != NULL) {
 
 			/* assignment operator */
 			if (strchr("+-*/%", *p) != NULL && *(p + 1) == '=') {

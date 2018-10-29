@@ -271,6 +271,119 @@ static struct node_t *identifier(struct vector_t *tokens)
 }
 
 /**
+ * @brief equality_expression
+ *
+ * equality_expression := relational_expression
+ *                      | equality_expression EQ_OP relational_expression
+ *                      | equality_expression NE_OP relational_expression
+ *                      ;
+ */
+static struct node_t *equality_expression(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct token_t *t;
+	int nd_type;
+
+	lhs = additive_expression(tokens);		// TODO: temporary
+
+	for (;;) {
+		t = tokens->data[g_position];
+
+		if (t->type != TK_EQ_OP && t->type != TK_NE_OP)
+			break;
+
+		consume_token(tokens, t->type);
+
+		nd_type = (t->type == TK_EQ_OP) ? ND_EQ_OP : ND_NE_OP;
+		lhs = new_node(nd_type, lhs, additive_expression(tokens)/* TODO */, NULL, -1);
+	}
+
+	return lhs;
+}
+
+/**
+ * @brief and_expression
+ *
+ * and_expression := equality_expression
+ *                 | and_expression '&' equality_expression
+ *                 ;
+ */
+static struct node_t *and_expression(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct token_t *t;
+
+	lhs = equality_expression(tokens);
+
+	for (;;) {
+		t = tokens->data[g_position];
+
+		if (t->type != TK_AND)
+			break;
+
+		consume_token(tokens, TK_AND);
+		lhs = new_node(ND_AND, lhs, equality_expression(tokens), NULL, -1);
+	}
+
+	return lhs;
+}
+
+/**
+ * @brief exclusive_or_expression
+ *
+ * exclusive_or_expression := and_expression
+ *                          | exclusive_or_expression '^' and_expression
+ *                          ;
+ */
+static struct node_t *exclusive_or_expression(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct token_t *t;
+
+	lhs = and_expression(tokens);
+
+	for (;;) {
+		t = tokens->data[g_position];
+
+		if (t->type != TK_XOR)
+			break;
+
+		consume_token(tokens, TK_XOR);
+		lhs = new_node(ND_XOR, lhs, and_expression(tokens), NULL, -1);
+	}
+
+	return lhs;
+}
+
+/**
+ * @brief inclusive_or_expression
+ *
+ * inclusive_or_expression := exclusive_or_expression
+ *                          | inclusive_or_expression '|' exclusive_or_expression
+ *                          ;
+ */
+static struct node_t *inclusive_or_expression(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct token_t *t;
+
+	lhs = exclusive_or_expression(tokens);
+
+	for (;;) {
+		t = tokens->data[g_position];
+
+		if (t->type != TK_OR)
+			break;
+
+		consume_token(tokens, TK_OR);
+		lhs = new_node(ND_OR, lhs, exclusive_or_expression(tokens), NULL, -1);
+	}
+
+	return lhs;
+}
+
+
+/**
  * @brief logical_and_expression
  *
  * logical_and_expression := inclusive_or_expression
@@ -282,13 +395,16 @@ static struct node_t *logical_and_expression(struct vector_t *tokens)
 	struct node_t *lhs;
 	struct token_t *t;
 
-	lhs = additive_expression(tokens);		// TODO: temporary
+	lhs = inclusive_or_expression(tokens);
 
-	t = tokens->data[g_position];
+	for (;;) {
+		t = tokens->data[g_position];
 
-	if (t->type == TK_AND_OP) {
+		if (t->type != TK_AND_OP)
+			break;
+
 		consume_token(tokens, TK_AND_OP);
-		lhs = new_node(ND_AND_OP, lhs, additive_expression(tokens)/* TODO */, NULL, -1);
+		lhs = new_node(ND_AND_OP, lhs, inclusive_or_expression(tokens), NULL, -1);
 	}
 
 	return lhs;
@@ -308,9 +424,13 @@ static struct node_t *logical_or_expression(struct vector_t *tokens)
 
 	lhs = logical_and_expression(tokens);
 
-	t = tokens->data[g_position];
+	for (;;) {
 
-	if (t->type == TK_OR_OP) {
+		t = tokens->data[g_position];
+
+		if (t->type != TK_OR_OP)
+			break;
+
 		consume_token(tokens, TK_OR_OP);
 		lhs = new_node(ND_OR_OP, lhs, logical_and_expression(tokens), NULL, -1);
 	}

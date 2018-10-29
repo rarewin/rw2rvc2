@@ -118,8 +118,18 @@ test: rebuild
 	@./tools/test.sh "int main() {if (1 && 0) {return 0;} else {return 1;} }" 1
 	@./tools/test.sh "int main() {if (0 && 0) {return 0;} else {return 1;} }" 1
 	@./tools/test.sh "int main() {if (1 && 1) {return 0;} else {return 1;} }" 0
-#	@./tools/test.sh "int main() {a = 15; if (a == 15) {return 0;} else {return 1;} }" 0
-#	@./tools/test.sh "int main() {a = 15; if (a != 15) {return 0;} else {return 1;} }" 1
+	@./tools/test.sh "int main() {if (1 && 1 || 0) {return 0;} else {return 1;} }" 0
+	@./tools/test.sh "int main() {if (0 || 1 && 1) {return 0;} else {return 1;} }" 0
+	@./tools/test.sh "int main() {if (1 && 0 || 1 && 1) {return 0;} else {return 1;} }" 0
+	@./tools/test.sh "int main() {if (0 | 1) {return 0;} else {return 1;} }" 0
+	@./tools/test.sh "int main() {if (0 | 0) {return 0;} else {return 1;} }" 1
+	@./tools/test.sh "int main() {if (1 ^ 1) {return 0;} else {return 1;} }" 1
+	@./tools/test.sh "int main() {if (0 ^ 1) {return 0;} else {return 1;} }" 0
+	@./tools/test.sh "int main() {if (0 & 1) {return 0;} else {return 1;} }" 1
+	@./tools/test.sh "int main() {if (2 & 1) {return 0;} else {return 1;} }" 1
+	@./tools/test.sh "int main() {if (17 & 16) {return 0;} else {return 1;} }" 0
+	@./tools/test.sh "int main() {a = 15; if (a == 15) {return 0;} else {return 1;} }" 0
+	@./tools/test.sh "int main() {a = 15; if (a != 15) {return 0;} else {return 1;} }" 1
 
 	@./tools/fail.sh "{c = ="
 	@./tools/fail.sh "{return 1"

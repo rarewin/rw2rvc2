@@ -32,12 +32,19 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_MOD),		/**< % */
 		TRANS_ELEMENT(TK_EQUAL),	/**< = */
 		TRANS_ELEMENT(TK_OR),		/**< | */
+		TRANS_ELEMENT(TK_AND),		/**< & */
+		TRANS_ELEMENT(TK_XOR),		/**< ^ */
+		TRANS_ELEMENT(TK_NOT),		/**< ! */
+		TRANS_ELEMENT(TK_INV),		/**< ~ */
 		TRANS_ELEMENT(TK_MUL_ASSIGN),	/**< *= */
 		TRANS_ELEMENT(TK_DIV_ASSIGN),	/**< /= */
 		TRANS_ELEMENT(TK_MOD_ASSIGN),	/**< %= */
 		TRANS_ELEMENT(TK_ADD_ASSIGN),	/**< += */
 		TRANS_ELEMENT(TK_SUB_ASSIGN),	/**< -= */
 		TRANS_ELEMENT(TK_OR_OP),	/**< || */
+		TRANS_ELEMENT(TK_AND_OP),	/**< && */
+		TRANS_ELEMENT(TK_EQ_OP),	/**< == */
+		TRANS_ELEMENT(TK_NE_OP),	/**< != */
 		TRANS_ELEMENT(TK_NUM),		/**< 数値  */
 		TRANS_ELEMENT(TK_STRING),	/**< 文字列 */
 		TRANS_ELEMENT(TK_CHAR),		/**< 文字 */
@@ -83,6 +90,9 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_MUL),		/**< * */
 		TRANS_ELEMENT(ND_DIV),		/**< / */
 		TRANS_ELEMENT(ND_MOD),		/**< % */
+		TRANS_ELEMENT(ND_OR),		/**< | */
+		TRANS_ELEMENT(ND_AND),		/**< & */
+		TRANS_ELEMENT(ND_XOR),		/**< ^ */
 		TRANS_ELEMENT(ND_IDENT),	/**< 識別子 */
 		TRANS_ELEMENT(ND_CONST),	/**< numbers */
 		TRANS_ELEMENT(ND_SEMICOLON),	/**< ; */
@@ -93,6 +103,9 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_EXPRESSION),	/**< 式 */
 		TRANS_ELEMENT(ND_ASSIGN),	/**< 代入文 */
 		TRANS_ELEMENT(ND_OR_OP),	/**< OR */
+		TRANS_ELEMENT(ND_AND_OP),	/**< AND */
+		TRANS_ELEMENT(ND_EQ_OP),	/**< == */
+		TRANS_ELEMENT(ND_NE_OP),	/**< != */
 		TRANS_ELEMENT(ND_TYPE),		/**< 型名 */
 		TRANS_ELEMENT(ND_FUNC_DEF),	/**< 関数定義 */
 		TRANS_ELEMENT(ND_FUNC_CALL),	/**< 関数コール */
@@ -142,10 +155,15 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_MUL),
 		TRANS_ELEMENT(IR_DIV),
 		TRANS_ELEMENT(IR_MOD),		/**< 剰余を求める a0 % a1 */
+		TRANS_ELEMENT(IR_AND),		/**< 論理積 */
+		TRANS_ELEMENT(IR_OR),		/**< 論理和 */
+		TRANS_ELEMENT(IR_NOT),		/**< 論理否定 */
+		TRANS_ELEMENT(IR_XOR),		/**< 排他的論理和 */
+		TRANS_ELEMENT(IR_EQ_OP),	/**< == */
+		TRANS_ELEMENT(IR_NE_OP),	/**< != */
+		TRANS_ELEMENT(IR_RETURN),
 		TRANS_ELEMENT(IR_IMM),
 		TRANS_ELEMENT(IR_MOV),
-		TRANS_ELEMENT(IR_OR),		/**< 論理和 */
-		TRANS_ELEMENT(IR_RETURN),
 		TRANS_ELEMENT(IR_KILL),
 		TRANS_ELEMENT(IR_LOAD),
 		TRANS_ELEMENT(IR_STORE),
