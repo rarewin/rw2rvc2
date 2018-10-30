@@ -177,6 +177,26 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		return lhs;
 	}
 
+	if (node->type == ND_LESS_OP || node->type == ND_GREATER_OP ||
+	    node->type == ND_LE_OP || node->type == ND_GE_OP) {
+		lhs = gen_ir_sub(v, d, node->lhs);
+		rhs = gen_ir_sub(v, d, node->rhs);
+
+		if (node->type == ND_GREATER_OP || node->type == ND_LE_OP) {
+			int tmp;
+			tmp = lhs; lhs = rhs; rhs = tmp;	/* swap */
+		}
+
+		if (node->type == ND_LESS_OP || node->type == ND_GREATER_OP)
+			vector_push(v, new_ir(IR_SLT, lhs, rhs, NULL));
+		else
+			vector_push(v, new_ir(IR_SLET, lhs, rhs, NULL));
+
+		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
+
+		return lhs;
+	}
+
 	if (node->type == ND_STATEMENT) {
 		gen_ir_sub(v, d, node->lhs);
 		if (node->rhs != NULL)

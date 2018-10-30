@@ -271,6 +271,47 @@ static struct node_t *identifier(struct vector_t *tokens)
 }
 
 /**
+ * @brief relational_expression
+ *
+ * relational_expression := shift_expression
+ *                        | relational_expression '<' shift_expression
+ *                        | relational_expression '>' shift_expression
+ *                        | relational_expression LE_OP shift_expression
+ *                        | relational_expression GE_OP shift_expression
+ *                        ;
+ */
+static struct node_t *relational_expression(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct token_t *t;
+	int nd_type;
+
+	lhs = additive_expression(tokens);		// TODO: temporary
+
+	for (;;) {
+		t = tokens->data[g_position];
+
+		if (t->type != TK_LESS_OP && t->type != TK_GREATER_OP &&
+		    t->type != TK_LE_OP && t->type != TK_GE_OP)
+			break;
+
+		if (t->type == TK_LESS_OP)
+			nd_type = ND_LESS_OP;
+		else if (t->type == TK_GREATER_OP)
+			nd_type = ND_GREATER_OP;
+		else if (t->type == TK_LE_OP)
+			nd_type = ND_LE_OP;
+		else
+			nd_type = ND_GE_OP;
+
+		consume_token(tokens, t->type);
+		lhs = new_node(nd_type, lhs, additive_expression(tokens)/* TODO */, NULL, -1);
+	}
+
+	return lhs;
+}
+
+/**
  * @brief equality_expression
  *
  * equality_expression := relational_expression
@@ -284,7 +325,7 @@ static struct node_t *equality_expression(struct vector_t *tokens)
 	struct token_t *t;
 	int nd_type;
 
-	lhs = additive_expression(tokens);		// TODO: temporary
+	lhs = relational_expression(tokens);
 
 	for (;;) {
 		t = tokens->data[g_position];
@@ -295,7 +336,7 @@ static struct node_t *equality_expression(struct vector_t *tokens)
 		consume_token(tokens, t->type);
 
 		nd_type = (t->type == TK_EQ_OP) ? ND_EQ_OP : ND_NE_OP;
-		lhs = new_node(nd_type, lhs, additive_expression(tokens)/* TODO */, NULL, -1);
+		lhs = new_node(nd_type, lhs, relational_expression(tokens), NULL, -1);
 	}
 
 	return lhs;

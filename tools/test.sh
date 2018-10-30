@@ -10,7 +10,7 @@ RESULT=$?
 
 echo -n "\"$1\" -> ${RESULT}  (expected: $2) ... "
 
-if [ "${RESULT}" == "${2}" ]; then
+if [ "${RESULT}" = "${2}" ]; then
     echo -e "\e[1;32mOK\e[m"
 else
     echo -e "\e[1;31mNG\e[m"

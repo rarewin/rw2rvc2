@@ -45,6 +45,10 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_AND_OP),	/**< && */
 		TRANS_ELEMENT(TK_EQ_OP),	/**< == */
 		TRANS_ELEMENT(TK_NE_OP),	/**< != */
+		TRANS_ELEMENT(TK_GREATER_OP),	/**< > */
+		TRANS_ELEMENT(TK_LESS_OP),	/**< < */
+		TRANS_ELEMENT(TK_GE_OP),		/** >= */
+		TRANS_ELEMENT(TK_LE_OP),		/** <= */
 		TRANS_ELEMENT(TK_NUM),		/**< 数値  */
 		TRANS_ELEMENT(TK_STRING),	/**< 文字列 */
 		TRANS_ELEMENT(TK_CHAR),		/**< 文字 */
@@ -161,6 +165,7 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_XOR),		/**< 排他的論理和 */
 		TRANS_ELEMENT(IR_EQ_OP),	/**< == */
 		TRANS_ELEMENT(IR_NE_OP),	/**< != */
+		TRANS_ELEMENT(IR_SLT),		/**< < */
 		TRANS_ELEMENT(IR_RETURN),
 		TRANS_ELEMENT(IR_IMM),
 		TRANS_ELEMENT(IR_MOV),

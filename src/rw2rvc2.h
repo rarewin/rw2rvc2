@@ -59,6 +59,10 @@ typedef enum {
 	TK_AND_OP,		/**< && */
 	TK_EQ_OP,		/**< == */
 	TK_NE_OP,		/**< != */
+	TK_GREATER_OP,		/**< > */
+	TK_LESS_OP,		/**< < */
+	TK_GE_OP,		/** >= */
+	TK_LE_OP,		/** <= */
 	TK_NUM,			/**< 数値  */
 	TK_STRING,		/**< 文字列 */
 	TK_CHAR,		/**< 文字 */
@@ -115,6 +119,10 @@ typedef enum {
 	ND_AND_OP,	/**< AND */
 	ND_EQ_OP,	/**< == */
 	ND_NE_OP,	/**< != */
+	ND_GREATER_OP,	/**< > */
+	ND_LESS_OP,	/**< < */
+	ND_GE_OP,	/** >= */
+	ND_LE_OP,	/** <= */
 	ND_TYPE,	/**< 型名 */
 	ND_FUNC_DEF,	/**< 関数定義 */
 	ND_FUNC_CALL,	/**< 関数コール */
@@ -148,6 +156,8 @@ typedef enum {
 	IR_XOR,		/**< 排他的論理和 */
 	IR_EQ_OP,	/**< == */
 	IR_NE_OP,	/**< != */
+	IR_SLT,		/**< < */
+	IR_SLET,	/**< <= */
 	IR_RETURN,
 	IR_IMM,
 	IR_MOV,
