@@ -47,8 +47,10 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_NE_OP),	/**< != */
 		TRANS_ELEMENT(TK_GREATER_OP),	/**< > */
 		TRANS_ELEMENT(TK_LESS_OP),	/**< < */
-		TRANS_ELEMENT(TK_GE_OP),		/** >= */
-		TRANS_ELEMENT(TK_LE_OP),		/** <= */
+		TRANS_ELEMENT(TK_GE_OP),	/** >= */
+		TRANS_ELEMENT(TK_LE_OP),	/** <= */
+		TRANS_ELEMENT(TK_LEFT_OP),	/** << */
+		TRANS_ELEMENT(TK_RIGHT_OP),	/** >> */
 		TRANS_ELEMENT(TK_NUM),		/**< 数値  */
 		TRANS_ELEMENT(TK_STRING),	/**< 文字列 */
 		TRANS_ELEMENT(TK_CHAR),		/**< 文字 */
@@ -110,6 +112,12 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_AND_OP),	/**< AND */
 		TRANS_ELEMENT(ND_EQ_OP),	/**< == */
 		TRANS_ELEMENT(ND_NE_OP),	/**< != */
+		TRANS_ELEMENT(ND_GREATER_OP),	/**< > */
+		TRANS_ELEMENT(ND_LESS_OP),	/**< < */
+		TRANS_ELEMENT(ND_GE_OP),	/**< >= */
+		TRANS_ELEMENT(ND_LE_OP),	/**< <= */
+		TRANS_ELEMENT(ND_RIGHT_OP),	/**< >> */
+		TRANS_ELEMENT(ND_LEFT_OP),	/**< << */
 		TRANS_ELEMENT(ND_TYPE),		/**< 型名 */
 		TRANS_ELEMENT(ND_FUNC_DEF),	/**< 関数定義 */
 		TRANS_ELEMENT(ND_FUNC_CALL),	/**< 関数コール */
@@ -166,6 +174,8 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_EQ_OP),	/**< == */
 		TRANS_ELEMENT(IR_NE_OP),	/**< != */
 		TRANS_ELEMENT(IR_SLT),		/**< < */
+		TRANS_ELEMENT(IR_LEFT_OP),	/**< << */
+		TRANS_ELEMENT(IR_RIGHT_OP),	/**< >> */
 		TRANS_ELEMENT(IR_RETURN),
 		TRANS_ELEMENT(IR_IMM),
 		TRANS_ELEMENT(IR_MOV),

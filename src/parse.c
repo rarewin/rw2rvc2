@@ -271,6 +271,37 @@ static struct node_t *identifier(struct vector_t *tokens)
 }
 
 /**
+ * @brief shift_expression
+ *
+ * shift_expression := additive_expression
+ *                   | shift_expression LEFT_OP additive_expression
+ *                   | shift_expression RIGHT_OP additive_expression
+ *                   ;
+ */
+static struct node_t *shift_expression(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct token_t *t;
+	int nd_type;
+
+	lhs = additive_expression(tokens);
+
+	for (;;) {
+		t = tokens->data[g_position];
+
+		if (t->type != TK_RIGHT_OP && t->type != TK_LEFT_OP)
+			break;
+
+		nd_type = (t->type == TK_RIGHT_OP) ? ND_RIGHT_OP : ND_LEFT_OP;
+		consume_token(tokens, t->type);
+		lhs = new_node(nd_type, lhs, additive_expression(tokens), NULL, -1);
+	}
+
+	return lhs;
+}
+
+
+/**
  * @brief relational_expression
  *
  * relational_expression := shift_expression
@@ -286,7 +317,7 @@ static struct node_t *relational_expression(struct vector_t *tokens)
 	struct token_t *t;
 	int nd_type;
 
-	lhs = additive_expression(tokens);		// TODO: temporary
+	lhs = shift_expression(tokens);
 
 	for (;;) {
 		t = tokens->data[g_position];
@@ -305,7 +336,7 @@ static struct node_t *relational_expression(struct vector_t *tokens)
 			nd_type = ND_GE_OP;
 
 		consume_token(tokens, t->type);
-		lhs = new_node(nd_type, lhs, additive_expression(tokens)/* TODO */, NULL, -1);
+		lhs = new_node(nd_type, lhs, shift_expression(tokens), NULL, -1);
 	}
 
 	return lhs;

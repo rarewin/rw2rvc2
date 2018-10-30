@@ -125,6 +125,8 @@ struct vector_t *tokenize(char *p)
 		{"%=", TK_MOD_ASSIGN},
 		{"+=", TK_ADD_ASSIGN},
 		{"-=", TK_SUB_ASSIGN},
+		{">>", TK_RIGHT_OP},
+		{"<<", TK_LEFT_OP},
 	};
 	unsigned int i;
 

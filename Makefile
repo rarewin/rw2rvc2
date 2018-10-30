@@ -142,6 +142,12 @@ test: rebuild
 	@./tools/test.sh "int main() {a = 15; if (a <= 15) {return 0;} else {return 1;} }" 0
 	@./tools/test.sh "int main() {a = 5; if (a <= 15) {return 0;} else {return 1;} }" 0
 	@./tools/test.sh "int main() {a = 35; if (a <= 15) {return 0;} else {return 1;} }" 1
+	@./tools/test.sh "int main() {return (1 << 3);}" 8
+	@./tools/test.sh "int main() {return (8 >> 3);}" 1
+	@./tools/test.sh "int main() {return (1 >> 1);}" 0
+	@./tools/test.sh "int main() {return (0 << 4);}" 0
+	@./tools/test.sh "int main() {return (1 << 32);}" 0
+	@./tools/test.sh "int main() {return (1 | 1 << 4);}" 17
 
 	@./tools/fail.sh "{c = ="
 	@./tools/fail.sh "{return 1"
