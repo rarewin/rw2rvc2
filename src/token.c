@@ -80,6 +80,7 @@ static token_type_t get_token_type_of_symbol(char s)
 		{'~', TK_INV},
 		{'<', TK_LESS_OP},
 		{'>', TK_GREATER_OP},
+		{',', TK_COMMA},
 	};
 	unsigned int i;
 
@@ -139,7 +140,7 @@ struct vector_t *tokenize(char *p)
 		}
 
 		/* symbols */
-		if (strchr("+-*/%;(){}'\"=|&^!~<>", *p) != NULL) {
+		if (strchr("+-*/%;(){}'\"=|&^!~<>,", *p) != NULL) {
 
 			/* check if multibytes operations */
 			for (i = 0; i < (sizeof(multibytes_operations) / sizeof(multibytes_operations[0])); i++) {

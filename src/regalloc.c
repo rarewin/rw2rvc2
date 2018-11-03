@@ -5,7 +5,7 @@
 #include "rw2rvc2.h"
 
 static char *TEMP_REGS[] = {"t0", "t1", "t2", "t3", "t4", "t5", "t6",
-			    "a1", "a2", "a3", "a4", "a5", "a6", "a7", NULL};
+			    "a7", "a6", "a5", "a4", "a3", "a2", "a1", "a0", NULL};
 static bool used_temp_regs[NUM_OF_TEMP_REGS];
 
 // static char *SAVED_REGS[] = {"s0", "s1", "s2", "s3", "s4", "s5", "s6",
@@ -18,11 +18,11 @@ static bool used_temp_regs[NUM_OF_TEMP_REGS];
  * @param[in] ir_reg   register
  * @param[in] reg_map  register map
  */
-int find_allocatable_reg(int ir_reg, int *reg_map)
+static int find_allocatable_reg(int ir_reg, int *reg_map)
 {
 	int i;
 
-	if (reg_map[ir_reg] != -1)
+	if (reg_map[ir_reg] != -2)
 		return reg_map[ir_reg];		// ?
 
 	for (i = 0; i < NUM_OF_TEMP_REGS; i++) {
@@ -33,14 +33,35 @@ int find_allocatable_reg(int ir_reg, int *reg_map)
 		}
 	}
 
-	return -10;
+	return -10;	/* 割り当て不可 */
+}
+
+/**
+ * @brief アーギュメントレジスタを指定して割り当てる
+ *
+ * @param[in] ir_reg   IR中のレジスタ番号
+ * @param[in] reg_map  レジスタマップ
+ * @param[in] arg      引数番号 (0オリジン)
+ *
+ * @return レジスタ
+ */
+static int allocate_argument_reg(int ir_reg, int *reg_map, int arg)
+{
+	int index = NUM_OF_TEMP_REGS - 2 - arg;
+	if (used_temp_regs[index])
+		return -10;	/* 割り当て不可 */
+
+	used_temp_regs[index] = true;
+	reg_map[ir_reg] = index;
+
+	return index;
 }
 
 /**
  * @brief release the register
  * @param[in] r  register index
  */
-void release_reg(int r)
+static void release_reg(int r)
 {
 	used_temp_regs[r] = false;
 }
@@ -105,7 +126,7 @@ void allocate_regs(struct vector_t *irv)
 
 	/* initialize */
 	for (i = 0; i < irv->len; i++)
-		reg_map[i] = -1;
+		reg_map[i] = -2;
 
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];

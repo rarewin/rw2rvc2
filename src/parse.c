@@ -5,10 +5,11 @@
 
 /* static関数のプロトタイプ宣言. (循環コールのため) */
 static struct node_t *expression(struct vector_t *tokens);
-struct node_t *statement(struct vector_t *tokens);
-struct node_t *statement_list(struct vector_t *tokens);
-struct node_t *declarator(struct vector_t *tokens);
-struct node_t *declaration_specifiers(struct vector_t *tokens);
+static struct node_t *statement(struct vector_t *tokens);
+static struct node_t *statement_list(struct vector_t *tokens);
+static struct node_t *declarator(struct vector_t *tokens);
+static struct node_t *declaration_specifiers(struct vector_t *tokens);
+static struct node_t *assignment_expression(struct vector_t *tokens);
 
 static int g_position = 0;
 
@@ -57,7 +58,7 @@ static void parse_error(void)
  * @brief 新規ノードにメモリを割り当てる
  * @return 割り当てたメモリへのポインタ
  */
-struct node_t *allocate_node(void)
+static struct node_t *allocate_node(void)
 {
 	const size_t ALLOCATE_SIZE = 256;
 	static struct node_t *node_array = NULL;
@@ -149,6 +150,32 @@ static struct node_t *primary_expression(struct vector_t *tokens)
 	return NULL;
 }
 
+
+/**
+ * @brief argument_expression_list
+ *
+ * argument_expression_list := assignment_expression
+ *                           | argument_expression_list ',' assignment_expression
+ *                           ;
+ */
+static struct node_t *argument_expression_list(struct vector_t *tokens)
+{
+	struct node_t *lhs;
+	struct node_t *n1, *n2;
+
+	lhs = new_node(ND_FUNC_ARG, assignment_expression(tokens), NULL, NULL, -1);
+	n1 = lhs;
+
+	while (((struct token_t*)tokens->data[g_position])->type == TK_COMMA) {
+		consume_token(tokens, TK_COMMA);
+		n2 = new_node(ND_FUNC_ARG, assignment_expression(tokens), NULL, NULL, -1);
+		n1->rhs = n2;
+		n1 = n2;
+	}
+
+	return lhs;
+}
+
 /**
  * @brief postfix_expression
  *
@@ -164,20 +191,31 @@ static struct node_t *primary_expression(struct vector_t *tokens)
  */
 static struct node_t *postfix_expression(struct vector_t *tokens)
 {
-	struct node_t *n;
+	struct node_t *lhs;
 	struct token_t *t;
 
-	n = primary_expression(tokens);
+	lhs = primary_expression(tokens);
 
-	t = tokens->data[g_position];
+	for (;;) {
+		t = tokens->data[g_position];
 
-	if (t->type == TK_LEFT_PAREN) {
-		consume_token(tokens, TK_LEFT_PAREN);
-		n = new_node(ND_FUNC_CALL, n, NULL, n->name, -1);
-		expect_token(tokens, TK_RIGHT_PAREN);
+		if (t->type == TK_LEFT_PAREN) {
+			consume_token(tokens, TK_LEFT_PAREN);
+
+			if (t->type == TK_RIGHT_PAREN) {
+				consume_token(tokens, TK_RIGHT_PAREN);
+				lhs = new_node(ND_FUNC_CALL, lhs, NULL, lhs->name, -1);
+			} else {
+				lhs = new_node(ND_FUNC_CALL, lhs, argument_expression_list(tokens), lhs->name, -1);
+				expect_token(tokens, TK_RIGHT_PAREN);
+			}
+			continue;
+		}
+
+		break;
 	}
 
-	return n;
+	return lhs;
 }
 
 /**
@@ -497,7 +535,6 @@ static struct node_t *logical_or_expression(struct vector_t *tokens)
 	lhs = logical_and_expression(tokens);
 
 	for (;;) {
-
 		t = tokens->data[g_position];
 
 		if (t->type != TK_OR_OP)
@@ -690,7 +727,7 @@ static struct node_t *selection_statement(struct vector_t *tokens)
  *                       | expression ';'
  *                       ;
  */
-struct node_t *expression_statement(struct vector_t *tokens)
+static struct node_t *expression_statement(struct vector_t *tokens)
 {
 	struct node_t *node = NULL;
 	struct token_t *t = tokens->data[g_position];
@@ -712,7 +749,7 @@ struct node_t *expression_statement(struct vector_t *tokens)
  *                     | '{' declaration_list statement_list '}'
  *                     ;
  */
-struct node_t *compound_statement(struct vector_t *tokens)
+static struct node_t *compound_statement(struct vector_t *tokens)
 {
 	struct token_t *t = tokens->data[g_position];
 	struct node_t *node = NULL;
@@ -737,7 +774,7 @@ struct node_t *compound_statement(struct vector_t *tokens)
  *            | jump_statement
  *            ;
  */
-struct node_t *statement(struct vector_t *tokens)
+static struct node_t *statement(struct vector_t *tokens)
 {
 	struct node_t *node = NULL;
 
@@ -761,7 +798,7 @@ struct node_t *statement(struct vector_t *tokens)
  *                 | statement_list statement
  *                 ;
  */
-struct node_t *statement_list(struct vector_t *tokens)
+static struct node_t *statement_list(struct vector_t *tokens)
 {
 	struct node_t *n = NULL;
 	struct node_t *s;
@@ -805,7 +842,7 @@ static node_t *parameter_list(struct vector_t *tokens)
  * parameter_type_list := parameter_list
  *                      | parameter_list ',' ELLIPSIS
  */
-struct node_t *parameter_type_list(struct vector_t *tokens)
+static struct node_t *parameter_type_list(struct vector_t *tokens)
 {
 	return parameter_list(tokens);
 }
@@ -822,7 +859,7 @@ struct node_t *parameter_type_list(struct vector_t *tokens)
  *                    | direct_declarator '(' ')'
  *                    ;
  */
-struct node_t *direct_declarator(struct vector_t *tokens)
+static struct node_t *direct_declarator(struct vector_t *tokens)
 {
 	struct token_t *t;
 	struct node_t *lhs;
@@ -850,7 +887,7 @@ struct node_t *direct_declarator(struct vector_t *tokens)
  *             | direct_declarator
  *             ;
  */
-struct node_t *declarator(struct vector_t *tokens)
+static struct node_t *declarator(struct vector_t *tokens)
 {
 	return direct_declarator(tokens);
 }
@@ -872,7 +909,7 @@ struct node_t *declarator(struct vector_t *tokens)
  *                 | TYPE_NAME
  *                 ;
  */
-struct node_t *type_specifier(struct vector_t *tokens)
+static struct node_t *type_specifier(struct vector_t *tokens)
 {
 	struct token_t *t = tokens->data[g_position];
 
@@ -895,7 +932,7 @@ struct node_t *type_specifier(struct vector_t *tokens)
  *                         | type_qualifier declaration_specifiers
  *                         ;
  */
-struct node_t *declaration_specifiers(struct vector_t *tokens)
+static struct node_t *declaration_specifiers(struct vector_t *tokens)
 {
 	return type_specifier(tokens);
 }
@@ -909,7 +946,7 @@ struct node_t *declaration_specifiers(struct vector_t *tokens)
  *                      | declarator compound_statement
  *                      ;
  */
-struct node_t *function_definition(struct vector_t *tokens)
+static struct node_t *function_definition(struct vector_t *tokens)
 {
 	struct node_t *lhs;
 
@@ -928,7 +965,7 @@ struct node_t *function_definition(struct vector_t *tokens)
  *                       | declaration
  *                       ;
  */
-struct node_t *external_declaration(struct vector_t *tokens)
+static struct node_t *external_declaration(struct vector_t *tokens)
 {
 	return function_definition(tokens);
 }
@@ -940,7 +977,7 @@ struct node_t *external_declaration(struct vector_t *tokens)
  *                   | translation_unit external_declaration
  *                   ;
  */
-struct node_t *translation_unit(struct vector_t *tokens)
+static struct node_t *translation_unit(struct vector_t *tokens)
 {
 	struct node_t *lhs;
 
@@ -957,9 +994,8 @@ struct node_t *parse(struct vector_t *tokens)
 {
 	struct node_t *lhs = translation_unit(tokens); // start point
 
-	if (lhs == NULL) {
+	if (lhs == NULL)
 		parse_error();
-	}
 
 	return lhs;
 }

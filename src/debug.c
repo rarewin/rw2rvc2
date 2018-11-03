@@ -61,6 +61,7 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_RIGHT_BRACE),	/**< } */
 		TRANS_ELEMENT(TK_DOUBLE_QUOTE),	/**< " */
 		TRANS_ELEMENT(TK_SINGLE_QUOTE),	/**< ' */
+		TRANS_ELEMENT(TK_COMMA),	/**< , */
 		TRANS_ELEMENT(TK_IDENT),	/**< 識別子 (変数名等) */
 		TRANS_ELEMENT(TK_RETURN),	/**< "return" */
 		TRANS_ELEMENT(TK_IF),		/**< "if" */
@@ -123,6 +124,7 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_FUNC_CALL),	/**< 関数コール */
 		TRANS_ELEMENT(ND_PARAM),	/**< 関数パラメータ */
 		TRANS_ELEMENT(ND_DECLARATION),	/**< 宣言文 */
+		TRANS_ELEMENT(ND_FUNC_ARG),	/**< 関数引数 */
 	};
 
 	if (node == NULL)
@@ -186,9 +188,11 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_BEQZ),		/**< lhs がゼロならブランチする */
 		TRANS_ELEMENT(IR_JUMP),		/**< ジャンプする */
 		TRANS_ELEMENT(IR_LABEL),	/**< ラベルを生成 */
+		TRANS_ELEMENT(IR_FUNC_PREP),	/**< 関数呼び出し準備 */
 		TRANS_ELEMENT(IR_FUNC_DEF),	/**< 関数定義 */
 		TRANS_ELEMENT(IR_FUNC_CALL),	/**< 関数呼び出し */
 		TRANS_ELEMENT(IR_FUNC_END),	/**< 関数定義終端 */
+		TRANS_ELEMENT(IR_FUNC_ARG),	/**< 関数引数 */
 		TRANS_ELEMENT(IR_NOP),
 	};
 

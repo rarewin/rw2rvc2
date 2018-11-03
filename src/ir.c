@@ -63,18 +63,21 @@ static struct ir_t *new_ir(ir_type_t op, int lhs, int rhs, char *name)
 }
 
 /**
- * @brief generate IR (sub function)
- * @param[in] v    vector
- * @param[in] node node
- * @return LHS
+ * @brief IR生成 サブ関数
+ * @param[in] v     IRのベクタ
+ * @param[in] d     変数の辞書
+ * @param[in] node  パースしたノード
+ * @return 上段に渡す結果レジスタ, もしくはそれに相当する値
  */
 static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 {
 	static int regno = 0;
 	static int label = 0;
+	struct node_t *n;
 	int lhs, rhs;
 	int r = regno;
 	int l = label;
+	int i;
 
 	if (node == NULL)
 		return -1;
@@ -223,6 +226,19 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_FUNC_CALL) {
+		n = node;
+		i = 0;
+
+		while (n->rhs != NULL) {
+			n = n->rhs;
+			if (n->type == ND_FUNC_ARG) {
+				rhs = gen_ir_sub(v, d, node->rhs);
+				vector_push(v, new_ir(IR_FUNC_ARG, i++, rhs, NULL));
+			} else {
+				error_printf("unexpected node\n");
+			}
+		}
+
 		vector_push(v, new_ir(IR_FUNC_CALL, regno++, -1, node->name));
 	}
 
