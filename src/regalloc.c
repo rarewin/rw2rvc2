@@ -47,7 +47,7 @@ static int find_allocatable_reg(int ir_reg, int *reg_map)
  */
 static int allocate_argument_reg(int ir_reg, int *reg_map, int arg)
 {
-	int index = NUM_OF_TEMP_REGS - 2 - arg;
+	int index = NUM_OF_TEMP_REGS - 1 - arg;
 	if (used_temp_regs[index])
 		return -10;	/* 割り当て不可 */
 
@@ -131,15 +131,17 @@ void allocate_regs(struct vector_t *irv)
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];
 
-		if (ir->op == IR_IMM || ir->op == IR_LOADADDR) {
+		if (ir->op == IR_IMM || ir->op == IR_LOADADDR)
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
-			continue;
+
+		if (ir->op == IR_FUNC_ARG) {
+			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
+			ir->lhs = allocate_argument_reg(ir->rhs, reg_map, ir->lhs);
 		}
 
 		if (ir->op == IR_FUNC_CALL) {
 			ir->rhs = record_using_regs();
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
-			continue;
 		}
 
 		if (ir->op == IR_MOV || ir->op == IR_PLUS || ir->op == IR_MINUS ||
@@ -151,7 +153,6 @@ void allocate_regs(struct vector_t *irv)
 		    ir->op == IR_LOAD) {
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
-			continue;
 		}
 
 		if (ir->op == IR_STORE) {
@@ -159,15 +160,12 @@ void allocate_regs(struct vector_t *irv)
 			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
 		}
 
-		if (ir->op == IR_RETURN || ir->op == IR_BEQZ || ir->op == IR_NOT) {
+		if (ir->op == IR_RETURN || ir->op == IR_BEQZ || ir->op == IR_NOT)
 			ir->lhs = reg_map[ir->lhs];
-			continue;
-		}
 
 		if (ir->op == IR_KILL) {
 			release_reg(reg_map[ir->lhs]);
 			ir->op = IR_NOP;
-			continue;
 		}
 	}
 

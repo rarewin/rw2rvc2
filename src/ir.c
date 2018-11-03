@@ -93,9 +93,8 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 	}
 
-	if (node->type == ND_CONST) {
+	if (node->type == ND_CONST)
 		vector_push(v, new_ir(IR_IMM, regno++, node->value, NULL));
-	}
 
 	if (node->type == ND_ASSIGN) {
 		rhs = gen_ir_sub(v, d, node->rhs);
@@ -232,8 +231,9 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		while (n->rhs != NULL) {
 			n = n->rhs;
 			if (n->type == ND_FUNC_ARG) {
-				rhs = gen_ir_sub(v, d, node->rhs);
+				rhs = gen_ir_sub(v, d, n->lhs);
 				vector_push(v, new_ir(IR_FUNC_ARG, i++, rhs, NULL));
+				vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
 			} else {
 				error_printf("unexpected node\n");
 			}

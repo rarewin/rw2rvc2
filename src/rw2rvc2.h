@@ -177,7 +177,6 @@ typedef enum {
 	IR_JUMP,	/**< ジャンプする */
 	IR_LABEL,	/**< ラベルを生成 */
 	IR_FUNC_DEF,	/**< 関数定義 */
-	IR_FUNC_PREP,	/**< 関数呼び出し準備 */
 	IR_FUNC_CALL,	/**< 関数呼び出し */
 	IR_FUNC_END,	/**< 関数定義終端 */
 	IR_FUNC_ARG,	/**< 関数引数 */

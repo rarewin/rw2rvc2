@@ -163,7 +163,10 @@ static struct node_t *argument_expression_list(struct vector_t *tokens)
 	struct node_t *lhs;
 	struct node_t *n1, *n2;
 
-	lhs = new_node(ND_FUNC_ARG, assignment_expression(tokens), NULL, NULL, -1);
+	if ((lhs = assignment_expression(tokens)) ==NULL)
+		return NULL;
+
+	lhs = new_node(ND_FUNC_ARG, lhs, NULL, NULL, -1);
 	n1 = lhs;
 
 	while (((struct token_t*)tokens->data[g_position])->type == TK_COMMA) {

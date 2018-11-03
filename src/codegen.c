@@ -48,6 +48,9 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			printf("	mv	%s, a0\n", get_temp_reg_str(ir->lhs));
 		}
 
+		if (ir->op == IR_FUNC_ARG)
+			printf("	mv	%s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+
 		if (ir->op == IR_FUNC_END)
 			printf("	.size %s, . - %s\n\n", ir->name, ir->name);
 
