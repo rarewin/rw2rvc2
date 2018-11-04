@@ -122,9 +122,10 @@ void show_node(struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_TYPE),		/**< 型名 */
 		TRANS_ELEMENT(ND_FUNC_DEF),	/**< 関数定義 */
 		TRANS_ELEMENT(ND_FUNC_CALL),	/**< 関数コール */
-		TRANS_ELEMENT(ND_PARAM),	/**< 関数パラメータ */
 		TRANS_ELEMENT(ND_DECLARATION),	/**< 宣言文 */
 		TRANS_ELEMENT(ND_FUNC_ARG),	/**< 関数引数 */
+		TRANS_ELEMENT(ND_FUNC_PLIST),	/**< 関数パラメータリスト */
+		TRANS_ELEMENT(ND_FUNC_PARAM),	/**< 関数パラメータ */
 	};
 
 	if (node == NULL)
@@ -176,12 +177,14 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_EQ_OP),	/**< == */
 		TRANS_ELEMENT(IR_NE_OP),	/**< != */
 		TRANS_ELEMENT(IR_SLT),		/**< < */
+		TRANS_ELEMENT(IR_SLET),		/**< <= */
 		TRANS_ELEMENT(IR_LEFT_OP),	/**< << */
 		TRANS_ELEMENT(IR_RIGHT_OP),	/**< >> */
 		TRANS_ELEMENT(IR_RETURN),
 		TRANS_ELEMENT(IR_IMM),
 		TRANS_ELEMENT(IR_MOV),
 		TRANS_ELEMENT(IR_KILL),
+		TRANS_ELEMENT(IR_KILL_ARG),	/**< アーギュメントレジスタを解放する */
 		TRANS_ELEMENT(IR_LOAD),
 		TRANS_ELEMENT(IR_STORE),
 		TRANS_ELEMENT(IR_LOADADDR),
@@ -192,6 +195,8 @@ void show_ir(struct vector_t *irv)
 		TRANS_ELEMENT(IR_FUNC_CALL),	/**< 関数呼び出し */
 		TRANS_ELEMENT(IR_FUNC_END),	/**< 関数定義終端 */
 		TRANS_ELEMENT(IR_FUNC_ARG),	/**< 関数引数 */
+		TRANS_ELEMENT(IR_FUNC_PLIST),	/**< 関数パラメータリスト */
+		TRANS_ELEMENT(IR_FUNC_PARAM),	/**< 関数パラメータ */
 		TRANS_ELEMENT(IR_NOP),
 	};
 

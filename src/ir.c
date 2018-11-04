@@ -107,6 +107,21 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		vector_push(v, new_ir(IR_KILL, regno - 1, 0, NULL));
 	}
 
+	if (node->type == ND_FUNC_PLIST) {
+		int i = 0;
+
+		node = node->lhs;
+
+		if (node->type == ND_FUNC_PARAM && node->rhs != NULL) {
+			dict_append(d, node->rhs->name, 0);
+			vector_push(v, new_ir(IR_LOADADDR, regno++, -1, node->rhs->name));
+			vector_push(v, new_ir(IR_FUNC_PARAM, regno - 1, i, node->rhs->name));
+			regno++;	/* arg reg用の番号を確保……  */
+			vector_push(v, new_ir(IR_KILL, regno - 2, -1, NULL));
+			vector_push(v, new_ir(IR_KILL_ARG, i, -1, NULL));
+		}
+	}
+
 	if (node->type == ND_IDENT) {
 		if (dict_lookup(d, node->name) == NULL) {
 			error_printf("uninitialized identifier: %s\n", node->name);
@@ -221,6 +236,11 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 
 	if (node->type == ND_FUNC_DEF) {
 		vector_push(v, new_ir(IR_FUNC_DEF, -1, -1, node->lhs->lhs->name));
+
+		/* for parameters */
+		if (node->lhs->lhs->lhs)
+			gen_ir_sub(v, d, node->lhs->lhs->lhs);
+
 		vector_push(v, new_ir(IR_FUNC_END, gen_ir_sub(v, d, node->rhs), -1, node->lhs->lhs->name));
 	}
 
@@ -234,6 +254,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 				rhs = gen_ir_sub(v, d, n->lhs);
 				vector_push(v, new_ir(IR_FUNC_ARG, i++, rhs, NULL));
 				vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
+				vector_push(v, new_ir(IR_KILL_ARG, i - 1, 0, NULL));
 			} else {
 				error_printf("unexpected node\n");
 			}

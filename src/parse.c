@@ -825,7 +825,7 @@ static node_t *parameter_declaration(struct vector_t *tokens)
 	struct node_t *lhs;
 
 	lhs = declaration_specifiers(tokens);
-	return new_node(ND_PARAM, lhs, declarator(tokens), NULL, -1);
+	return new_node(ND_FUNC_PARAM, lhs, declarator(tokens), NULL, -1);
 }
 
 /**
@@ -868,12 +868,12 @@ static struct node_t *direct_declarator(struct vector_t *tokens)
 	struct node_t *lhs;
 
 	if ((lhs = identifier(tokens)) != NULL) {
-
 		t = tokens->data[g_position];
 
+		/* parameter_type_list */
 		if (t->type == TK_LEFT_PAREN) {
 			consume_token(tokens, TK_LEFT_PAREN);
-			// lhs = parameter_type_list(tokens);
+			lhs->lhs = new_node(ND_FUNC_PLIST, parameter_type_list(tokens), 0, NULL, -1);
 			expect_token(tokens, TK_RIGHT_PAREN);
 		}
 

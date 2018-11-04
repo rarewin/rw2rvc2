@@ -139,6 +139,11 @@ void allocate_regs(struct vector_t *irv)
 			ir->lhs = allocate_argument_reg(ir->rhs, reg_map, ir->lhs);
 		}
 
+		if (ir->op == IR_FUNC_PARAM) {
+			ir->rhs = allocate_argument_reg(ir->lhs + 1/* 特殊 */, reg_map, ir->rhs);
+			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
+		}
+
 		if (ir->op == IR_FUNC_CALL) {
 			ir->rhs = record_using_regs();
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
@@ -165,6 +170,11 @@ void allocate_regs(struct vector_t *irv)
 
 		if (ir->op == IR_KILL) {
 			release_reg(reg_map[ir->lhs]);
+			ir->op = IR_NOP;
+		}
+
+		if (ir->op == IR_KILL_ARG) {
+			release_reg(NUM_OF_TEMP_REGS - 1 - ir->lhs);
 			ir->op = IR_NOP;
 		}
 	}

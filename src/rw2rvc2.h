@@ -131,9 +131,10 @@ typedef enum {
 	ND_TYPE,	/**< 型名 */
 	ND_FUNC_DEF,	/**< 関数定義 */
 	ND_FUNC_CALL,	/**< 関数コール */
-	ND_PARAM,	/**< 関数パラメータ */
 	ND_DECLARATION,	/**< 宣言文 */
 	ND_FUNC_ARG,	/**< 関数引数 */
+	ND_FUNC_PLIST,	/**< 関数パラメータリスト */
+	ND_FUNC_PARAM,	/**< 関数パラメータ */
 } node_type_t;
 
 /**
@@ -170,6 +171,7 @@ typedef enum {
 	IR_IMM,
 	IR_MOV,
 	IR_KILL,
+	IR_KILL_ARG,	/**< アーギュメントレジスタを解放する */
 	IR_LOAD,
 	IR_STORE,
 	IR_LOADADDR,
@@ -180,6 +182,8 @@ typedef enum {
 	IR_FUNC_CALL,	/**< 関数呼び出し */
 	IR_FUNC_END,	/**< 関数定義終端 */
 	IR_FUNC_ARG,	/**< 関数引数 */
+	IR_FUNC_PLIST,	/**< 関数パラメータリスト */
+	IR_FUNC_PARAM,	/**< 関数パラメータ */
 	IR_NOP,
 } ir_type_t;
 

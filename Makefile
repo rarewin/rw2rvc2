@@ -148,6 +148,9 @@ test: rebuild
 	@./tools/test.sh "int main() {return (0 << 4);}" 0
 	@./tools/test.sh "int main() {return (1 << 32);}" 0
 	@./tools/test.sh "int main() {return (1 | 1 << 4);}" 17
+	@./tools/test.sh "int hoge(int a) {return a;} int main() {return hoge(17);}" 17
+	@./tools/test.sh "int factorial(int a) {if (a <= 0) {return 1;} else {return (a * factorial(a - 1));}} int main() {return factorial(4);}" 24
+	@./tools/test.sh "int factorial(int a) {if (a <= 0) {return 1;} else {return (a * factorial(a - 1));}} int main() {return factorial(5);}" 120
 
 	@./tools/fail.sh "{c = ="
 	@./tools/fail.sh "{return 1"
