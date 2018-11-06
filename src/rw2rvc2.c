@@ -10,14 +10,33 @@ int main(int argc, char **argv)
 	struct vector_t *tokens;
 	struct node_t *node = NULL;
 	struct dict_t *d = NULL;
+	FILE *fp;
+	char *buf;
+	size_t s;
 
 	if (argc != 2) {
-		fprintf(stderr, "usage: %s [num]\n", argv[0]);
+		fprintf(stderr, "usage: %s [source file]  or  %s [code]\n", argv[0], argv[0]);
 		return 1;
 	}
 
+	if ((fp = fopen(argv[1], "rt")) == NULL) {
+		buf = argv[1];
+	} else {
+		/* read file to buffer */
+		fseek(fp, 0, SEEK_END);
+		s = ftell(fp); /* ファイルサイズを取得 */
+		fseek(fp, 0, SEEK_SET);
+
+		if ((buf = malloc(s)) == NULL) {
+			fprintf(stderr, "memory allocation error\n");
+			return 3;
+		}
+
+		fread(buf, 1, s, fp);
+	}
+
 	/* tokenize */
-	tokens = tokenize(argv[1]);
+	tokens = tokenize(buf);
 
 #if defined(DEBUG)
 	color_printf(COL_YELLOW, "=====[token]=====\n");
@@ -45,6 +64,8 @@ int main(int argc, char **argv)
 	show_ir(irv);
 #endif
 	gen_riscv(irv, d);
+
+	fflush(stdout);
 
 	return 0;
 }
