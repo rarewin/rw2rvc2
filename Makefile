@@ -153,6 +153,7 @@ test: rebuild
 	@./tools/test.sh "int factorial(int a) {if (a <= 0) {return 1;} else {return (a * factorial(a - 1));}} int main() {return factorial(5);}" 120
 	@./tools/test.sh "int mul(int a, int b) {return a * b;} int main() {return mul(3, 2);}" 6
 	@./tools/test.sh "int mul(int a, int b) {return a * b;} int main() {return mul(10, 0);}" 0
+	@./tools/test.sh "/* hoge */ int mul(int a, int b) {return a * b;} int main() {/* fuga moge */ return mul(10, 0);} /* test *//*test*/" 0
 
 	@./tools/fail.sh "{c = ="
 	@./tools/fail.sh "{return 1"

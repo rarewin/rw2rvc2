@@ -132,7 +132,6 @@ struct vector_t *tokenize(char *p)
 	unsigned int i;
 
 	while (*p) {
-
 		/* ignore spaces */
 		if (isspace(*p)) {
 			p++;
@@ -141,6 +140,18 @@ struct vector_t *tokenize(char *p)
 
 		/* symbols */
 		if (strchr("+-*/%;(){}'\"=|&^!~<>,", *p) != NULL) {
+
+			/* コメントは無視する. TODO: 文字列に気をつける.  */
+			if (strncmp(p, "/*", 2) == 0) {
+				p += 2;
+				while (*p) {
+					if (*p == '*' && *(p + 1) == '/') {
+						p += 2;
+						goto LOOP_END;
+					}
+					p++;
+				}
+			}
 
 			/* check if multibytes operations */
 			for (i = 0; i < (sizeof(multibytes_operations) / sizeof(multibytes_operations[0])); i++) {
@@ -197,6 +208,8 @@ struct vector_t *tokenize(char *p)
 
 		color_printf(COL_RED, "tokenize error: %s\n", p);
 		exit(1);
+	LOOP_END:
+		;
 	}
 
 	add_token(v, TK_EOF, "EOF");
