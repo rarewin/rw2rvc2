@@ -23,7 +23,10 @@ static struct vector_t *allocate_vector(void)
 	/* リサイズ */
 	if (index >= size) {
 		size *= 2;
-		vector_array = (struct vector_t*)realloc(vector_array, sizeof(struct vector_t) * size);
+		if ((vector_array = (struct vector_t*)realloc(vector_array, sizeof(struct vector_t) * size)) == NULL) {
+			color_printf(COL_RED, "memory allocation failed\n");
+			exit(1);
+		}
 	}
 
 	return &vector_array[index++];

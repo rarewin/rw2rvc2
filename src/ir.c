@@ -25,18 +25,14 @@ static struct ir_t *allocate_ir(void)
 	const size_t ALLOCATE_SIZE = 256;
 	static struct ir_t *ir_array = NULL;
 	static size_t index = 0;
-	static size_t size = 0;
 
 	/* initial allocation */
-	if (ir_array == NULL) {
-		size += ALLOCATE_SIZE;
-		ir_array = (struct ir_t*)malloc(sizeof(struct ir_t) * size);
-	}
-
-	/* reallocate */
-	if (index >= size) {
-		size += ALLOCATE_SIZE;
-		ir_array = (struct ir_t*)realloc(ir_array, sizeof(struct ir_t) * size);
+	if (ir_array == NULL || index >= ALLOCATE_SIZE) {
+		if ((ir_array = (struct ir_t*)malloc(sizeof(struct ir_t) * ALLOCATE_SIZE)) == NULL) {
+			error_printf("memmory allocation failed\n");
+			exit(1);
+		}
+		index = 0;
 	}
 
 	return &ir_array[index++];

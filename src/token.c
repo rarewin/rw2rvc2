@@ -8,24 +8,22 @@
 #include "rw2rvc2.h"
 
 /**
- * @brief allocate memory to the new token
- * @return a pointer to the new token
+ * @brief トークン用にメモリを割り当てる
+ * @return 新トークンへのポインタ
  */
 static struct token_t *allocate_token(void)
 {
 	const size_t ALLOCATE_SIZE = 256;
 	static struct token_t *token_array = NULL;
 	static size_t index = 0;
-	static size_t size = ALLOCATE_SIZE;
 
-	/* 初期化 */
-	if (token_array == NULL)
-		token_array = (struct token_t*)malloc(sizeof(struct token_t) * size);
-
-	/* サイズを拡大する */
-	if (index >= size) {
-		size *= 2;
-		token_array = (struct token_t*)realloc(token_array, sizeof(struct token_t) * size);
+	/* 新規のメモリプールを作成 */
+	if (token_array == NULL || index >= ALLOCATE_SIZE) {
+		if ((token_array = (struct token_t*)malloc(sizeof(struct token_t) * ALLOCATE_SIZE)) == NULL) {
+			color_printf(COL_RED, "memory allocation failed\n");
+			exit(1);
+		}
+		index = 0;
 	}
 
 	return &token_array[index++];
