@@ -5,3 +5,8 @@
 
 /*.o
 /*.d
+
+/test/*.s
+/test/*.o
+/test/test
+

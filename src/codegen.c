@@ -117,7 +117,7 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 		}
 
 		if (ir->op == IR_LEFT_OP)
-			printf("	sll	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	sllw	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
 
 		if (ir->op == IR_RIGHT_OP)
 			printf("	srl	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
