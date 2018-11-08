@@ -27,12 +27,13 @@ int main(int argc, char **argv)
 		s = ftell(fp); /* ファイルサイズを取得 */
 		fseek(fp, 0, SEEK_SET);
 
-		if ((buf = malloc(s)) == NULL) {
+		if ((buf = malloc(s + 1)) == NULL) {
 			fprintf(stderr, "memory allocation error\n");
 			return 3;
 		}
 
 		fread(buf, 1, s, fp);
+		buf[s] = '\0';
 	}
 
 	/* tokenize */
