@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 		}
 
 		fread(buf, 1, s, fp);
-		buf[s] = '\0';
+		buf[s] = 0;
 	}
 
 	/* tokenize */

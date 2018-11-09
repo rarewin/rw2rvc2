@@ -138,7 +138,9 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_IF) {
-		vector_push(v, new_ir(IR_BEQZ, gen_ir_sub(v, d, node->lhs), label++, NULL));
+		lhs = gen_ir_sub(v, d, node->lhs);
+		vector_push(v, new_ir(IR_BEQZ, lhs, label++, NULL));
+		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 
 		if (node->rhs->type != ND_THEN_ELSE) {
 			error_printf("unexpected error\n");
