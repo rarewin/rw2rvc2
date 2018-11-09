@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-static inline void assert(bool exp, char *func_name)
+static inline int assert(bool exp, char *func_name)
 {
 	printf("%s => ", func_name);
 	if (exp) {
@@ -9,6 +9,8 @@ static inline void assert(bool exp, char *func_name)
 	} else {
 		printf("\e[1;31mNG\e[m\n");
 	}
+
+	return (!exp) ? 1 : 0;
 }
 
 int test_if_true();
@@ -22,6 +24,33 @@ int test_rshift2();
 int test_lshift2();
 int test_lshift3();
 int test_priority_shift_and_or();
+int test_equal();
+int test_not_equal();
+int test_greater_equal();
+int test_less_equal();
+int test_less();
+int test_less2();
+int test_greater();
+int test_greater2();
+int test_greater_equal2();
+int test_greater_equal3();
+int test_less_equal2();
+int test_less_equal3();
+int test_or_1();
+int test_or_2();
+int test_and_1();
+int test_and_2();
+int test_and_3();
+int test_and_or_1();
+int test_and_or_2();
+int test_and_or_3();
+int test_logical_or_1();
+int test_logical_or_2();
+int test_xor_1();
+int test_xor_2();
+int test_logical_and_1();
+int test_logical_and_2();
+int test_logical_and_3();
 int test_mul_assign();
 int test_div_assign();
 int test_mod_assign();
@@ -66,58 +95,86 @@ int test_func_arg();
 
 int main(void)
 {
-	assert(test_if_true() == 1, "test_if_true");
-	assert(test_if_false() == 0, "test_if_false");
-	assert(test_if_assign() == 1, "test_if_assign");
-	assert(test_if_else_true() == 1, "test_if_else_true");
-	assert(test_if_else_false() == 3, "test_if_else_false");
-	assert(test_lshift() == 8, "test_lshift");
-	assert(test_rshift() == 1, "test_rshift");
-	assert(test_rshift2() == 0, "test_rshift2");
-	assert(test_lshift2() == 0, "test_lshift2");
-	assert(test_lshift3() == 0x400, "test_lshift3");
-	assert(test_priority_shift_and_or() == 17, "test_priority_shift_and_or");
-	assert(test_mul_assign() == 10, "test_mul_assign");
-	assert(test_div_assign() == 3, "test_div_assign");
-	assert(test_mod_assign() == 3, "test_mod_assign");
-	assert(test_add_assign() == 19, "test_add_assign");
-	assert(test_sub_assign() == 11, "test_sub_assign");
-	assert(test_multi_assign_op() == 32, "test_multi_assign_op");
-	assert(test_var() == 2, "test_var");
-	assert(test_factorial_4() == 24, "test_factorial_4");
-	assert(test_factorial_5() == 120, "test_factorial_5");
-	assert(test_return0() == 0, "test_return0");
-	assert(test_return100() == 100, "test_return100");
-	assert(test_return10000() == 10000, "test_return10000");
-	assert(test_return_arg(0) == 0, "test_return_arg");
-	assert(test_add_1_1() == 2, "test_add_1_1");
-	assert(test_add_100_1() == 101, "test_add_100_1");
-	assert(test_sub_3_1() == 2, "test_sub_3_1");
-	assert(test_sub_255_1() == 254, "test_sub_255_1");
-	assert(test_add_255_1() == 256, "test_add_255_1");
-	assert(test_64_a_64_a_64() == 192, "test_64_a_64_a_64");
-	assert(test_64_s_64_a_64_s_64() == 0, "test_64_s_64_a_64_s_64");
-	assert(test_sum_1_10() == 55, "test_sum_1_10");
-	assert(test_sum_1_10_s_sum_1_10_a_0() == 0, "test_sum_1_10_s_sum_1_10_a_0");
-	assert(test_mul_1_2() == 2, "test_mul_1_2");
-	assert(test_cal_1_a_1_m_2() == 3, "test_cal_1_a_1_m_2");
-	assert(test_cal_4_m_3_a_1_m_2() == 14, "test_cal_4_m_3_a_1_m_2");
-	assert(test_cal_4_mod_3_a_1_mod_2() == 2, "test_cal_4_mod_3_a_1_mod_2");
-	assert(test_cal_4_d_2() == 2, "test_cal_4_d_2");
-	assert(test_cal_5_d_2() == 2, "test_cal_5_d_2");
-	assert(test_cal_4_m_3_d_4() == 3, "test_cal_4_m_3_d_4");
-	assert(test_cal_11_mod_4() == 3, "test_cal_11_mod_4");
-	assert(test_cal_10_d_3_m_3() == 9, "test_cal_10_d_3_m_3");
-	assert(test_cal_10_mod_3_m_3() == 3, "test_cal_10_mod_3_m_3");
-	assert(test_cal_10_d_3_m_3_with_extra() == 9, "test_cal_10_d_3_m_3_with_extra");
-	assert(test_cal_10_d_3_m_3_with_many_extras() == 9, "test_cal_10_d_3_m_3_with_many_extras");
-	assert(test_cal_sum_1_10_with_extra() == 55, "test_cal_sum_1_10_with_extra");
-	assert(test_func_call_return_10() == 10, "test_func_call_return_10");
-	assert(test_func_call_return_10_twice() == 100, "test_func_call_return_10_twice");
-	assert(test_func_call_return_10_three_times() == 110, "test_func_call_return_10_three_times");
-	assert(test_two_func_call() == 180, "test_two_func_call");
-	assert(test_many_func_calls() == 57, "test_many_func_calls");
-	assert(test_func_arg() == 17, "test_func_arg");
+	int ret = 0;
+	ret += assert(test_if_true() == 1, "test_if_true");
+	ret += assert(test_if_false() == 0, "test_if_false");
+	ret += assert(test_if_assign() == 1, "test_if_assign");
+	ret += assert(test_if_else_true() == 1, "test_if_else_true");
+	ret += assert(test_if_else_false() == 3, "test_if_else_false");
+	ret += assert(test_lshift() == 8, "test_lshift");
+	ret += assert(test_rshift() == 1, "test_rshift");
+	ret += assert(test_rshift2() == 0, "test_rshift2");
+	ret += assert(test_lshift2() == 0, "test_lshift2");
+	ret += assert(test_lshift3() == 0x400, "test_lshift3");
+	ret += assert(test_priority_shift_and_or() == 17, "test_priority_shift_and_or");
+	ret += assert(test_equal() == 0, "test_equal");
+	ret += assert(test_not_equal() == 1, "test_not_equal");
+	ret += assert(test_greater_equal() == 0, "test_greater_equal");
+	ret += assert(test_less_equal() == 0, "test_less_equal");
+	ret += assert(test_less() == 1, "test_less");
+	ret += assert(test_less2() == 0, "test_less2");
+	ret += assert(test_greater() == 0, "test_greater");
+	ret += assert(test_greater2() == 1, "test_greater2");
+	ret += assert(test_greater_equal2() == 1, "test_greater_equal2");
+	ret += assert(test_greater_equal3() == 0, "test_greater_equal3");
+	ret += assert(test_less_equal2() == 0, "test_less_equal2");
+	ret += assert(test_less_equal3() == 1, "test_less_equal3");
+	ret += assert(test_or_1() == 0, "test_or_1");
+	ret += assert(test_or_2() == 1, "test_or_2");
+	ret += assert(test_and_1() == 1, "test_and_1");
+	ret += assert(test_and_2() == 1, "test_and_2");
+	ret += assert(test_and_3() == 0, "test_and_3");
+	ret += assert(test_and_or_1() == 0, "test_and_or_1");
+	ret += assert(test_and_or_2() == 0, "test_and_or_2");
+	ret += assert(test_and_or_3() == 0, "test_and_or_3");
+	ret += assert(test_logical_or_1() == 0, "test_logical_or_1");
+	ret += assert(test_logical_or_2() == 1, "test_logical_or_2");
+	ret += assert(test_xor_1() == 1, "test_xor_1");
+	ret += assert(test_xor_2() == 0, "test_xor_2");
+	ret += assert(test_logical_and_1() == 1, "test_logical_and_1");
+	ret += assert(test_logical_and_2() == 1, "test_logical_and_2");
+	ret += assert(test_logical_and_3() == 0, "test_logical_and_3");
+	ret += assert(test_mul_assign() == 10, "test_mul_assign");
+	ret += assert(test_div_assign() == 3, "test_div_assign");
+	ret += assert(test_mod_assign() == 3, "test_mod_assign");
+	ret += assert(test_add_assign() == 19, "test_add_assign");
+	ret += assert(test_sub_assign() == 11, "test_sub_assign");
+	ret += assert(test_multi_assign_op() == 32, "test_multi_assign_op");
+	ret += assert(test_var() == 2, "test_var");
+	ret += assert(test_factorial_4() == 24, "test_factorial_4");
+	ret += assert(test_factorial_5() == 120, "test_factorial_5");
+	ret += assert(test_return0() == 0, "test_return0");
+	ret += assert(test_return100() == 100, "test_return100");
+	ret += assert(test_return10000() == 10000, "test_return10000");
+	ret += assert(test_return_arg(0) == 0, "test_return_arg");
+	ret += assert(test_add_1_1() == 2, "test_add_1_1");
+	ret += assert(test_add_100_1() == 101, "test_add_100_1");
+	ret += assert(test_sub_3_1() == 2, "test_sub_3_1");
+	ret += assert(test_sub_255_1() == 254, "test_sub_255_1");
+	ret += assert(test_add_255_1() == 256, "test_add_255_1");
+	ret += assert(test_64_a_64_a_64() == 192, "test_64_a_64_a_64");
+	ret += assert(test_64_s_64_a_64_s_64() == 0, "test_64_s_64_a_64_s_64");
+	ret += assert(test_sum_1_10() == 55, "test_sum_1_10");
+	ret += assert(test_sum_1_10_s_sum_1_10_a_0() == 0, "test_sum_1_10_s_sum_1_10_a_0");
+	ret += assert(test_mul_1_2() == 2, "test_mul_1_2");
+	ret += assert(test_cal_1_a_1_m_2() == 3, "test_cal_1_a_1_m_2");
+	ret += assert(test_cal_4_m_3_a_1_m_2() == 14, "test_cal_4_m_3_a_1_m_2");
+	ret += assert(test_cal_4_mod_3_a_1_mod_2() == 2, "test_cal_4_mod_3_a_1_mod_2");
+	ret += assert(test_cal_4_d_2() == 2, "test_cal_4_d_2");
+	ret += assert(test_cal_5_d_2() == 2, "test_cal_5_d_2");
+	ret += assert(test_cal_4_m_3_d_4() == 3, "test_cal_4_m_3_d_4");
+	ret += assert(test_cal_11_mod_4() == 3, "test_cal_11_mod_4");
+	ret += assert(test_cal_10_d_3_m_3() == 9, "test_cal_10_d_3_m_3");
+	ret += assert(test_cal_10_mod_3_m_3() == 3, "test_cal_10_mod_3_m_3");
+	ret += assert(test_cal_10_d_3_m_3_with_extra() == 9, "test_cal_10_d_3_m_3_with_extra");
+	ret += assert(test_cal_10_d_3_m_3_with_many_extras() == 9, "test_cal_10_d_3_m_3_with_many_extras");
+	ret += assert(test_cal_sum_1_10_with_extra() == 55, "test_cal_sum_1_10_with_extra");
+	ret += assert(test_func_call_return_10() == 10, "test_func_call_return_10");
+	ret += assert(test_func_call_return_10_twice() == 100, "test_func_call_return_10_twice");
+	ret += assert(test_func_call_return_10_three_times() == 110, "test_func_call_return_10_three_times");
+	ret += assert(test_two_func_call() == 180, "test_two_func_call");
+	ret += assert(test_many_func_calls() == 57, "test_many_func_calls");
+	ret += assert(test_func_arg() == 17, "test_func_arg");
 
+	return ret;
 }
-

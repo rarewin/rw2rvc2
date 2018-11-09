@@ -8,7 +8,7 @@ import os
 TEST_FUNC_HEADER = """#include <stdio.h>
 #include <stdbool.h>
 
-static inline void assert(bool exp, char *func_name)
+static inline int assert(bool exp, char *func_name)
 {
 	printf("%s => ", func_name);
 	if (exp) {
@@ -16,6 +16,8 @@ static inline void assert(bool exp, char *func_name)
 	} else {
 		printf("\\e[1;31mNG\\e[m\\n");
 	}
+
+	return (!exp) ? 1 : 0;
 }
 """
 
@@ -53,7 +55,7 @@ def main():
                 if m:
                     func_prototype += """{} {}({});\n""".format(
                         m.group('ret_type').strip(), m.group('func_name').strip(), m.group('parameters').strip())
-                    func_body += """	assert({}({}) == {}, "{}");\n""".format(
+                    func_body += """	ret += assert({}({}) == {}, "{}");\n""".format(
                         m.group('func_name').strip(), m.group('args').strip(),
                         m.group('expected').strip(), m.group('func_name').strip())
 
@@ -62,9 +64,9 @@ def main():
     print(TEST_FUNC_HEADER)
     print(func_prototype)
 
-    print("int main(void)\n{")
+    print("int main(void)\n{\n\tint ret = 0;")
     print(func_body)
-    print("}\n")
+    print("\treturn ret;\n}")
 
 
 if __name__ == '__main__':
