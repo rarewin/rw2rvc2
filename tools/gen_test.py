@@ -55,6 +55,7 @@ def main():
                 if m:
                     func_prototype += """{} {}({});\n""".format(
                         m.group('ret_type').strip(), m.group('func_name').strip(), m.group('parameters').strip())
+
                     func_body += """	ret += assert({}({}) == {}, "{}");\n""".format(
                         m.group('func_name').strip(), m.group('args').strip(),
                         m.group('expected').strip(), m.group('func_name').strip())
