@@ -3,5 +3,9 @@
 /release
 /debug
 
-/*.o
-/*.d
+*.o
+*.d
+
+/test/*.s
+/test/test
+/test/test.c

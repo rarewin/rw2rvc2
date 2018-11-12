@@ -35,12 +35,14 @@ static struct token_t *allocate_token(void)
  * @param[in]  type   タイプ (TK_XXX)
  * @param[in]  input  入力文字列へのポインタ
  */
-struct token_t *add_token(struct vector_t *v, token_type_t type, char *input)
+struct token_t *add_token(struct vector_t *v, token_type_t type, char *input, int line, int position)
 {
 	struct token_t *t = allocate_token();
 
-	t->type = type;
-	t->input = input;
+	t->type     = type;
+	t->input    = input;
+	t->line     = line;
+	t->position = position;
 	vector_push(v, t);
 
 	return t;
@@ -128,10 +130,16 @@ struct vector_t *tokenize(char *p)
 		{"<<", TK_LEFT_OP},
 	};
 	unsigned int i;
+	int line = 1;
+	char *begin = p;
 
 	while (*p) {
 		/* ignore spaces */
 		if (isspace(*p)) {
+			if (*p == '\n') {
+				line++;
+				begin = p + 1;
+			}
 			p++;
 			continue;
 		}
@@ -156,7 +164,7 @@ struct vector_t *tokenize(char *p)
 				size_t len = strlen(multibytes_operations[i].word);
 
 				if (strncmp(multibytes_operations[i].word, p, len) == 0) {
-					add_token(v, multibytes_operations[i].tkval, p);
+					add_token(v, multibytes_operations[i].tkval, p, line, p - begin);
 					p += len;
 					break;
 				}
@@ -165,14 +173,14 @@ struct vector_t *tokenize(char *p)
 			if (i != (sizeof(multibytes_operations) / sizeof(multibytes_operations[0])))
 				continue;
 
-			add_token(v, get_token_type_of_symbol(*p), p);
+			add_token(v, get_token_type_of_symbol(*p), p, line, p - begin);
 			p++;
 			continue;
 		}
 
 		/* number */
 		if (isdigit(*p)) {
-			t = add_token(v, TK_NUM, p);
+			t = add_token(v, TK_NUM, p, line, p - begin);
 			t->value = strtol(p, &p, 10);
 			continue;
 		}
@@ -186,7 +194,7 @@ struct vector_t *tokenize(char *p)
 			/* 予約語かどうかの判定 */
 			for (i = 0; i < (sizeof(keywords) / sizeof(keywords[0])); i++) {
 				if (strncmp(keywords[i].word, p, len) == 0) {
-					t = add_token(v, keywords[i].tkval, p);	/* 予約語だった */
+					t = add_token(v, keywords[i].tkval, p, line, p - begin);	/* 予約語だった */
 					t->name = keywords[i].word;
 					p += len;
 					break;
@@ -198,19 +206,19 @@ struct vector_t *tokenize(char *p)
 				continue;
 
 			/* 識別子 */
-			t = add_token(v, TK_IDENT, p);
+			t = add_token(v, TK_IDENT, p, line, p - begin);
 			t->name = strndup(p, len);
 			p += len;
 			continue;
 		}
 
-		color_printf(COL_RED, "tokenize error: %s\n", p);
+		color_printf(COL_RED, "tokenize error: %s at line %d position %d\n", p, line, p - begin);
 		exit(1);
 	LOOP_END:
 		;
 	}
 
-	add_token(v, TK_EOF, "EOF");
+	add_token(v, TK_EOF, "EOF", line, p - begin);
 
 	return v;
 }

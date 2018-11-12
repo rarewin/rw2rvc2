@@ -95,6 +95,8 @@ typedef struct token_t {
 	int value;		/**< token value */
 	char *input;		/**< input string */
 	char *name;		/**< 識別子等の名前 */
+	int line;		/**< 行番号 */
+	int position;		/**< その行での位置 */
 } token_t;
 
 /**
