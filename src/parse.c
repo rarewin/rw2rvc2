@@ -10,6 +10,7 @@ static struct node_t *statement_list(struct vector_t *tokens);
 static struct node_t *declarator(struct vector_t *tokens);
 static struct node_t *declaration_specifiers(struct vector_t *tokens);
 static struct node_t *assignment_expression(struct vector_t *tokens);
+static struct node_t *unary_expression(struct vector_t *tokens);
 
 static int g_position = 0;
 
@@ -222,6 +223,50 @@ static struct node_t *postfix_expression(struct vector_t *tokens)
 }
 
 /**
+ * @brief unary_operator
+ *
+ * unary_operator := '&'
+ *                 | '*'
+ *                 | '+'
+ *                 | '-'
+ *                 | '~'
+ *                 | '!'
+ *                 ;
+ */
+static struct node_t *unary_operator(struct vector_t *tokens)
+{
+	struct token_t *t = tokens->data[g_position];
+
+	if (t->type == TK_MINUS) {
+		g_position++;
+		return new_node(ND_MINUS, NULL, NULL, NULL, -1);
+	}
+
+	if (t->type == TK_PLUS) {
+		g_position++;
+		return new_node(ND_PLUS, NULL, NULL, NULL, -1);
+	}
+
+	/* TODO: &, *, ~, ! の実装 */
+
+	return NULL;
+}
+
+/**
+ * @brief cast_expression
+ *
+ * cast_expression := unary_expression
+ *                  | '(' type_name ')' cast_expression
+ *                  ;
+ */
+static struct node_t *cast_expression(struct vector_t *tokens)
+{
+	/* TODO: type_nameの実装 */
+
+	return unary_expression(tokens);
+}
+
+/**
  * @brief unary_expression
  *
  * unary_expression := postfix_expression
@@ -234,6 +279,16 @@ static struct node_t *postfix_expression(struct vector_t *tokens)
  */
 static struct node_t *unary_expression(struct vector_t *tokens)
 {
+	struct node_t *lhs;
+
+	if ((lhs = unary_operator(tokens)) != NULL) {
+
+		if ((lhs->rhs = cast_expression(tokens)) == NULL)
+			parse_error();
+
+		return lhs;
+	}
+
 	return postfix_expression(tokens);
 }
 

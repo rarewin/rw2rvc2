@@ -8,13 +8,14 @@ import os
 TEST_FUNC_HEADER = """#include <stdio.h>
 #include <stdbool.h>
 
-static inline int assert(bool exp, char *func_name)
+static inline int assert(int result, int expected, char *func_name)
 {
+        bool exp = (result == expected);
 	printf("%s => ", func_name);
 	if (exp) {
 		printf("\\e[1;32mOK\\e[m\\n");
 	} else {
-		printf("\\e[1;31mNG\\e[m\\n");
+		printf("\\e[1;31mNG\\e[m: %d (expected: %d)\\n", result, expected);
 	}
 
 	return (!exp) ? 1 : 0;
@@ -56,7 +57,7 @@ def main():
                     func_prototype += """{} {}({});\n""".format(
                         m.group('ret_type').strip(), m.group('func_name').strip(), m.group('parameters').strip())
 
-                    func_body += """	ret += assert({}({}) == {}, "{}");\n""".format(
+                    func_body += """	ret += assert({}({}), {}, "{}");\n""".format(
                         m.group('func_name').strip(), m.group('args').strip(),
                         m.group('expected').strip(), m.group('func_name').strip())
 

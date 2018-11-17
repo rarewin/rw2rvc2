@@ -164,7 +164,18 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	    node->type == ND_MUL  || node->type == ND_DIV || node->type == ND_MOD ||
 	    node->type == ND_OR_OP ||
 	    node->type == ND_AND || node->type == ND_OR || node->type == ND_XOR) {
-		lhs = gen_ir_sub(v, d, node->lhs);
+
+		if (node->lhs != NULL) {
+			lhs = gen_ir_sub(v, d, node->lhs);
+		} else {
+			if (node->type == ND_PLUS || node->type == ND_MINUS) {
+				lhs = regno;
+				vector_push(v, new_ir(IR_IMM, regno++, 0, NULL));
+			} else {
+				error_printf("unexpected error\n");
+				exit(1);
+			}
+		}
 		rhs = gen_ir_sub(v, d, node->rhs);
 
 		vector_push(v, new_ir(CONVERSION_NODE_TO_IR[node->type], lhs, rhs, NULL));
