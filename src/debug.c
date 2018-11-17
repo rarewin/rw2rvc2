@@ -69,9 +69,10 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_GOTO),		/**< "goto" */
 		TRANS_ELEMENT(TK_INT),		/**< "int" */
 		TRANS_ELEMENT(TK_EOF),		/**< EOF */
+		TRANS_ELEMENT(TK_INVALID),	/**< 不正な値(関数のエラー用) */
 	};
 
-	return table[token_type];
+	return (token_type < TK_INVALID) ? table[token_type] : "INVALID";
 }
 
 /**
