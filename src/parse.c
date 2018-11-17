@@ -26,7 +26,7 @@ static void expect_token(struct vector_t *tokens, token_type_t type)
 		g_position++;	/* 期待値通りならインデックスを進めて戻る. */
 	} else {
 		/* 期待値と異なった場合, 止まる. */
-		error_printf("unexpect token: %s at %d\n", t->input, g_position);
+		error_printf("unexpect token: %s at line %d position %d\n", t->input, t->line, t->position);
 		error_printf("expect token: %s (%d)\n", get_token_str(type), type);
 		exit(1);
 	}
