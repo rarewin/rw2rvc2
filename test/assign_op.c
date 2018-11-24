@@ -51,10 +51,27 @@ int test_left_assign_op() /* */ /* 8 */
 	return a;
 }
 
+int test_left_assign_op2() /* */ /* 0x1000 */
+{
+	a = 0x10;
+	a <<= 8;
+
+	return a;
+}
+
+
 int test_right_assign_op() /* */ /* 8 */
 {
 	a = 64;
 	a >>= 3;
+
+	return a;
+}
+
+int test_right_assign_op2() /* */ /* 0x100 */
+{
+	a = 0x40000;
+	a >>= 10;
 
 	return a;
 }

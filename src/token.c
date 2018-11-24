@@ -181,6 +181,22 @@ struct vector_t *tokenize(char *p)
 		}
 
 		/* number */
+
+		/* hex */
+		if (*p == '0' && (*(p + 1) == 'X' || *(p + 1) == 'x') && isdigit(*(p + 2))) {
+			t = add_token(v, TK_NUM, p, line, p - begin);
+			t->value = strtol(p, &p, 16);
+			continue;
+		 }
+
+		/* octal */
+		if (*p == '0' && isdigit(*(p + 1))) {
+			t = add_token(v, TK_NUM, p, line, p - begin);
+			t->value = strtol(p, &p, 8);
+			continue;
+		}
+
+		/* decimal */
 		if (isdigit(*p)) {
 			t = add_token(v, TK_NUM, p, line, p - begin);
 			t->value = strtol(p, &p, 10);

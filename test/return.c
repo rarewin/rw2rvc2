@@ -42,3 +42,18 @@ int test_return_minus_arg3(int a) /* -10 */ /* -10 */
 {
 	return -(-a);
 }
+
+int test_return_hex_value() /* */ /* 0x10 */
+{
+	return 0x10;
+}
+
+int test_return_oct_value() /* */ /* 020 */
+{
+	return 020;
+}
+
+int test_return_sum_dec_hex_oct_value() /* */ /* 10 + 0x10 + 010 */
+{
+	return 10 + 0x10 + 010;
+}
