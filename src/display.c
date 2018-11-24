@@ -6,15 +6,18 @@
 /**
  * @brief 文字を色付きで標準出力する
  */
-int color_printf(dprint_color_t color, const char *format, ...)
+int color_printf(FILE *file, dprint_color_t color, const char *format, ...)
 {
 	va_list ap;
 	int ret = 0;
 
+	/* FIXME: アセンブラファイルに色を出力するととエラーになるので一旦無効に. */
+	(void)color;
+
 	va_start(ap, format);
-	ret += printf("\e[1;%dm", color);
-	ret += vprintf(format, ap);
-	ret += printf("\e[m");
+	// ret += fprintf(file, "\e[1;%dm", color);
+	ret += vfprintf(file, format, ap);
+	// ret += fprintf(file, "\e[m");
 	va_end(ap);
 
 	return ret;

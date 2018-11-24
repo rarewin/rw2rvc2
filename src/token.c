@@ -20,7 +20,7 @@ static struct token_t *allocate_token(void)
 	/* 新規のメモリプールを作成 */
 	if (token_array == NULL || index >= ALLOCATE_SIZE) {
 		if ((token_array = (struct token_t*)malloc(sizeof(struct token_t) * ALLOCATE_SIZE)) == NULL) {
-			color_printf(COL_RED, "memory allocation failed\n");
+			color_printf(stderr, COL_RED, "memory allocation failed\n");
 			exit(1);
 		}
 		index = 0;
@@ -212,7 +212,7 @@ struct vector_t *tokenize(char *p)
 			continue;
 		}
 
-		color_printf(COL_RED, "tokenize error: %s at line %d position %d\n", p, line, p - begin);
+		color_printf(stderr, COL_RED, "tokenize error: %s at line %d position %d\n", p, line, p - begin);
 		exit(1);
 	LOOP_END:
 		;

@@ -12,7 +12,7 @@ test: $(OBJS)
 	@echo "\\e[1;32mAll green!!\\e[m\\n"
 
 %.o: %.c
-	@../release/rw2rvc2 $< > $(@:.o=.s)
+	@../release/rw2rvc2 -z $< > $(@:.o=.s)
 	@riscv64-linux-gnu-gcc $(@:.o=.s) -c -o $@
 
 .PHONY: clean

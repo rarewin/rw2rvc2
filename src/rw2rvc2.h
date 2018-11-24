@@ -4,7 +4,9 @@
 #if !defined(RW2RVC2_H_INCLUDED)
 #define RW2RVC2_H_INCLUDED
 #include <stdlib.h>
+#include <stdio.h>
 
+#define ASM_COMMENTOUT_STR	"# "
 
 /**
  * @brief Vector type
@@ -274,11 +276,12 @@ struct vector_t *gen_ir(struct node_t *node, struct dict_t *d);
 /* display.c */
 /**
  * @brief 文字を色付きで標準出力する
- * @param[in] color   表示色
- * @param[in] format  表示フォーマット
+ * @param[out] file    出力先
+ * @param[in]  color   表示色
+ * @param[in]  format  表示フォーマット
  * @return 出力した文字数
  */
-int color_printf(dprint_color_t color, const char *format, ...);
+int color_printf(FILE *file, dprint_color_t color, const char *format, ...);
 
 /**
  * @brief エラー表示をエラー出力に吐き出す
@@ -325,10 +328,11 @@ struct dict_element_t *dict_lookup(struct dict_t *d, char *key);
 
 /* debug.c */
 /**
- * @brief debug function for tokenizer
- * @param[in] vector of tokens
+ * @brief トークナイザーの出力を表示する
+ * @param[out] file   出力先
+ * @param[in]  tokens トークンベクター
  */
-void show_token(struct vector_t *tokens);
+void show_token(FILE *file, struct vector_t *tokens);
 
 /**
  * @brief トークンタイプからトークンを表す文字列を取得する.
@@ -338,12 +342,17 @@ void show_token(struct vector_t *tokens);
 const char *get_token_str(token_type_t token_type);
 
 /**
- * @brief debug function for IR
+ * @brief IRの出力を表示する
+ * @param[out] file  出力先
+ * @param[in]  irv   IRベクター
  */
-void show_ir(struct vector_t *irv);
+void show_ir(FILE *file, struct vector_t *irv);
 
 /**
- * @brief debug function for parser
+ * @brief パーサーの出力を表示する
+ * @param[out] file   出力先
+ * @param[in]  node   ノードデータ
+ * @param[in]  indent インデント段数
  */
-void show_node(struct node_t *node, unsigned int indent);
+void show_node(FILE *file, struct node_t *node, unsigned int indent);
 #endif

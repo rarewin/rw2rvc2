@@ -24,7 +24,7 @@ static struct vector_t *allocate_vector(void)
 	if (index >= size) {
 		size *= 2;
 		if ((vector_array = (struct vector_t*)realloc(vector_array, sizeof(struct vector_t) * size)) == NULL) {
-			color_printf(COL_RED, "memory allocation failed\n");
+			color_printf(stderr, COL_RED, "memory allocation failed\n");
 			exit(1);
 		}
 	}

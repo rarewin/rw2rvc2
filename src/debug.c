@@ -1,19 +1,17 @@
-#include <stdio.h>
-
 #include "rw2rvc2.h"
 
 #define TRANS_ELEMENT(e)    [e] = #e
 
 /**
- * @brief debug function for tokenizer
+ * @brief トークナイザーの出力を表示する
  */
-void show_token(struct vector_t *tokens)
+void show_token(FILE *file, struct vector_t *tokens)
 {
 	unsigned int i;
 
 	for (i = 0; i < tokens->len; i++) {
 		token_type_t tt = ((struct token_t*)(tokens->data[i]))->type;
-		printf("%02d: %s(%d)\n", i, get_token_str(tt), tt);
+		fprintf(file, ASM_COMMENTOUT_STR "%02d: %s(%d)\n", i, get_token_str(tt), tt);
 	}
 }
 
@@ -77,20 +75,24 @@ const char *get_token_str(token_type_t token_type)
 
 /**
  * @breif @p indent 文字だけ空白を標準出力する
- * @param[in] indent  インデント量
+ * @param[out] file    出力先
+ * @param[in]  indent  インデント量
  */
-static void print_indent(unsigned int indent)
+static void print_indent(FILE *file, unsigned int indent)
 {
 	unsigned int i;
 
 	for (i = 0; i < indent + 1; i++)
-		putchar(' ');
+		fputc(' ', file);
 }
 
 /**
- * @brief debug function for parser
+ * @brief パーサーの出力を表示する
+ * @param[out] file   出力先
+ * @param[in]  node   ノードデータ
+ * @param[in]  indent インデント段数
  */
-void show_node(struct node_t *node, unsigned int indent)
+void show_node(FILE *file, struct node_t *node, unsigned int indent)
 {
 	const char *table[] = {
 		TRANS_ELEMENT(ND_PLUS),		/**< + */
@@ -132,33 +134,39 @@ void show_node(struct node_t *node, unsigned int indent)
 	if (node == NULL)
 		return;
 
-	print_indent(indent);
+	fprintf(file, ASM_COMMENTOUT_STR);
+	print_indent(file, indent);
 
-	printf("%s: %d\n", table[node->type], node->value);
+	fprintf(file, "%s: %d\n", table[node->type], node->value);
 
 	if (node->name != NULL) {
-		print_indent(indent + 1);
-		color_printf(COL_GREEN, "name: ");
-		printf("%s\n", node->name);
+		fprintf(file, ASM_COMMENTOUT_STR);
+		print_indent(file, indent + 1);
+		color_printf(file, COL_GREEN, "name: ");
+		fprintf(file, "%s\n", node->name);
 	}
 
 	if (node->lhs != NULL) {
-		print_indent(indent + 1);
-		color_printf(COL_GREEN, "lhs:\n");
-		show_node(node->lhs, indent + 1);
+		fprintf(file, ASM_COMMENTOUT_STR);
+		print_indent(file, indent + 1);
+		color_printf(file, COL_GREEN, "lhs:\n");
+		show_node(file, node->lhs, indent + 1);
 	}
 
 	if (node->rhs != NULL) {
-		print_indent(indent + 1);
-		color_printf(COL_GREEN, "rhs:\n");
-		show_node(node->rhs, indent + 1);
+		fprintf(file, ASM_COMMENTOUT_STR);
+		print_indent(file, indent + 1);
+		color_printf(file, COL_GREEN, "rhs:\n");
+		show_node(file, node->rhs, indent + 1);
 	}
 }
 
 /**
- * @brief debug function for IR
+ * @brief IRの出力を表示する
+ * @param[out] file  出力先
+ * @param[in]  irv   IRベクター
  */
-void show_ir(struct vector_t *irv)
+void show_ir(FILE *file, struct vector_t *irv)
 {
 	struct ir_t *ir;
 	unsigned int i;
@@ -203,16 +211,16 @@ void show_ir(struct vector_t *irv)
 
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];
-		printf("%s(%d) %d %d %s\n",
+		fprintf(file, ASM_COMMENTOUT_STR "%s(%d) %d %d %s\n",
 		       OP2STR[ir->op], ir->op, ir->lhs, ir->rhs, ir->name);
 
 		if (ir->op == IR_FUNC_CALL && (using_regs = get_using_regs(ir->rhs)) != NULL) {
-			printf("  regs: ");
+			fprintf(file, ASM_COMMENTOUT_STR "  regs: ");
 
 			for (j = 0; j < using_regs->num; j++)
-				printf("%s ", get_temp_reg_str(using_regs->list[j]));
+				fprintf(file, "%s ", get_temp_reg_str(using_regs->list[j]));
 
-			printf("\n");
+			fprintf(file, "\n");
 		}
 	}
 }
