@@ -39,6 +39,8 @@ const char *get_token_str(token_type_t token_type)
 		TRANS_ELEMENT(TK_MOD_ASSIGN),	/**< %= */
 		TRANS_ELEMENT(TK_ADD_ASSIGN),	/**< += */
 		TRANS_ELEMENT(TK_SUB_ASSIGN),	/**< -= */
+		TRANS_ELEMENT(TK_LEFT_ASSIGN),	/**< <<= */
+		TRANS_ELEMENT(TK_RIGHT_ASSIGN),	/**< >>= */
 		TRANS_ELEMENT(TK_OR_OP),	/**< || */
 		TRANS_ELEMENT(TK_AND_OP),	/**< && */
 		TRANS_ELEMENT(TK_EQ_OP),	/**< == */

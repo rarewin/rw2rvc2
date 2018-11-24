@@ -628,7 +628,8 @@ static inline bool is_assignment_operator(token_type_t type)
 {
 	return ((type == TK_EQUAL || type == TK_MUL_ASSIGN ||
 		 type == TK_DIV_ASSIGN || type == TK_MOD_ASSIGN ||
-		 type == TK_ADD_ASSIGN || type == TK_SUB_ASSIGN)) ? true : false;
+		 type == TK_ADD_ASSIGN || type == TK_SUB_ASSIGN ||
+		 type == TK_LEFT_ASSIGN || type == TK_RIGHT_ASSIGN)) ? true : false;
 }
 
 /**
@@ -664,6 +665,10 @@ static struct node_t *assignment_expression(struct vector_t *tokens)
 				rhs = new_node(ND_PLUS, lhs, expression(tokens), NULL, -1);
 			} else if (t->type == TK_SUB_ASSIGN) {
 				rhs = new_node(ND_MINUS, lhs, expression(tokens), NULL, -1);
+			} else if (t->type == TK_LEFT_ASSIGN) {
+				rhs = new_node(ND_LEFT_OP, lhs, expression(tokens), NULL, -1);
+			} else if (t->type == TK_RIGHT_ASSIGN) {
+				rhs = new_node(ND_RIGHT_OP, lhs, expression(tokens), NULL, -1);
 			} else {
 				rhs = expression(tokens);
 			}

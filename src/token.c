@@ -115,19 +115,21 @@ struct vector_t *tokenize(char *p)
 		char *word;
 		token_type_t tkval;
 	} multibytes_operations[] = {
-		{"||", TK_OR_OP},
-		{"&&", TK_AND_OP},
-		{"==", TK_EQ_OP},
-		{"!=", TK_NE_OP},
-		{"<=", TK_LE_OP},
-		{">=", TK_GE_OP},
-		{"*=", TK_MUL_ASSIGN},
-		{"/=", TK_DIV_ASSIGN},
-		{"%=", TK_MOD_ASSIGN},
-		{"+=", TK_ADD_ASSIGN},
-		{"-=", TK_SUB_ASSIGN},
-		{">>", TK_RIGHT_OP},
-		{"<<", TK_LEFT_OP},
+		{"||",  TK_OR_OP},
+		{"&&",  TK_AND_OP},
+		{"==",  TK_EQ_OP},
+		{"!=",  TK_NE_OP},
+		{"<=",  TK_LE_OP},
+		{">=",  TK_GE_OP},
+		{"*=",  TK_MUL_ASSIGN},
+		{"/=",  TK_DIV_ASSIGN},
+		{"%=",  TK_MOD_ASSIGN},
+		{"+=",  TK_ADD_ASSIGN},
+		{"-=",  TK_SUB_ASSIGN},
+		{"<<=", TK_LEFT_ASSIGN},
+		{">>=", TK_RIGHT_ASSIGN},
+		{">>",  TK_RIGHT_OP},
+		{"<<",  TK_LEFT_OP},
 	};
 	unsigned int i;
 	int line = 1;

@@ -57,6 +57,8 @@ typedef enum {
 	TK_MOD_ASSIGN,		/**< %= */
 	TK_ADD_ASSIGN,		/**< += */
 	TK_SUB_ASSIGN,		/**< -= */
+	TK_LEFT_ASSIGN,		/**< <<= */
+	TK_RIGHT_ASSIGN,	/**< >>= */
 	TK_OR_OP,		/**< || */
 	TK_AND_OP,		/**< && */
 	TK_EQ_OP,		/**< == */

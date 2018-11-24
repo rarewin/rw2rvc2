@@ -42,3 +42,19 @@ int test_multi_assign_op() /* */ /* 32 */
 	a += (a + b);
 	return a;
 }
+
+int test_left_assign_op() /* */ /* 8 */
+{
+	a = 1;
+	a <<= 3;
+
+	return a;
+}
+
+int test_right_assign_op() /* */ /* 8 */
+{
+	a = 64;
+	a >>= 3;
+
+	return a;
+}
