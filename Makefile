@@ -32,6 +32,7 @@ $(OUTDIR)/%.o: $(OUTDIR) %.c
 clean:
 	rm -f rw2rvc2
 	rm -rf release debug
+	rm -rf doc/html
 
 	$(MAKE) -C test clean
 
@@ -43,3 +44,7 @@ rebuild:
 .PHONY: test
 test: release/rw2rvc2
 	$(MAKE) -C test
+
+.PHONY: doc
+doc:
+	doxygen doc/Doxyfile

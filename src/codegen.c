@@ -1,12 +1,15 @@
+/**
+ * @brief アセンブラ生成
+ *
+ * @author Katsuki Kobayashi<rare@tirasweel.org>
+ * @copyright 2018- Katsuki Kobayashi. All rights reserved.
+ */
 #include <stdio.h>
 
 #include "rw2rvc2.h"
 
 /**
  * @brief RISC-Vのアセンブラを生成する
- *
- * @param[in]  irv IRのベクタ
- * @param[in]  d   辞書
  */
 void gen_riscv(struct vector_t *irv, struct dict_t *d)
 {

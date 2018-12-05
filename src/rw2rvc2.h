@@ -9,12 +9,12 @@
 #define ASM_COMMENTOUT_STR	"# "
 
 /**
- * @brief Vector type
+ * @brief ベクター タイプ
  */
 typedef struct vector_t {
-	void **data;		/**< pointer to data */
-	size_t capacity;	/**< vector capacity */
-	size_t len;		/**< current length */
+	void **data;		/**< データポインタ(void*)へのポインタ */
+	size_t capacity;	/**< ベクターの容量  */
+	size_t len;		/**< ベクターの現在の長さ */
 } vector_t;
 
 
@@ -22,8 +22,8 @@ typedef struct vector_t {
  * @brief 辞書要素用 構造体
  */
 typedef struct dict_element_t {
-	char *key;
-	void *value;
+	char *key;	/**< キー */
+	void *value;	/**< 値 */
 } dict_element_t;
 
 
@@ -31,14 +31,14 @@ typedef struct dict_element_t {
  * @brief 辞書用 構造体
  */
 typedef struct dict_t {
-	struct dict_element_t *dict;
-	size_t len;
-	size_t capacity;
+	struct dict_element_t *dict;	/**< 辞書要素へのポインタ */
+	size_t len;			/**< 辞書の現在の長さ */
+	size_t capacity;		/**< ベクターの容量 */
 } dict_t;
 
 
 /**
- * @brief types of tokens
+ * @brief トークンタイプ
  */
 typedef enum {
 	TK_PLUS,		/**< + */
@@ -92,19 +92,19 @@ typedef enum {
 } token_type_t;
 
 /**
- * @brief Token type
+ * @brief トークン
  */
 typedef struct token_t {
-	token_type_t type;	/**< token type */
-	int value;		/**< token value */
-	char *input;		/**< input string */
+	token_type_t type;	/**< タイプ */
+	int value;		/**< 値  */
+	char *input;		/**< 入力文字列 */
 	char *name;		/**< 識別子等の名前 */
 	int line;		/**< 行番号 */
 	int position;		/**< その行での位置 */
 } token_t;
 
 /**
- * @brief types of nodes
+ * @brief ノードタイプ
  */
 typedef enum {
 	ND_PLUS,	/**< + */
@@ -147,33 +147,33 @@ typedef enum {
  * @brief ノード構造体
  */
 typedef struct node_t {
-	node_type_t type;		/**< タイプ (ND_XXXX) */
-	struct node_t *lhs;		/**< 左辺値 */
-	struct node_t *rhs;		/**< 右辺値 */
-	char *name;			/**< 識別子等の名前 */
-	int value;			/**< 値 */
+	node_type_t type;	/**< タイプ (ND_XXXX) */
+	struct node_t *lhs;	/**< 左辺値 */
+	struct node_t *rhs;	/**< 右辺値 */
+	char *name;		/**< 識別子等の名前 */
+	int value;		/**< 値 */
 } node_t;
 
 /**
- * @brief types of IR
+ * @brief 中間表現(IR)タイプ
  */
 typedef enum {
-	IR_PLUS,
-	IR_MINUS,
-	IR_MUL,
-	IR_DIV,
-	IR_MOD,		/**< 剰余を求める a0 % a1 */
-	IR_AND,		/**< 論理積 */
-	IR_OR,		/**< 論理和 */
-	IR_NOT,		/**< 論理否定 */
-	IR_XOR,		/**< 排他的論理和 */
-	IR_EQ_OP,	/**< == */
-	IR_NE_OP,	/**< != */
-	IR_SLT,		/**< < */
-	IR_SLET,	/**< <= */
-	IR_LEFT_OP,	/**< << */
-	IR_RIGHT_OP,	/**< >> */
-	IR_RETURN,
+	IR_PLUS,	/**< 加算: lhs + rhs */
+	IR_MINUS,	/**< 減算: lhs - rhs */
+	IR_MUL,		/**< 乗算: lhs * rhs*/
+	IR_DIV,		/**< 除算: lhs / rhs */
+	IR_MOD,		/**< 剰余: lhs % rhs */
+	IR_AND,		/**< 論理積: lhs & rhs */
+	IR_OR,		/**< 論理和: lhs | rhs  */
+	IR_NOT,		/**< 論理否定: ~lhs  */
+	IR_XOR,		/**< 排他的論理和: lhs ^ rhs  */
+	IR_EQ_OP,	/**< 等号: lhs == rhs  */
+	IR_NE_OP,	/**< 否定等号: lhs != rhs */
+	IR_SLT,		/**< 不等号: lhs < rhs */
+	IR_SLET,	/**< 不等号: lhs <= rhs */
+	IR_LEFT_OP,	/**< 不等号: lhs << rhs */
+	IR_RIGHT_OP,	/**< 不等号: lhs >> rhs */
+	IR_RETURN,	/**< return */
 	IR_IMM,
 	IR_MOV,
 	IR_KILL,

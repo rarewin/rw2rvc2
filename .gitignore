@@ -10,3 +10,5 @@
 /test/*.o
 /test/test
 /test/test.c
+
+/doc/html
