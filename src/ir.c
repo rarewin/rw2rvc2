@@ -78,19 +78,24 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	if (node == NULL)
 		return -1;
 
-	if (node->type == ND_DECLARATION) {
-		gen_ir_sub(v, d, node->lhs);
-		gen_ir_sub(v, d, node->rhs);
+	if (node->type == ND_PROGRAM) {
+		size_t j;
+		for (j = 0; j < node->list->len; j++)
+			gen_ir_sub(v, d, node->list->data[j]);
+		return -1;
 	}
 
 	if (node->type == ND_RETURN) {
 		lhs = gen_ir_sub(v, d, node->lhs);
 		vector_push(v, new_ir(IR_RETURN, lhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
+		return r;
 	}
 
-	if (node->type == ND_CONST)
+	if (node->type == ND_CONST) {
 		vector_push(v, new_ir(IR_IMM, regno++, node->value, NULL));
+		return r;
+	}
 
 	if (node->type == ND_ASSIGN) {
 		rhs = gen_ir_sub(v, d, node->rhs);
@@ -101,6 +106,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, regno - 1, 0, NULL));
+		return r;
 	}
 
 	if (node->type == ND_FUNC_PLIST) {

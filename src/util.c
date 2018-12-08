@@ -35,7 +35,7 @@ static struct vector_t *allocate_vector(void)
 const size_t VECTOR_DATA_DEFAULT_CAPACITY = 16;
 
 /**
- * @brief create a new vector
+ * @brief 新規ベクタを生成する
  */
 struct vector_t *new_vector(void)
 {
@@ -68,7 +68,7 @@ struct vector_t *new_vector(void)
 }
 
 /**
- * @brief push an element to a vector
+ * @brief ベクタ要素をプッシュする
  */
 void vector_push(struct vector_t *v, void *element)
 {

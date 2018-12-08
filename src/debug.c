@@ -127,11 +127,12 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_TYPE),		/**< 型名 */
 		TRANS_ELEMENT(ND_FUNC_DEF),	/**< 関数定義 */
 		TRANS_ELEMENT(ND_FUNC_CALL),	/**< 関数コール */
-		TRANS_ELEMENT(ND_DECLARATION),	/**< 宣言文 */
 		TRANS_ELEMENT(ND_FUNC_ARG),	/**< 関数引数 */
 		TRANS_ELEMENT(ND_FUNC_PLIST),	/**< 関数パラメータリスト */
 		TRANS_ELEMENT(ND_FUNC_PARAM),	/**< 関数パラメータ */
+		TRANS_ELEMENT(ND_PROGRAM),	/**< プログラム (スタートポイント) */
 	};
+	size_t i;
 
 	if (node == NULL)
 		return;
@@ -140,6 +141,15 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 	print_indent(file, indent);
 
 	fprintf(file, "%s: %d\n", table[node->type], node->value);
+
+	if (node->list != NULL) {
+		for (i = 0; i < node->list->len; i++) {
+			fprintf(file, ASM_COMMENTOUT_STR);
+			print_indent(file, indent + 1);
+			color_printf(file, COL_GREEN, "list%d:\n", i);
+			show_node(file, node->list->data[i], indent + 1);
+		}
+	}
 
 	if (node->name != NULL) {
 		fprintf(file, ASM_COMMENTOUT_STR);

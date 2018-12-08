@@ -137,10 +137,10 @@ typedef enum {
 	ND_TYPE,	/**< 型名 */
 	ND_FUNC_DEF,	/**< 関数定義 */
 	ND_FUNC_CALL,	/**< 関数コール */
-	ND_DECLARATION,	/**< 宣言文 */
 	ND_FUNC_ARG,	/**< 関数引数 */
 	ND_FUNC_PLIST,	/**< 関数パラメータリスト */
 	ND_FUNC_PARAM,	/**< 関数パラメータ */
+	ND_PROGRAM,	/**< プログラム (スタートポイント) */
 } node_type_t;
 
 /**
@@ -150,6 +150,7 @@ typedef struct node_t {
 	node_type_t type;	/**< タイプ (ND_XXXX) */
 	struct node_t *lhs;	/**< 左辺値 */
 	struct node_t *rhs;	/**< 右辺値 */
+	struct vector_t *list;	/**< リスト */
 	char *name;		/**< 識別子等の名前 */
 	int value;		/**< 値 */
 } node_t;
@@ -295,15 +296,15 @@ int error_printf(const char *format, ...);
 /* util.c */
 
 /**
- * @brief push an element to a vector
- * @param[in] v        vector storing an element
- * @param[in] element  an element to be pushed
+ * @brief ベクタ要素をプッシュする
+ * @param[in] v        プッシュされるベクタ
+ * @param[in] element  プッシュする要素
  */
 void vector_push(struct vector_t *v, void *element);
 
 /**
- * @brief create a new vector
- * @return a created vector
+ * @brief 新規ベクタを生成する
+ * @return 生成されたベクタ
  */
 struct vector_t *new_vector(void);
 
