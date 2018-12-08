@@ -69,12 +69,12 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 {
 	static int regno = 0;
 	static int label = 0;
-	struct node_t *n;
+	struct node_t *n = NULL;
 	int lhs, rhs;
 	int r = regno;
 	int l = label;
-	int i;
-	size_t j;
+	int i = 0;
+	size_t j = 0;
 
 	if (node == NULL)
 		return -1;
@@ -110,11 +110,8 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_FUNC_PLIST) {
-		int i = 0;
-
-		n = node->lhs;
-
-		while (n->type == ND_FUNC_PARAM && n->rhs != NULL) {
+		for (j = 0; j < node->list->len; j++) {
+			n = node->list->data[j];
 			dict_append(d, n->rhs->name, 0);
 			vector_push(v, new_ir(IR_LOADADDR, regno++, -1, n->rhs->name));
 			vector_push(v, new_ir(IR_FUNC_PARAM, regno - 1, i, n->rhs->name));
@@ -122,12 +119,6 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 			vector_push(v, new_ir(IR_KILL, regno - 2, -1, NULL));
 			vector_push(v, new_ir(IR_KILL_ARG, i, -1, NULL));
 			i++;
-
-			if (node->rhs == NULL)
-				break;
-
-			node = node->rhs;
-			n = node->lhs;
 		}
 	}
 

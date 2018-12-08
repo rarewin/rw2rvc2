@@ -895,7 +895,9 @@ static node_t *parameter_declaration(struct vector_t *tokens)
 {
 	struct node_t *lhs;
 
-	lhs = declaration_specifiers(tokens);
+	if ((lhs = declaration_specifiers(tokens)) == NULL)
+		return NULL;
+
 	return new_node(ND_FUNC_PARAM, lhs, declarator(tokens), NULL, NULL, -1);
 }
 
@@ -907,25 +909,33 @@ static node_t *parameter_declaration(struct vector_t *tokens)
  */
 static node_t *parameter_list(struct vector_t *tokens)
 {
-	struct node_t *lhs, *l;
+	struct node_t *pl = NULL;
+	struct node_t *n;
 	struct token_t *t;
 
-	lhs = new_node(ND_FUNC_PLIST, parameter_declaration(tokens), NULL, NULL, NULL, -1);
-	l = lhs;
+	if ((n = parameter_declaration(tokens)) == NULL)
+		return NULL;
+
+	/* 新規にFUNC_PLISTノードを作成する */
+	pl = new_node(ND_FUNC_PLIST, NULL, NULL, new_vector(), NULL, -1);
 
 	for (;;) {
 		t = tokens->data[g_position];
+
+		if (n == NULL)
+			break;
+
+		vector_push(pl->list, n);
 
 		if (t->type != TK_COMMA)
 			break;
 
 		consume_token(tokens, TK_COMMA);
 
-		l->rhs = new_node(ND_FUNC_PLIST, parameter_declaration(tokens), NULL, NULL, NULL, -1);
-		l = l->rhs;
+		n = parameter_declaration(tokens);
 	}
 
-	return lhs;
+	return pl;
 }
 
 /**
