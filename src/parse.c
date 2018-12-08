@@ -858,19 +858,29 @@ static struct node_t *statement(struct vector_t *tokens)
 }
 
 /**
+ * @brief statement_listパーサ
+ *
  * statement_list := statement
  *                 | statement_list statement
  *                 ;
  */
 static struct node_t *statement_list(struct vector_t *tokens)
 {
-	struct node_t *n = NULL;
+	struct node_t *sl = NULL;
 	struct node_t *s;
 
-	if ((s = statement(tokens)) != NULL)
-		n = new_node(ND_STATEMENT, s, statement_list(tokens), NULL, NULL, -1);
+	if ((s = statement(tokens)) == NULL)
+		return NULL;
 
-	return n;
+	/* 新規にSTATEMENTSノードを作成する  */
+	sl = new_node(ND_STATEMENTS, NULL, NULL, new_vector(), NULL, -1);
+
+	do {
+		vector_push(sl->list, s);
+		s = statement(tokens);
+	} while (s != NULL);
+
+	return sl;
 }
 
 /**
@@ -1064,9 +1074,7 @@ static struct node_t *translation_unit(struct vector_t *tokens)
 	struct node_t *tu = NULL;
 	struct node_t *n;
 
-	n = external_declaration(tokens);
-
-	if (n == NULL)
+	if ((n = external_declaration(tokens)) == NULL)
 		return NULL;
 
 	/* 新規にPROGRAMノードを作成する */

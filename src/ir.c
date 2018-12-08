@@ -74,12 +74,12 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	int r = regno;
 	int l = label;
 	int i;
+	size_t j;
 
 	if (node == NULL)
 		return -1;
 
 	if (node->type == ND_PROGRAM) {
-		size_t j;
 		for (j = 0; j < node->list->len; j++)
 			gen_ir_sub(v, d, node->list->data[j]);
 		return -1;
@@ -246,10 +246,10 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		return lhs;
 	}
 
-	if (node->type == ND_STATEMENT) {
-		gen_ir_sub(v, d, node->lhs);
-		if (node->rhs != NULL)
-			gen_ir_sub(v, d, node->rhs);
+	if (node->type == ND_STATEMENTS) {
+		for (j = 0; j < node->list->len; j++)
+			gen_ir_sub(v, d, node->list->data[j]);
+		return -1;
 	}
 
 	if (node->type == ND_EXPRESSION) {

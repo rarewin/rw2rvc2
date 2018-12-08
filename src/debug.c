@@ -111,7 +111,7 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_RETURN),	/**< "return" */
 		TRANS_ELEMENT(ND_IF),		/**< "if" */
 		TRANS_ELEMENT(ND_THEN_ELSE),	/**< then-else */
-		TRANS_ELEMENT(ND_STATEMENT),	/**< 文 */
+		TRANS_ELEMENT(ND_STATEMENTS),	/**< 複合文 */
 		TRANS_ELEMENT(ND_EXPRESSION),	/**< 式 */
 		TRANS_ELEMENT(ND_ASSIGN),	/**< 代入文 */
 		TRANS_ELEMENT(ND_OR_OP),	/**< OR */
