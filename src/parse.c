@@ -162,23 +162,30 @@ static struct node_t *primary_expression(struct vector_t *tokens)
  */
 static struct node_t *argument_expression_list(struct vector_t *tokens)
 {
-	struct node_t *lhs;
-	struct node_t *n1, *n2;
+	struct node_t *al;
+	struct node_t *n;
+	struct token_t *t;
 
-	if ((lhs = assignment_expression(tokens)) ==NULL)
+	int num = 0;
+
+	if ((n = assignment_expression(tokens)) == NULL)
 		return NULL;
 
-	lhs = new_node(ND_FUNC_ARG, lhs, NULL, NULL, NULL, -1);
-	n1 = lhs;
+	al = new_node(ND_FUNC_ALIST, NULL, NULL, new_vector(), NULL, -1);
 
-	while (((struct token_t*)tokens->data[g_position])->type == TK_COMMA) {
-		consume_token(tokens, TK_COMMA);
-		n2 = new_node(ND_FUNC_ARG, assignment_expression(tokens), NULL, NULL, NULL, -1);
-		n1->rhs = n2;
-		n1 = n2;
+	for (;;) {
+		vector_push(al->list, new_node(ND_FUNC_ARG, n, NULL, NULL, NULL, num));
+
+		t = tokens->data[g_position];
+		if (t->type != TK_COMMA)
+			break;
+
+		num++;
+		if ((n = assignment_expression(tokens)) == NULL)
+			break;
 	}
 
-	return lhs;
+	return al;
 }
 
 /**

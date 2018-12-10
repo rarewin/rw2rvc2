@@ -106,7 +106,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, regno - 1, 0, NULL));
-		return r;
+		return -1;
 	}
 
 	if (node->type == ND_FUNC_PLIST) {
@@ -120,6 +120,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 			vector_push(v, new_ir(IR_KILL_ARG, i, -1, NULL));
 			i++;
 		}
+		return -1;
 	}
 
 	if (node->type == ND_IDENT) {
@@ -255,25 +256,31 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 			gen_ir_sub(v, d, node->lhs->lhs->lhs);
 
 		vector_push(v, new_ir(IR_FUNC_END, gen_ir_sub(v, d, node->rhs), -1, node->lhs->lhs->name));
+
+		return -1;
 	}
 
 	if (node->type == ND_FUNC_CALL) {
-		n = node;
-		i = 0;
 
-		while (n->rhs != NULL) {
-			n = n->rhs;
-			if (n->type == ND_FUNC_ARG) {
-				rhs = gen_ir_sub(v, d, n->lhs);
-				vector_push(v, new_ir(IR_FUNC_ARG, i++, rhs, NULL));
-				vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
-				vector_push(v, new_ir(IR_KILL_ARG, i - 1, 0, NULL));
-			} else {
-				error_printf("unexpected node\n");
+		if (node->rhs != NULL && node->rhs->type == ND_FUNC_ALIST) {
+
+			for (j = 0; j < node->rhs->list->len; j++) {
+				n = node->rhs->list->data[j];
+
+				if (n->type == ND_FUNC_ARG) {
+					rhs = gen_ir_sub(v, d, n->lhs);
+					vector_push(v, new_ir(IR_FUNC_ARG, n->value, rhs, NULL));
+					vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
+					vector_push(v, new_ir(IR_KILL_ARG, n->value, 0, NULL));
+				} else {
+					error_printf("unexpected node\n");
+				}
 			}
 		}
 
 		vector_push(v, new_ir(IR_FUNC_CALL, regno++, -1, node->name));
+
+		return r;
 	}
 
 	return r;

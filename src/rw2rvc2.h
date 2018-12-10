@@ -138,8 +138,9 @@ typedef enum {
 	ND_FUNC_DEF,	/**< 関数定義 */
 	ND_FUNC_CALL,	/**< 関数コール */
 	ND_FUNC_ARG,	/**< 関数引数 */
-	ND_FUNC_PLIST,	/**< 関数パラメータリスト */
+	ND_FUNC_ALIST,	/**< 関数引数リスト */
 	ND_FUNC_PARAM,	/**< 関数パラメータ */
+	ND_FUNC_PLIST,	/**< 関数パラメータリスト */
 	ND_PROGRAM,	/**< プログラム (スタートポイント) */
 } node_type_t;
 

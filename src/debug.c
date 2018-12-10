@@ -128,8 +128,9 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_FUNC_DEF),	/**< 関数定義 */
 		TRANS_ELEMENT(ND_FUNC_CALL),	/**< 関数コール */
 		TRANS_ELEMENT(ND_FUNC_ARG),	/**< 関数引数 */
-		TRANS_ELEMENT(ND_FUNC_PLIST),	/**< 関数パラメータリスト */
+		TRANS_ELEMENT(ND_FUNC_ALIST),	/**< 関数引数リスト */
 		TRANS_ELEMENT(ND_FUNC_PARAM),	/**< 関数パラメータ */
+		TRANS_ELEMENT(ND_FUNC_PLIST),	/**< 関数パラメータリスト */
 		TRANS_ELEMENT(ND_PROGRAM),	/**< プログラム (スタートポイント) */
 	};
 	size_t i;
