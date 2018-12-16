@@ -1,4 +1,4 @@
-CFLAGS =  -Wall -Wextra -Wswitch-enum -Wswitch-enum
+CFLAGS =  -Wall -Wextra
 CFLAGS += -MD
 
 ifeq ($(DEBUG),1)

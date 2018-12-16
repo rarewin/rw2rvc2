@@ -107,41 +107,42 @@ typedef struct token_t {
  * @brief ノードタイプ
  */
 typedef enum {
-	ND_PLUS,	/**< + */
-	ND_MINUS,	/**< - */
-	ND_MUL,		/**< * */
-	ND_DIV,		/**< / */
-	ND_MOD,		/**< % */
-	ND_OR,		/**< | */
-	ND_AND,		/**< & */
-	ND_XOR,		/**< ^ */
-	ND_CONST,	/**< 定数 */
-	ND_IDENT,	/**< 識別子 */
-	ND_SEMICOLON,	/**< ; */
-	ND_RETURN,	/**< "return" */
-	ND_IF,		/**< "if" */
-	ND_THEN_ELSE,	/**< then-else */
-	ND_STATEMENTS,	/**< 複合文 */
-	ND_EXPRESSION,	/**< 式 */
-	ND_ASSIGN,	/**< 代入文 */
-	ND_OR_OP,	/**< OR */
-	ND_AND_OP,	/**< AND */
-	ND_EQ_OP,	/**< == */
-	ND_NE_OP,	/**< != */
-	ND_GREATER_OP,	/**< > */
-	ND_LESS_OP,	/**< < */
-	ND_GE_OP,	/**< >= */
-	ND_LE_OP,	/**< <= */
-	ND_RIGHT_OP,	/**< >> */
-	ND_LEFT_OP,	/**< << */
-	ND_TYPE,	/**< 型名 */
-	ND_FUNC_DEF,	/**< 関数定義 */
-	ND_FUNC_CALL,	/**< 関数コール */
-	ND_FUNC_ARG,	/**< 関数引数 */
-	ND_FUNC_ALIST,	/**< 関数引数リスト */
-	ND_FUNC_PARAM,	/**< 関数パラメータ */
-	ND_FUNC_PLIST,	/**< 関数パラメータリスト */
-	ND_PROGRAM,	/**< プログラム (スタートポイント) */
+	ND_PLUS,		/**< + */
+	ND_MINUS,		/**< - */
+	ND_MUL,			/**< * */
+	ND_DIV,			/**< / */
+	ND_MOD,			/**< % */
+	ND_OR,			/**< | */
+	ND_AND,			/**< & */
+	ND_XOR,			/**< ^ */
+	ND_CONST,		/**< 定数 */
+	ND_IDENT,		/**< 識別子 */
+	ND_SEMICOLON,		/**< ; */
+	ND_RETURN,		/**< "return" */
+	ND_IF,			/**< "if" */
+	ND_THEN_ELSE,		/**< then-else */
+	ND_STATEMENTS,		/**< 複合文 */
+	ND_EXPRESSION,		/**< 式 */
+	ND_ASSIGN,		/**< 代入文 */
+	ND_OR_OP,		/**< OR */
+	ND_AND_OP,		/**< AND */
+	ND_EQ_OP,		/**< == */
+	ND_NE_OP,		/**< != */
+	ND_GREATER_OP,		/**< > */
+	ND_LESS_OP,		/**< < */
+	ND_GE_OP,		/**< >= */
+	ND_LE_OP,		/**< <= */
+	ND_RIGHT_OP,		/**< >> */
+	ND_LEFT_OP,		/**< << */
+	ND_TYPE,		/**< 型名 */
+	ND_FUNC_DEF,		/**< 関数定義 */
+	ND_FUNC_CALL,		/**< 関数コール */
+	ND_FUNC_ARG,		/**< 関数引数 */
+	ND_FUNC_ALIST,		/**< 関数引数リスト */
+	ND_FUNC_PARAM,		/**< 関数パラメータ */
+	ND_FUNC_PLIST,		/**< 関数パラメータリスト */
+	ND_PROGRAM,		/**< プログラム (スタートポイント) */
+	ND_ILLEGAL = -1,	/**< 不正なノードの場合 */
 } node_type_t;
 
 /**
@@ -218,9 +219,12 @@ typedef enum {
 
 /* parser.c */
 /**
- * @brief main function of parser
+ * @brief パーサーのメイン関数
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
  */
-struct node_t *parse(struct vector_t *token);
+struct node_t *parse(struct vector_t *tokens);
 
 /**
  * @brief tokenizer

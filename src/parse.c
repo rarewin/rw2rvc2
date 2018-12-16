@@ -80,11 +80,12 @@ static struct node_t *allocate_node(void)
 
 /**
  * @brief 新規ノードをつくる
- * @param[in] op           ノードの種類
- * @param[in] lhs          左辺
- * @param[in] rhs          右辺
- * @param[in] expression   式
- * @param[in] name         名前
+ * @param[in] op      ノードの種類
+ * @param[in] lhs     左辺
+ * @param[in] rhs     右辺
+ * @param[in] list    リスト
+ * @param[in] name    名前
+ * @param[in] value   値 (整数値)
  */
 static struct node_t *new_node(node_type_t op,
 			       struct node_t *lhs,
@@ -106,44 +107,66 @@ static struct node_t *new_node(node_type_t op,
 }
 
 /**
- * @brief conversion table for token type to node type
+ * @brief 演算子のトークンタイプからノードタイプに変換できるものを変換する.
+ * @param[in] tt  トークンタイプ
+ * @return 変換できればそのノードタイプを, 失敗したらND_ILLEGALを返す.
  */
-static node_type_t CONVERSION_TOKEN_TO_NODE[] = {
-	[TK_PLUS]  = ND_PLUS,
-	[TK_MINUS] = ND_MINUS,
-	[TK_MUL]   = ND_MUL,
-	[TK_DIV]   = ND_DIV,
-	[TK_MOD]   = ND_MOD,
-	[TK_NUM]   = ND_CONST,
-	[TK_RETURN] = ND_RETURN,
-};
+static node_type_t convert_token_to_node(token_type_t tt)
+{
+	switch (tt) {
+	case TK_PLUS:
+		return ND_PLUS;
+	case TK_MINUS:
+		return ND_MINUS;
+	case TK_MUL:
+		return ND_MUL;
+	case TK_DIV:
+		return ND_DIV;
+	case TK_MOD:
+		return ND_MOD;
+	case TK_NUM:
+		return ND_CONST;
+	case TK_RETURN:
+		return ND_RETURN;
+	default:
+		return ND_ILLEGAL;
+	}
+}
 
 /**
- * @brief primary expression
+ * @brief primary expressionのパーサ
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
  *
  * primary_expression := IDENTIFIER
  *                     | CONSTANT
  *                     | STRING_LITERAL
  *                     | '(' expression ')'
  *                     ;
+ *
+ * @todo STRING_LITERAL
  */
 static struct node_t *primary_expression(struct vector_t *tokens)
 {
 	struct token_t *t = tokens->data[g_position];
-	struct node_t *node;
+	struct node_t *n;
 
+	/* '(' expression ')' */
 	if (t->type == TK_LEFT_PAREN) {
 		g_position++;
-		node = expression(tokens);
+		n = expression(tokens);
 		consume_token(tokens, TK_RIGHT_PAREN);
-		return node;
+		return n;
 	}
 
+	/* CONSTANT */
 	if (t->type == TK_NUM) {
 		g_position++;
 		return new_node(ND_CONST, NULL, NULL, NULL, NULL, t->value);
 	}
 
+	/* IDENTIFIER */
 	if (t->type == TK_IDENT) {
 		g_position++;
 		return new_node(ND_IDENT, NULL, NULL, NULL, t->name, -1);
@@ -152,9 +175,11 @@ static struct node_t *primary_expression(struct vector_t *tokens)
 	return NULL;
 }
 
-
 /**
  * @brief argument_expression_list
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
  *
  * argument_expression_list := assignment_expression
  *                           | argument_expression_list ',' assignment_expression
@@ -189,7 +214,10 @@ static struct node_t *argument_expression_list(struct vector_t *tokens)
 }
 
 /**
- * @brief postfix_expression
+ * @brief postfix_expressionのパーサ
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
  *
  * postfix_expression := primary_expression
  *                     | postfix_expression '[' expression ']'
@@ -200,25 +228,29 @@ static struct node_t *argument_expression_list(struct vector_t *tokens)
  *                     | postfix_expression INC_OP
  *                     | postfix_expression DEC_OP
  *                     ;
+ *
+ * @todo '[' expression ']', '.' IDENTIFIER, PTR_OP IDENTIFIER, INC_OP, DEC_OP
  */
 static struct node_t *postfix_expression(struct vector_t *tokens)
 {
-	struct node_t *lhs;
+	struct node_t *n;
 	struct token_t *t;
 
-	lhs = primary_expression(tokens);
+	n = primary_expression(tokens);
 
 	for (;;) {
 		t = tokens->data[g_position];
 
+		/* '(' ')' */
+		/* '(' argument_expression_list ')' */
 		if (t->type == TK_LEFT_PAREN) {
 			consume_token(tokens, TK_LEFT_PAREN);
 
-			if (t->type == TK_RIGHT_PAREN) {
-				consume_token(tokens, TK_RIGHT_PAREN);
-				lhs = new_node(ND_FUNC_CALL, lhs, NULL, NULL, lhs->name, -1);
-			} else {
-				lhs = new_node(ND_FUNC_CALL, lhs, argument_expression_list(tokens), NULL, lhs->name, -1);
+			if (t->type == TK_RIGHT_PAREN) { /* '(' ')' */
+				expect_token(tokens, TK_RIGHT_PAREN);
+				n = new_node(ND_FUNC_CALL, n, NULL, NULL, n->name, -1);
+			} else { /* '(' argument_expression_list ')' */
+				n = new_node(ND_FUNC_CALL, n, argument_expression_list(tokens), NULL, n->name, -1);
 				expect_token(tokens, TK_RIGHT_PAREN);
 			}
 			continue;
@@ -227,11 +259,14 @@ static struct node_t *postfix_expression(struct vector_t *tokens)
 		break;
 	}
 
-	return lhs;
+	return n;
 }
 
 /**
- * @brief unary_operator
+ * @brief unary_operatorのパーサ
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
  *
  * unary_operator := '&'
  *                 | '*'
@@ -240,37 +275,37 @@ static struct node_t *postfix_expression(struct vector_t *tokens)
  *                 | '~'
  *                 | '!'
  *                 ;
+ *
+ * @todo: &, *, ~, ! の実装
  */
 static struct node_t *unary_operator(struct vector_t *tokens)
 {
 	struct token_t *t = tokens->data[g_position];
 
-	if (t->type == TK_MINUS) {
+	if (t->type == TK_MINUS) { /* - */
 		g_position++;
 		return new_node(ND_MINUS, NULL, NULL, NULL, NULL, -1);
 	}
 
-	if (t->type == TK_PLUS) {
+	if (t->type == TK_PLUS) { /* + */
 		g_position++;
 		return new_node(ND_PLUS, NULL, NULL, NULL, NULL, -1);
 	}
-
-	/* TODO: &, *, ~, ! の実装 */
 
 	return NULL;
 }
 
 /**
- * @brief cast_expression
+ * @brief cast_expressionのパーサ
  *
  * cast_expression := unary_expression
  *                  | '(' type_name ')' cast_expression
  *                  ;
+ *
+ * @todo type_nameの実装
  */
 static struct node_t *cast_expression(struct vector_t *tokens)
 {
-	/* TODO: type_nameの実装 */
-
 	return unary_expression(tokens);
 }
 
@@ -326,7 +361,7 @@ static struct node_t *multiplicative_expression(struct vector_t *tokens)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, unary_expression(tokens), NULL, NULL, -1);
+		lhs = new_node(convert_token_to_node(op), lhs, unary_expression(tokens), NULL, NULL, -1);
 	}
 
 	return lhs;
@@ -356,7 +391,7 @@ static struct node_t *additive_expression(struct vector_t *tokens)
 			break;
 
 		g_position++;
-		lhs = new_node(CONVERSION_TOKEN_TO_NODE[op], lhs, multiplicative_expression(tokens), NULL, NULL, -1);
+		lhs = new_node(convert_token_to_node(op), lhs, multiplicative_expression(tokens), NULL, NULL, -1);
 	}
 
 	return lhs;
@@ -959,6 +994,9 @@ static struct node_t *parameter_type_list(struct vector_t *tokens)
 /**
  * @brief direct_declaratorのパーサ
  *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
+ *
  * direct_declarator := IDENTIFIER
  *                    | '(' declarator ')'
  *                    | direct_declarator '[' constant_expression ']'
@@ -971,19 +1009,19 @@ static struct node_t *parameter_type_list(struct vector_t *tokens)
 static struct node_t *direct_declarator(struct vector_t *tokens)
 {
 	struct token_t *t;
-	struct node_t *lhs;
+	struct node_t *n;
 
-	if ((lhs = identifier(tokens)) != NULL) {
+	if ((n = identifier(tokens)) != NULL) {
 		t = tokens->data[g_position];
 
 		/* parameter_type_list */
 		if (t->type == TK_LEFT_PAREN) {
 			consume_token(tokens, TK_LEFT_PAREN);
-			lhs->lhs = parameter_type_list(tokens);
+			n->lhs = parameter_type_list(tokens);
 			expect_token(tokens, TK_RIGHT_PAREN);
 		}
 
-		return lhs;
+		return n;
 	}
 
 	return NULL;
@@ -992,9 +1030,14 @@ static struct node_t *direct_declarator(struct vector_t *tokens)
 /**
  * @brief declaratorのパーサ
  *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
+ *
  * declarator := pointer direct_declarator
  *             | direct_declarator
  *             ;
+ *
+ * @todo direct_declarator以外への対応
  */
 static struct node_t *declarator(struct vector_t *tokens)
 {
@@ -1017,6 +1060,11 @@ static struct node_t *declarator(struct vector_t *tokens)
  *                 | enum_specifier
  *                 | TYPE_NAME
  *                 ;
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
+ *
+ * @todo INT以外への対応
  */
 static struct node_t *type_specifier(struct vector_t *tokens)
 {
@@ -1032,6 +1080,9 @@ static struct node_t *type_specifier(struct vector_t *tokens)
 
 /**
  * @brief declaration_specifiersのパーサ
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
  *
  * declaration_specifiers := storage_class_specifier
  *                         | storage_class_specifier declaration_specifiers
@@ -1049,30 +1100,40 @@ static struct node_t *declaration_specifiers(struct vector_t *tokens)
 /**
  * @brief function_definitionのパーサ
  *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
+ *
  * function_definition := declaration_specifiers declarator declaration_list compound_statement
  *                      | declaration_specifiers declarator compound_statement
  *                      | declarator declaration_list compound_statement
  *                      | declarator compound_statement
  *                      ;
+ *
+ * @todo declarator compound_statement 以外への対応
  */
 static struct node_t *function_definition(struct vector_t *tokens)
 {
-	struct node_t *lhs;
+	struct node_t *n;
 
-	if ((lhs = declaration_specifiers(tokens)) != NULL) {
-		lhs->lhs = declarator(tokens);
-		return new_node(ND_FUNC_DEF, lhs, compound_statement(tokens), NULL, NULL, -1);
-	}
+	if ((n = declaration_specifiers(tokens)) == NULL)
+		return NULL;
 
-	return lhs;
+	n->lhs = declarator(tokens);
+
+	return new_node(ND_FUNC_DEF, n, compound_statement(tokens), NULL, NULL, -1);
 }
 
 /**
  * @brief external_declarationのパーサ
  *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
+ *
  * external_declaration := function_definition
  *                       | declaration
  *                       ;
+ *
+ * @todo declarationの処理
  */
 static struct node_t *external_declaration(struct vector_t *tokens)
 {
@@ -1081,6 +1142,9 @@ static struct node_t *external_declaration(struct vector_t *tokens)
 
 /**
  * @brief translation_unitのパーサ
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
  *
  * translation_unit := external_declaration
  *                   | translation_unit external_declaration
@@ -1106,7 +1170,7 @@ static struct node_t *translation_unit(struct vector_t *tokens)
 }
 
 /**
- * @brief main function of parser
+ * @brief パーサーのメイン関数
  */
 struct node_t *parse(struct vector_t *tokens)
 {
