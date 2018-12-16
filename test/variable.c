@@ -34,7 +34,15 @@ int test_declarate_var2() /* */ /* 3 */
 
 int test_declarate_var3() /* */ /* 3 */
 {
-	int c = 2 + 1;
+	int d = 2 + 1;
 
-	return c;
+	return d;
+}
+
+int test_declarate_va4() /* */ /* 1 */
+{
+	int e = 1;
+	int f = 1;
+
+	return f;
 }

@@ -211,7 +211,7 @@ struct vector_t *tokenize(char *p)
 
 			/* 予約語かどうかの判定 */
 			for (i = 0; i < (sizeof(keywords) / sizeof(keywords[0])); i++) {
-				if (strncmp(keywords[i].word, p, len) == 0) {
+				if (strncmp(keywords[i].word, p, strlen(keywords[i].word)) == 0) {
 					t = add_token(v, keywords[i].tkval, p, line, p - begin);	/* 予約語だった */
 					t->name = keywords[i].word;
 					p += len;
