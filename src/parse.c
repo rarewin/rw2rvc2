@@ -847,6 +847,56 @@ static struct node_t *expression_statement(struct vector_t *tokens)
 }
 
 /**
+ * @param declarationをパースする
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
+ *
+ * declaration := declaration_specifiers ';'
+ *              | declaration_specifiers init_declarator_list ';'
+ *              ;
+ */
+static struct node_t *declaration(struct vector_t *tokens)
+{
+	struct node_t *n = NULL;
+
+	n = declaration_specifiers(tokens);
+
+	if (n != NULL)
+		expect_token(tokens, TK_SEMICOLON);
+
+	return n;
+}
+
+/**
+ * @brief declaration_listをパースする
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
+ *
+ * declaration_list := declaration
+ *                   | declaration_list declaration
+ *                   ;
+ */
+static struct node_t *declaration_list(struct vector_t *tokens)
+{
+	struct node_t *dl = NULL;
+	struct node_t *dn = NULL;
+
+	if ((dn = declaration(tokens)) == NULL)
+		return NULL;
+
+	dl = new_node(ND_VAR_DLIST, NULL, NULL, new_vector(), NULL, -1);
+
+	do {
+		vector_push(dl->list, dn);
+		dn = declaration(tokens);
+	} while (dn != NULL);
+
+	return dl;
+}
+
+/**
  * @brief compound_statementをパースする
  *
  * compound_statement := '{' '}'
@@ -858,15 +908,25 @@ static struct node_t *expression_statement(struct vector_t *tokens)
 static struct node_t *compound_statement(struct vector_t *tokens)
 {
 	struct token_t *t = tokens->data[g_position];
-	struct node_t *node = NULL;
+	struct node_t *sl = NULL, *dl = NULL, *n;
 
 	if (t->type == TK_LEFT_BRACE) {
 		g_position++;
-		node = statement_list(tokens);
+		dl = declaration_list(tokens);
+		sl = statement_list(tokens);
 		expect_token(tokens, TK_RIGHT_BRACE);
 	}
 
-	return node;
+	if (dl == NULL && sl == NULL) {
+		return NULL;
+	} else if (dl != NULL && sl != NULL) {
+		n = new_node(ND_STATEMENTS, NULL, NULL, new_vector(), NULL, -1);
+		vector_push(n->list, dl);
+		vector_push(n->list, sl);
+		return n;
+	} else {
+		return (dl != NULL) ? dl : sl;
+	}
 }
 
 /**
