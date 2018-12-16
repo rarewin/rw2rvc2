@@ -43,6 +43,7 @@ rebuild:
 
 .PHONY: test
 test: release/rw2rvc2
+	$(MAKE) -C test clean
 	$(MAKE) -C test
 
 .PHONY: doc

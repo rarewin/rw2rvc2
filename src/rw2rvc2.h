@@ -137,6 +137,7 @@ typedef enum {
 	ND_TYPE,		/**< 型名 */
 	ND_VAR_DEC,		/**< 変数宣言 */
 	ND_VAR_DLIST,		/**< 変数宣言リスト */
+	ND_VAR_INIT_DLIST,	/**< 初期宣言リスト  */
 	ND_FUNC_DEF,		/**< 関数定義 */
 	ND_FUNC_CALL,		/**< 関数コール */
 	ND_FUNC_ARG,		/**< 関数引数 */

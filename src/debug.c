@@ -97,43 +97,44 @@ static void print_indent(FILE *file, unsigned int indent)
 void show_node(FILE *file, struct node_t *node, unsigned int indent)
 {
 	const char *table[] = {
-		TRANS_ELEMENT(ND_PLUS),		/**< + */
-		TRANS_ELEMENT(ND_MINUS),	/**< - */
-		TRANS_ELEMENT(ND_MUL),		/**< * */
-		TRANS_ELEMENT(ND_DIV),		/**< / */
-		TRANS_ELEMENT(ND_MOD),		/**< % */
-		TRANS_ELEMENT(ND_OR),		/**< | */
-		TRANS_ELEMENT(ND_AND),		/**< & */
-		TRANS_ELEMENT(ND_XOR),		/**< ^ */
-		TRANS_ELEMENT(ND_IDENT),	/**< 識別子 */
-		TRANS_ELEMENT(ND_CONST),	/**< numbers */
-		TRANS_ELEMENT(ND_SEMICOLON),	/**< ; */
-		TRANS_ELEMENT(ND_RETURN),	/**< "return" */
-		TRANS_ELEMENT(ND_IF),		/**< "if" */
-		TRANS_ELEMENT(ND_THEN_ELSE),	/**< then-else */
-		TRANS_ELEMENT(ND_STATEMENTS),	/**< 複合文 */
-		TRANS_ELEMENT(ND_EXPRESSION),	/**< 式 */
-		TRANS_ELEMENT(ND_ASSIGN),	/**< 代入文 */
-		TRANS_ELEMENT(ND_OR_OP),	/**< OR */
-		TRANS_ELEMENT(ND_AND_OP),	/**< AND */
-		TRANS_ELEMENT(ND_EQ_OP),	/**< == */
-		TRANS_ELEMENT(ND_NE_OP),	/**< != */
-		TRANS_ELEMENT(ND_GREATER_OP),	/**< > */
-		TRANS_ELEMENT(ND_LESS_OP),	/**< < */
-		TRANS_ELEMENT(ND_GE_OP),	/**< >= */
-		TRANS_ELEMENT(ND_LE_OP),	/**< <= */
-		TRANS_ELEMENT(ND_RIGHT_OP),	/**< >> */
-		TRANS_ELEMENT(ND_LEFT_OP),	/**< << */
-		TRANS_ELEMENT(ND_TYPE),		/**< 型名 */
-		TRANS_ELEMENT(ND_VAR_DEC),	/**< 変数宣言 */
-		TRANS_ELEMENT(ND_VAR_DLIST),	/**< 変数宣言リスト */
-		TRANS_ELEMENT(ND_FUNC_DEF),	/**< 関数定義 */
-		TRANS_ELEMENT(ND_FUNC_CALL),	/**< 関数コール */
-		TRANS_ELEMENT(ND_FUNC_ARG),	/**< 関数引数 */
-		TRANS_ELEMENT(ND_FUNC_ALIST),	/**< 関数引数リスト */
-		TRANS_ELEMENT(ND_FUNC_PARAM),	/**< 関数パラメータ */
-		TRANS_ELEMENT(ND_FUNC_PLIST),	/**< 関数パラメータリスト */
-		TRANS_ELEMENT(ND_PROGRAM),	/**< プログラム (スタートポイント) */
+		TRANS_ELEMENT(ND_PLUS),			/**< + */
+		TRANS_ELEMENT(ND_MINUS),		/**< - */
+		TRANS_ELEMENT(ND_MUL),			/**< * */
+		TRANS_ELEMENT(ND_DIV),			/**< / */
+		TRANS_ELEMENT(ND_MOD),			/**< % */
+		TRANS_ELEMENT(ND_OR),			/**< | */
+		TRANS_ELEMENT(ND_AND),			/**< & */
+		TRANS_ELEMENT(ND_XOR),			/**< ^ */
+		TRANS_ELEMENT(ND_IDENT),		/**< 識別子 */
+		TRANS_ELEMENT(ND_CONST),		/**< numbers */
+		TRANS_ELEMENT(ND_SEMICOLON),		/**< ; */
+		TRANS_ELEMENT(ND_RETURN),		/**< "return" */
+		TRANS_ELEMENT(ND_IF),			/**< "if" */
+		TRANS_ELEMENT(ND_THEN_ELSE),		/**< then-else */
+		TRANS_ELEMENT(ND_STATEMENTS),		/**< 複合文 */
+		TRANS_ELEMENT(ND_EXPRESSION),		/**< 式 */
+		TRANS_ELEMENT(ND_ASSIGN),		/**< 代入文 */
+		TRANS_ELEMENT(ND_OR_OP),		/**< OR */
+		TRANS_ELEMENT(ND_AND_OP),		/**< AND */
+		TRANS_ELEMENT(ND_EQ_OP),		/**< == */
+		TRANS_ELEMENT(ND_NE_OP),		/**< != */
+		TRANS_ELEMENT(ND_GREATER_OP),		/**< > */
+		TRANS_ELEMENT(ND_LESS_OP),		/**< < */
+		TRANS_ELEMENT(ND_GE_OP),		/**< >= */
+		TRANS_ELEMENT(ND_LE_OP),		/**< <= */
+		TRANS_ELEMENT(ND_RIGHT_OP),		/**< >> */
+		TRANS_ELEMENT(ND_LEFT_OP),		/**< << */
+		TRANS_ELEMENT(ND_TYPE),			/**< 型名 */
+		TRANS_ELEMENT(ND_VAR_DEC),		/**< 変数宣言 */
+		TRANS_ELEMENT(ND_VAR_DLIST),		/**< 変数宣言リスト */
+		TRANS_ELEMENT(ND_VAR_INIT_DLIST),	/**< 初期宣言リスト  */
+		TRANS_ELEMENT(ND_FUNC_DEF),		/**< 関数定義 */
+		TRANS_ELEMENT(ND_FUNC_CALL),		/**< 関数コール */
+		TRANS_ELEMENT(ND_FUNC_ARG),		/**< 関数引数 */
+		TRANS_ELEMENT(ND_FUNC_ALIST),		/**< 関数引数リスト */
+		TRANS_ELEMENT(ND_FUNC_PARAM),		/**< 関数パラメータ */
+		TRANS_ELEMENT(ND_FUNC_PLIST),		/**< 関数パラメータリスト */
+		TRANS_ELEMENT(ND_PROGRAM),		/**< プログラム (スタートポイント) */
 	};
 	size_t i;
 

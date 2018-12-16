@@ -17,8 +17,11 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 	unsigned int i;
 	int j;
 
-	for (i = 0; i < d->len; i++)
-		printf("	.comm %s, 4, 4\n", (d->dict)[i].key);
+	for (i = 0; i < d->len; i++) {
+		if ((d->dict)[i].value == 0) {
+			printf("	.comm %s, 4, 4\n", (d->dict)[i].key);
+		}
+	}
 
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];

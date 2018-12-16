@@ -847,7 +847,85 @@ static struct node_t *expression_statement(struct vector_t *tokens)
 }
 
 /**
- * @param declarationをパースする
+ * @brief initializerをパースする
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
+ *
+ * initializer := assignment_expression
+ *              | '{' initializer_list '}'
+ *              | '{' initializer_list ',' '}'
+ *              ;
+ *
+ * @todo assignment_expression以外の実装
+ */
+static struct node_t *initializer(struct vector_t *tokens)
+{
+	return assignment_expression(tokens);
+}
+
+/**
+ * @brief init_declaratorをパースする
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
+ *
+ * init_declarator := declarator
+ *                  | declarator '=' initializer
+ *                  ;
+ */
+static struct node_t *init_declarator(struct vector_t *tokens)
+{
+	struct node_t *n;
+	struct token_t *t;
+
+	n = declarator(tokens);
+	t = tokens->data[g_position];
+
+	if (t->type == TK_EQUAL) {
+		consume_token(tokens, TK_EQUAL);
+		n->rhs = initializer(tokens);
+	}
+
+	return n;
+}
+
+/**
+ * @brief init_declarator_listをパースする
+ *
+ * @param tokens  トークンベクタ
+ * @return パース結果のノード
+ *
+ * init_declarator_list := init_declarator
+ *                       | init_declarator_list ',' init_declarator
+ *                       ;
+ */
+static struct node_t *init_declarator_list(struct vector_t *tokens)
+{
+	struct node_t *idl = NULL, *id;
+	struct token_t *t;
+	int num = 0;
+
+	if ((id = init_declarator(tokens)) == NULL)
+		return NULL;
+
+	idl = new_node(ND_VAR_INIT_DLIST, NULL, NULL, new_vector(), NULL, num++);
+
+	do {
+		vector_push(idl->list, id);
+		t = tokens->data[g_position];
+
+		if (t->type != TK_COMMA)
+			break;
+
+		id = init_declarator(tokens);
+	} while (idl != NULL);
+
+	return idl;
+}
+
+/**
+ * @brief declarationをパースする
  *
  * @param tokens  トークンベクタ
  * @return パース結果のノード
@@ -858,14 +936,14 @@ static struct node_t *expression_statement(struct vector_t *tokens)
  */
 static struct node_t *declaration(struct vector_t *tokens)
 {
-	struct node_t *n = NULL;
+	struct node_t *d = NULL, *ds;
 
-	n = declaration_specifiers(tokens);
-
-	if (n != NULL)
+	if ((ds = declaration_specifiers(tokens)) != NULL) {
+		d = new_node(ND_VAR_DEC, ds, init_declarator_list(tokens), NULL, NULL, -1);
 		expect_token(tokens, TK_SEMICOLON);
+	}
 
-	return n;
+	return d;
 }
 
 /**

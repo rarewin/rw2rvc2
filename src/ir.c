@@ -79,9 +79,37 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	if (node == NULL)
 		return -1;
 
-	if (node->type == ND_PROGRAM) {
+	if (node->type == ND_PROGRAM || node->type == ND_STATEMENTS || node->type == ND_VAR_DLIST) {
 		for (j = 0; j < node->list->len; j++)
 			gen_ir_sub(v, d, node->list->data[j]);
+		return -1;
+	}
+
+	if (node->type == ND_VAR_DEC) {
+		/* node->lhs: 型, node->rhs: INIT_DLIST  */
+
+		/* 型名だけの行は何もしない */
+		if (node->rhs == NULL)
+			return -1;
+
+		if (node->rhs->type != ND_VAR_INIT_DLIST) {
+			error_printf("unexpected error\n");
+			exit(1);
+		}
+
+		for (j = 0; j < node->rhs->list->len; j++) {
+		 	n = node->rhs->list->data[j];
+		 	dict_append(d, n->name, 0);
+
+			if (n->rhs != NULL) {
+				rhs = gen_ir_sub(v, d, n->rhs);
+				vector_push(v, new_ir(IR_LOADADDR, regno++, -1, n->name));
+				vector_push(v, new_ir(IR_STORE, regno - 1, rhs, NULL));
+				vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
+				vector_push(v, new_ir(IR_KILL, regno - 1, 0, NULL));
+			}
+		}
+
 		return -1;
 	}
 
@@ -99,7 +127,6 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 
 	if (node->type == ND_ASSIGN) {
 		rhs = gen_ir_sub(v, d, node->rhs);
-		dict_append(d, node->lhs->name, 0);
 		lhs = gen_ir_sub(v, d, node->lhs);
 		vector_push(v, new_ir(IR_LOADADDR, regno++, -1, node->lhs->name));
 		vector_push(v, new_ir(IR_STORE, regno - 1, rhs, NULL));
@@ -236,12 +263,6 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
 
 		return lhs;
-	}
-
-	if (node->type == ND_STATEMENTS) {
-		for (j = 0; j < node->list->len; j++)
-			gen_ir_sub(v, d, node->list->data[j]);
-		return -1;
 	}
 
 	if (node->type == ND_EXPRESSION) {

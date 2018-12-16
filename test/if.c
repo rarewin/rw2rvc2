@@ -18,6 +18,8 @@ int test_if_false() /* */ /* 0 */
 
 int test_if_assign() /* */ /* 1 */
 {
+	int a;
+
 	if (a = 2) {
 		return 1;
 	}
@@ -28,6 +30,8 @@ int test_if_assign() /* */ /* 1 */
 
 int test_if_else_true() /* */ /* 1 */
 {
+	int a;
+
 	if (2) {
 		a = 1;
 	} else {
@@ -39,6 +43,8 @@ int test_if_else_true() /* */ /* 1 */
 
 int test_if_else_false() /* */ /* 3 */
 {
+	int a;
+
 	if (0) {
 		a = 1;
 	} else {
