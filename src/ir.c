@@ -35,7 +35,9 @@ static struct ir_t *allocate_ir(void)
 		index = 0;
 	}
 
-	return &ir_array[index++];
+	index++;
+
+	return &ir_array[index - 1];
 }
 
 /**
@@ -56,6 +58,33 @@ static struct ir_t *new_ir(ir_type_t op, int lhs, int rhs, char *name)
 	ir->name = name;
 
 	return ir;
+}
+
+/**
+ * @brief 新しい変数データにメモリを割り当てる
+ * @param[in] node    変数ノード
+ * @param[in] slevel  スコープレベル
+ */
+static struct variable_t *new_variable(struct node_t *node, int slevel)
+{
+	const size_t ALLOCATE_SIZE = 256;
+	static struct variable_t *var_array = NULL;
+	static size_t index = 0;
+
+	if (var_array == NULL || index >= ALLOCATE_SIZE) {
+		if ((var_array = (struct variable_t*)malloc(sizeof(struct variable_t) * ALLOCATE_SIZE)) == NULL) {
+			error_printf("memory allocation error\n");
+			exit(1);
+		}
+		index = 0;
+	}
+
+	var_array[index].node = node;
+	var_array[index].scope_level = slevel;
+
+	index++;
+
+	return &var_array[index - 1];
 }
 
 /**
@@ -100,8 +129,9 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 
 		for (j = 0; j < node->rhs->list->len; j++) {
 		 	n = node->rhs->list->data[j];
-		 	dict_append(d, n->name, 0);
+			dict_append(d, n->name, new_variable(n, 0));
 
+#if 0
 			if (n->rhs != NULL) {
 				rhs = gen_ir_sub(v, d, n->rhs);
 				vector_push(v, new_ir(IR_LOADADDR, regno++, -1, n->name));
@@ -109,6 +139,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 				vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
 				vector_push(v, new_ir(IR_KILL, regno - 1, 0, NULL));
 			}
+#endif
 		}
 
 		return -1;
@@ -147,7 +178,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	if (node->type == ND_FUNC_PLIST) {
 		for (j = 0; j < node->list->len; j++) {
 			n = node->list->data[j];
-			dict_append(d, n->rhs->name, 0);
+			dict_append(d, n->rhs->name, new_variable(n->rhs, 1));
 			vector_push(v, new_ir(IR_LOADADDR, regno++, -1, n->rhs->name));
 			vector_push(v, new_ir(IR_FUNC_PARAM, regno - 1, i, n->rhs->name));
 			regno++;	/* arg reg用の番号を確保……  */

@@ -1,15 +1,14 @@
-int a;
+int aa = 2;
 int b;
 int c;
 int d;
-int e;
+int e = 0;
 int f;
 
 int test_var() /* */ /* 2 */
 {
 	/* int; */
-	a = 2;
-	return a;
+	return aa;
 }
 
 int test_only_int() /* */ /* 0 */

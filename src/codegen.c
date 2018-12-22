@@ -17,11 +17,31 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 	unsigned int i;
 	int j;
 
+	printf("	.section .data\n");
 	for (i = 0; i < d->len; i++) {
-		if ((d->dict)[i].value == 0) {
+		struct variable_t *v = (d->dict)[i].value;
+		if (v->scope_level == 0) {
+			if (v->node->rhs != NULL && (v->node->rhs->type == ND_CONST && v->node->rhs->value != 0)) {
+				printf("%s:\n", (d->dict)[i].key);
+				printf("	.word	%d\n", v->node->rhs->value);
+			}
+		}
+	}
+
+	printf("\n");
+
+	for (i = 0; i < d->len; i++) {
+		struct variable_t *v = (d->dict)[i].value;
+		if (v->scope_level == 0) {
+			if (v->node->rhs == NULL || (v->node->rhs->type == ND_CONST && v->node->rhs->value == 0))
+				printf("	.comm %s, 4, 4\n", (d->dict)[i].key);
+		} else {
+			/* @todo スタック上への割り当て  */
 			printf("	.comm %s, 4, 4\n", (d->dict)[i].key);
 		}
 	}
+
+	printf("\n");
 
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];

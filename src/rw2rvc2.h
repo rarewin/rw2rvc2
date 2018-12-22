@@ -11,31 +11,28 @@
 /**
  * @brief ベクター タイプ
  */
-typedef struct vector_t {
+struct vector_t {
 	void **data;		/**< データポインタ(void*)へのポインタ */
 	size_t capacity;	/**< ベクターの容量  */
 	size_t len;		/**< ベクターの現在の長さ */
-} vector_t;
-
+};
 
 /**
  * @brief 辞書要素用 構造体
  */
-typedef struct dict_element_t {
+struct dict_element_t {
 	char *key;	/**< キー */
 	void *value;	/**< 値 */
-} dict_element_t;
-
+};
 
 /**
  * @brief 辞書用 構造体
  */
-typedef struct dict_t {
+struct dict_t {
 	struct dict_element_t *dict;	/**< 辞書要素へのポインタ */
 	size_t len;			/**< 辞書の現在の長さ */
 	size_t capacity;		/**< ベクターの容量 */
-} dict_t;
-
+};
 
 /**
  * @brief トークンタイプ
@@ -94,14 +91,22 @@ typedef enum {
 /**
  * @brief トークン
  */
-typedef struct token_t {
+struct token_t {
 	token_type_t type;	/**< タイプ */
 	int value;		/**< 値  */
 	char *input;		/**< 入力文字列 */
 	char *name;		/**< 識別子等の名前 */
 	int line;		/**< 行番号 */
 	int position;		/**< その行での位置 */
-} token_t;
+};
+
+/**
+ * @brief 変数
+ */
+struct variable_t {
+	struct node_t *node;		/**< ノード */
+	int            scope_level;	/**< スコープレベル (0: グローバル) */
+};
 
 /**
  * @brief ノードタイプ
