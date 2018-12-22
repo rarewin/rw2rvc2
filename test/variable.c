@@ -1,31 +1,33 @@
+int a;
+int b;
+int c;
+int d;
+int e;
+int f;
+
 int test_var() /* */ /* 2 */
 {
-	int;
-	int a;
+	/* int; */
 	a = 2;
 	return a;
 }
 
 int test_only_int() /* */ /* 0 */
 {
-	int;
-	int;
-	int   ;
+	/* int; */
+	/* int; */
+	/* int   ; */
 
 	return 0;
 }
 
 int test_declarate_var() /* */ /* 0 */
 {
-	int b;
-
 	return 0;
 }
 
-int test_declarate_var2() /* */ /* 3 */
+int test_declarate_var2() /* */ /* 1 */
 {
-	int c = 2;
-
 	c += 1;
 
 	return c;
@@ -34,15 +36,15 @@ int test_declarate_var2() /* */ /* 3 */
 
 int test_declarate_var3() /* */ /* 3 */
 {
-	int d = 2 + 1;
+	d = 2 + 1;
 
 	return d;
 }
 
 int test_declarate_va4() /* */ /* 1 */
 {
-	int e = 1;
-	int f = 1;
+	e = 1;
+	f = 1;
 
 	return f;
 }

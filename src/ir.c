@@ -85,7 +85,8 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		return -1;
 	}
 
-	if (node->type == ND_VAR_DEC) {
+	/* 静的変数の宣言 */
+	if (node->type == ND_VAR_DEC_STATIC) {
 		/* node->lhs: 型, node->rhs: INIT_DLIST  */
 
 		/* 型名だけの行は何もしない */
@@ -111,6 +112,13 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		}
 
 		return -1;
+	}
+
+	/* ローカル変数の宣言 */
+	if (node->type == ND_VAR_DEC) {
+		error_printf("local variable is not supported yet... %s\n", node->name);
+		exit(1);
+		/* NOTREACHED */
 	}
 
 	if (node->type == ND_RETURN) {

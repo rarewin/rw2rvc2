@@ -126,6 +126,7 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_LEFT_OP),		/**< << */
 		TRANS_ELEMENT(ND_TYPE),			/**< 型名 */
 		TRANS_ELEMENT(ND_VAR_DEC),		/**< 変数宣言 */
+		TRANS_ELEMENT(ND_VAR_DEC_STATIC),	/**< 静的変数制限 */
 		TRANS_ELEMENT(ND_VAR_DLIST),		/**< 変数宣言リスト */
 		TRANS_ELEMENT(ND_VAR_INIT_DLIST),	/**< 初期宣言リスト  */
 		TRANS_ELEMENT(ND_FUNC_DEF),		/**< 関数定義 */

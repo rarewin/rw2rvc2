@@ -1251,14 +1251,23 @@ static struct node_t *declaration_specifiers(struct vector_t *tokens)
  */
 static struct node_t *function_definition(struct vector_t *tokens)
 {
-	struct node_t *n;
+	struct node_t *dn, *sn;
+	int stored_pos = g_position;
 
-	if ((n = declaration_specifiers(tokens)) == NULL)
-		return NULL;
+	if ((dn = declaration_specifiers(tokens)) == NULL)
+		goto ERR;
 
-	n->lhs = declarator(tokens);
+	if ((dn->lhs = declarator(tokens)) == NULL)
+		goto ERR;
 
-	return new_node(ND_FUNC_DEF, n, compound_statement(tokens), NULL, NULL, -1);
+	if ((sn = compound_statement(tokens)) == NULL)
+		goto ERR;
+
+	return new_node(ND_FUNC_DEF, dn, sn, NULL, NULL, -1);
+
+ERR:
+	g_position = stored_pos;
+	return NULL;
 }
 
 /**
@@ -1275,7 +1284,18 @@ static struct node_t *function_definition(struct vector_t *tokens)
  */
 static struct node_t *external_declaration(struct vector_t *tokens)
 {
-	return function_definition(tokens);
+	struct node_t *n;
+
+	if ((n = function_definition(tokens)) != NULL)
+		return n;
+
+	if ((n = declaration(tokens)) == NULL)
+		return NULL;
+
+	/* グルーバル変数なので, ノードを書き換える. */
+	n->type = ND_VAR_DEC_STATIC;
+
+	return n;
 }
 
 /**
