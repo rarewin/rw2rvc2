@@ -327,6 +327,8 @@ struct dict_t *new_dict(void);
  * @param[in] d     辞書
  * @param[in] key   キー
  * @param[in] value 値
+ *
+ * @note 重複するキーを用いた場合でも登録される
  */
 void dict_append(struct dict_t *d, char *key, void *value);
 
@@ -335,6 +337,8 @@ void dict_append(struct dict_t *d, char *key, void *value);
  * @param[in] d     辞書
  * @param[in] key   キー
  * @return データが存在したら値へのポインタを、存在しなければNULLを返す
+ *
+ * @note 複数のデータが存在した場合、一番インデックスが大きい値に一致する
  */
 struct dict_element_t *dict_lookup(struct dict_t *d, char *key);
 

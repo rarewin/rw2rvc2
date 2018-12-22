@@ -31,6 +31,10 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			printf("	.global %s\n", ir->name);
 			printf("	.type %s, @function\n", ir->name);
 			printf("%s:\n", ir->name);
+			printf("	sd	ra, -8(sp)\n");
+			printf("	sd	s0, -16(sp)\n");
+			printf("	mv	s0, sp\n");
+			printf("	addi	sp, sp, -16\n");
 		}
 
 		if (ir->op == IR_FUNC_CALL) {
@@ -75,6 +79,9 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 		if (ir->op == IR_RETURN) {
 			if (ir->lhs != -1)
 				printf("	mv	a0, %s\n", get_temp_reg_str(ir->lhs));
+			printf("	ld	ra, -8(s0)\n");
+			printf("	ld	s0, -16(s0)\n");
+			printf("	addi	sp, sp, 16\n");
 			printf("	ret\n");
 		}
 
