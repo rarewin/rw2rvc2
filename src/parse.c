@@ -995,16 +995,18 @@ static struct node_t *compound_statement(struct vector_t *tokens)
 		expect_token(tokens, TK_RIGHT_BRACE);
 	}
 
-	if (dl == NULL && sl == NULL) {
+	if (dl == NULL && sl == NULL)
 		return NULL;
-	} else if (dl != NULL && sl != NULL) {
-		n = new_node(ND_STATEMENTS, NULL, NULL, new_vector(), NULL, -1);
+
+	n = new_node(ND_COMPOUND_STATEMENTS, NULL, NULL, new_vector(), NULL, -1);
+
+	if (dl != NULL)
 		vector_push(n->list, dl);
+
+	if (sl != NULL)
 		vector_push(n->list, sl);
-		return n;
-	} else {
-		return (dl != NULL) ? dl : sl;
-	}
+
+	return n;
 }
 
 /**

@@ -108,7 +108,8 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	if (node == NULL)
 		return -1;
 
-	if (node->type == ND_PROGRAM || node->type == ND_STATEMENTS || node->type == ND_VAR_DLIST) {
+	if (node->type == ND_PROGRAM || node->type == ND_STATEMENTS ||
+	    node->type == ND_COMPOUND_STATEMENTS || node->type == ND_VAR_DLIST) {
 		for (j = 0; j < node->list->len; j++)
 			gen_ir_sub(v, d, node->list->data[j]);
 		return -1;

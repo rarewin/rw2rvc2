@@ -126,7 +126,8 @@ typedef enum {
 	ND_RETURN,		/**< "return" */
 	ND_IF,			/**< "if" */
 	ND_THEN_ELSE,		/**< then-else */
-	ND_STATEMENTS,		/**< 複合文 */
+	ND_COMPOUND_STATEMENTS,	/**< 複合文 */
+	ND_STATEMENTS,		/**< 文リスト */
 	ND_EXPRESSION,		/**< 式 */
 	ND_ASSIGN,		/**< 代入文 */
 	ND_OR_OP,		/**< OR */

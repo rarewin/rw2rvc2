@@ -105,13 +105,14 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_OR),			/**< | */
 		TRANS_ELEMENT(ND_AND),			/**< & */
 		TRANS_ELEMENT(ND_XOR),			/**< ^ */
+		TRANS_ELEMENT(ND_CONST),		/**< 定数 */
 		TRANS_ELEMENT(ND_IDENT),		/**< 識別子 */
-		TRANS_ELEMENT(ND_CONST),		/**< numbers */
 		TRANS_ELEMENT(ND_SEMICOLON),		/**< ; */
 		TRANS_ELEMENT(ND_RETURN),		/**< "return" */
 		TRANS_ELEMENT(ND_IF),			/**< "if" */
 		TRANS_ELEMENT(ND_THEN_ELSE),		/**< then-else */
-		TRANS_ELEMENT(ND_STATEMENTS),		/**< 複合文 */
+		TRANS_ELEMENT(ND_COMPOUND_STATEMENTS),	/**< 複合文 */
+		TRANS_ELEMENT(ND_STATEMENTS),		/**< 文リスト */
 		TRANS_ELEMENT(ND_EXPRESSION),		/**< 式 */
 		TRANS_ELEMENT(ND_ASSIGN),		/**< 代入文 */
 		TRANS_ELEMENT(ND_OR_OP),		/**< OR */
