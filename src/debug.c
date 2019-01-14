@@ -110,7 +110,6 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_SEMICOLON),		/**< ; */
 		TRANS_ELEMENT(ND_RETURN),		/**< "return" */
 		TRANS_ELEMENT(ND_IF),			/**< "if" */
-		TRANS_ELEMENT(ND_THEN_ELSE),		/**< then-else */
 		TRANS_ELEMENT(ND_COMPOUND_STATEMENTS),	/**< 複合文 */
 		TRANS_ELEMENT(ND_STATEMENTS),		/**< 文リスト */
 		TRANS_ELEMENT(ND_EXPRESSION),		/**< 式 */

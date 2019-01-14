@@ -103,6 +103,10 @@ static struct node_t *new_node(node_type_t op,
 	node->name = name;
 	node->value = value;
 
+	node->condition = NULL;
+	node->consequence = NULL;
+	node->alternative = NULL;
+
 	return node;
 }
 
@@ -804,12 +808,11 @@ static struct node_t *selection_statement(struct vector_t *tokens)
 	if (t->type == TK_IF) {
 		g_position++;
 		expect_token(tokens, TK_LEFT_PAREN);
-		node = new_node(ND_IF, expression(tokens), NULL, NULL, NULL, -1);
+		node = new_node(ND_IF, NULL, NULL, NULL, NULL, -1);
+		node->condition = expression(tokens);
 		expect_token(tokens, TK_RIGHT_PAREN);
 
-		node->rhs = new_node(ND_THEN_ELSE, statement(tokens), NULL, NULL, NULL, -1);
-
-		if (node->rhs == NULL) {
+		if ((node->consequence = statement(tokens)) == NULL) {
 			parse_error();
 			/* NOTREACHED */
 		}
@@ -817,7 +820,7 @@ static struct node_t *selection_statement(struct vector_t *tokens)
 		t = tokens->data[g_position];
 		if (t->type == TK_ELSE) {
 			g_position++;
-			if ((node->rhs->rhs = statement(tokens)) == NULL) {
+			if ((node->alternative = statement(tokens)) == NULL) {
 				parse_error();
 				/* NOTREACHED */
 			}

@@ -203,22 +203,17 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_IF) {
-		lhs = gen_ir_sub(v, d, node->lhs);
+		lhs = gen_ir_sub(v, d, node->condition);
 		vector_push(v, new_ir(IR_BEQZ, lhs, label++, NULL));
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 
-		if (node->rhs->type != ND_THEN_ELSE) {
-			error_printf("unexpected error\n");
-			exit(1);
-		}
+		gen_ir_sub(v, d, node->consequence);	// then
 
-		gen_ir_sub(v, d, node->rhs->lhs);	// then
-
-		if (node->rhs != NULL) {
+		if (node->alternative != NULL) {
 			int l2 = label++;
 			vector_push(v, new_ir(IR_JUMP, l2, 0, NULL));
 			vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
-			gen_ir_sub(v, d, node->rhs->rhs);	// else
+			gen_ir_sub(v, d, node->alternative);	// else
 			vector_push(v, new_ir(IR_LABEL, l2, 0, NULL));
 		} else {
 			vector_push(v, new_ir(IR_LABEL, l, 0, NULL));

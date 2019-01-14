@@ -125,7 +125,6 @@ typedef enum {
 	ND_SEMICOLON,		/**< ; */
 	ND_RETURN,		/**< "return" */
 	ND_IF,			/**< "if" */
-	ND_THEN_ELSE,		/**< then-else */
 	ND_COMPOUND_STATEMENTS,	/**< 複合文 */
 	ND_STATEMENTS,		/**< 文リスト */
 	ND_EXPRESSION,		/**< 式 */
@@ -159,50 +158,55 @@ typedef enum {
  * @brief ノード構造体
  */
 typedef struct node_t {
-	node_type_t type;	/**< タイプ (ND_XXXX) */
-	struct node_t *lhs;	/**< 左辺値 */
-	struct node_t *rhs;	/**< 右辺値 */
-	struct vector_t *list;	/**< リスト */
-	char *name;		/**< 識別子等の名前 */
-	int value;		/**< 値 */
+	node_type_t type;		/**< タイプ (ND_XXXX) */
+	struct node_t *lhs;		/**< 左辺値 */
+	struct node_t *rhs;		/**< 右辺値 */
+	struct node_t *condition;	/**< 条件 */
+	struct node_t *consequence;	/**< consequence */
+	struct node_t *alternative;	/**< alternative */
+	struct vector_t *list;		/**< リスト */
+	char *name;			/**< 識別子等の名前 */
+	int value;			/**< 値 */
 } node_t;
 
 /**
  * @brief 中間表現(IR)タイプ
  */
 typedef enum {
-	IR_PLUS,	/**< 加算: lhs + rhs */
-	IR_MINUS,	/**< 減算: lhs - rhs */
-	IR_MUL,		/**< 乗算: lhs * rhs*/
-	IR_DIV,		/**< 除算: lhs / rhs */
-	IR_MOD,		/**< 剰余: lhs % rhs */
-	IR_AND,		/**< 論理積: lhs & rhs */
-	IR_OR,		/**< 論理和: lhs | rhs  */
-	IR_NOT,		/**< 論理否定: ~lhs  */
-	IR_XOR,		/**< 排他的論理和: lhs ^ rhs  */
-	IR_EQ_OP,	/**< 等号: lhs == rhs  */
-	IR_NE_OP,	/**< 否定等号: lhs != rhs */
-	IR_SLT,		/**< 不等号: lhs < rhs */
-	IR_SLET,	/**< 不等号: lhs <= rhs */
-	IR_LEFT_OP,	/**< 不等号: lhs << rhs */
-	IR_RIGHT_OP,	/**< 不等号: lhs >> rhs */
-	IR_RETURN,	/**< return */
+	IR_PLUS,		/**< 加算: lhs + rhs */
+	IR_MINUS,		/**< 減算: lhs - rhs */
+	IR_MUL,			/**< 乗算: lhs * rhs*/
+	IR_DIV,			/**< 除算: lhs / rhs */
+	IR_MOD,			/**< 剰余: lhs % rhs */
+	IR_AND,			/**< 論理積: lhs & rhs */
+	IR_OR,			/**< 論理和: lhs | rhs  */
+	IR_NOT,			/**< 論理否定: ~lhs  */
+	IR_XOR,			/**< 排他的論理和: lhs ^ rhs  */
+	IR_EQ_OP,		/**< 等号: lhs == rhs  */
+	IR_NE_OP,		/**< 否定等号: lhs != rhs */
+	IR_SLT,			/**< 不等号: lhs < rhs */
+	IR_SLET,		/**< 不等号: lhs <= rhs */
+	IR_LEFT_OP,		/**< 不等号: lhs << rhs */
+	IR_RIGHT_OP,		/**< 不等号: lhs >> rhs */
+	IR_RETURN,		/**< return */
 	IR_IMM,
 	IR_MOV,
 	IR_KILL,
-	IR_KILL_ARG,	/**< アーギュメントレジスタを解放する */
+	IR_KILL_ARG,		/**< アーギュメントレジスタを解放する */
 	IR_LOAD,
 	IR_STORE,
 	IR_LOADADDR,
-	IR_BEQZ,	/**< lhs がゼロならブランチする */
-	IR_JUMP,	/**< ジャンプする */
-	IR_LABEL,	/**< ラベルを生成 */
-	IR_FUNC_DEF,	/**< 関数定義 */
-	IR_FUNC_CALL,	/**< 関数呼び出し */
-	IR_FUNC_END,	/**< 関数定義終端 */
-	IR_FUNC_ARG,	/**< 関数引数 */
-	IR_FUNC_PLIST,	/**< 関数パラメータリスト */
-	IR_FUNC_PARAM,	/**< 関数パラメータ */
+	IR_BEQZ,		/**< lhs がゼロならブランチする */
+	IR_JUMP,		/**< ジャンプする */
+	IR_LABEL,		/**< ラベルを生成 */
+	IR_FUNC_DEF,		/**< 関数定義 */
+	IR_FUNC_CALL,		/**< 関数呼び出し */
+	IR_FUNC_END,		/**< 関数定義終端 */
+	IR_FUNC_ARG,		/**< 関数引数 */
+	IR_FUNC_PLIST,		/**< 関数パラメータリスト */
+	IR_FUNC_PARAM,		/**< 関数パラメータ */
+	IR_GET_VAR_STACK,	/**< ローカル変数用スタック領域確保: lhsワード分だけスタックを確保する */
+	IR_RELEASE_VAR_STACK,	/**< ローカル変数用スタック領域解放: lhsワード分だけスタックを解放する */
 	IR_NOP,
 } ir_type_t;
 
