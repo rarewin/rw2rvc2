@@ -106,6 +106,7 @@ static struct node_t *new_node(node_type_t op,
 	node->condition = NULL;
 	node->consequence = NULL;
 	node->alternative = NULL;
+	node->parameter_list = NULL;
 
 	return node;
 }
@@ -183,15 +184,15 @@ static struct node_t *primary_expression(struct vector_t *tokens)
  * @brief argument_expression_list
  *
  * @param tokens  トークンベクタ
- * @return パース結果のノード
+ * @return パース結果のベクタ
  *
  * argument_expression_list := assignment_expression
  *                           | argument_expression_list ',' assignment_expression
  *                           ;
  */
-static struct node_t *argument_expression_list(struct vector_t *tokens)
+static struct vector_t *argument_expression_list(struct vector_t *tokens)
 {
-	struct node_t *al;
+	struct vector_t *al;
 	struct node_t *n;
 	struct token_t *t;
 
@@ -200,10 +201,10 @@ static struct node_t *argument_expression_list(struct vector_t *tokens)
 	if ((n = assignment_expression(tokens)) == NULL)
 		return NULL;
 
-	al = new_node(ND_FUNC_ALIST, NULL, NULL, new_vector(), NULL, -1);
+	al = new_vector();
 
 	for (;;) {
-		vector_push(al->list, new_node(ND_FUNC_ARG, n, NULL, NULL, NULL, num));
+		vector_push(al, new_node(ND_FUNC_ARG, n, NULL, NULL, NULL, num));
 
 		t = tokens->data[g_position];
 		if (t->type != TK_COMMA)
@@ -254,7 +255,7 @@ static struct node_t *postfix_expression(struct vector_t *tokens)
 				expect_token(tokens, TK_RIGHT_PAREN);
 				n = new_node(ND_FUNC_CALL, n, NULL, NULL, n->name, -1);
 			} else { /* '(' argument_expression_list ')' */
-				n = new_node(ND_FUNC_CALL, n, argument_expression_list(tokens), NULL, n->name, -1);
+				n = new_node(ND_FUNC_CALL, n, NULL, argument_expression_list(tokens), n->name, -1);
 				expect_token(tokens, TK_RIGHT_PAREN);
 			}
 			continue;
@@ -1088,13 +1089,15 @@ static node_t *parameter_declaration(struct vector_t *tokens)
 
 /**
  * @brief parameter_listのパーサ
+ * @return パース済みのパラメータベクタ
+ *
  * parameter_list := parameter_declaration
  *                 | parameter_list ',' parameter_declaration
  *                 ;
  */
-static node_t *parameter_list(struct vector_t *tokens)
+static struct vector_t *parameter_list(struct vector_t *tokens)
 {
-	struct node_t *pl = NULL;
+	struct vector_t *pl = NULL;
 	struct node_t *n;
 	struct token_t *t;
 
@@ -1102,7 +1105,7 @@ static node_t *parameter_list(struct vector_t *tokens)
 		return NULL;
 
 	/* 新規にFUNC_PLISTノードを作成する */
-	pl = new_node(ND_FUNC_PLIST, NULL, NULL, new_vector(), NULL, -1);
+	pl = new_vector();
 
 	for (;;) {
 		t = tokens->data[g_position];
@@ -1110,13 +1113,12 @@ static node_t *parameter_list(struct vector_t *tokens)
 		if (n == NULL)
 			break;
 
-		vector_push(pl->list, n);
+		vector_push(pl, n);
 
 		if (t->type != TK_COMMA)
 			break;
 
 		consume_token(tokens, TK_COMMA);
-
 		n = parameter_declaration(tokens);
 	}
 
@@ -1125,11 +1127,12 @@ static node_t *parameter_list(struct vector_t *tokens)
 
 /**
  * @brief parameter_type_listのパーサ
+ * @return パース済みのパラメータベクタ
  *
  * parameter_type_list := parameter_list
  *                      | parameter_list ',' ELLIPSIS
  */
-static struct node_t *parameter_type_list(struct vector_t *tokens)
+static struct vector_t *parameter_type_list(struct vector_t *tokens)
 {
 	return parameter_list(tokens);
 }
@@ -1160,7 +1163,7 @@ static struct node_t *direct_declarator(struct vector_t *tokens)
 		/* parameter_type_list */
 		if (t->type == TK_LEFT_PAREN) {
 			consume_token(tokens, TK_LEFT_PAREN);
-			n->lhs = parameter_type_list(tokens);
+			n->parameter_list = parameter_type_list(tokens);
 			expect_token(tokens, TK_RIGHT_PAREN);
 		}
 
@@ -1256,7 +1259,7 @@ static struct node_t *declaration_specifiers(struct vector_t *tokens)
  */
 static struct node_t *function_definition(struct vector_t *tokens)
 {
-	struct node_t *dn, *sn;
+	struct node_t *dn, *sn, *n;
 	int stored_pos = g_position;
 
 	if ((dn = declaration_specifiers(tokens)) == NULL)
@@ -1268,7 +1271,9 @@ static struct node_t *function_definition(struct vector_t *tokens)
 	if ((sn = compound_statement(tokens)) == NULL)
 		goto ERR;
 
-	return new_node(ND_FUNC_DEF, dn, sn, NULL, NULL, -1);
+	n = new_node(ND_FUNC_DEF, dn, sn, NULL, NULL, -1);
+
+	return n;
 
 ERR:
 	g_position = stored_pos;

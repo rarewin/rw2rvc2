@@ -71,6 +71,13 @@ static struct variable_t *new_variable(struct node_t *node, int slevel)
 	static struct variable_t *var_array = NULL;
 	static size_t index = 0;
 
+	/* assert */
+	if (node == NULL || node->type != ND_IDENT /* @TODO たぶんおかしい*/) {
+		error_printf("unexpected error in %s() (unexpected node type: %d)\n",
+			     __FUNCTION__, (node == NULL) ? -1 : node->type);
+		exit(1);
+	}
+
 	if (var_array == NULL || index >= ALLOCATE_SIZE) {
 		if ((var_array = (struct variable_t*)malloc(sizeof(struct variable_t) * ALLOCATE_SIZE)) == NULL) {
 			error_printf("memory allocation error\n");
@@ -173,20 +180,6 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, regno - 1, 0, NULL));
-		return -1;
-	}
-
-	if (node->type == ND_FUNC_PLIST) {
-		for (j = 0; j < node->list->len; j++) {
-			n = node->list->data[j];
-			dict_append(d, n->rhs->name, new_variable(n->rhs, 1));
-			vector_push(v, new_ir(IR_LOADADDR, regno++, -1, n->rhs->name));
-			vector_push(v, new_ir(IR_FUNC_PARAM, regno - 1, i, n->rhs->name));
-			regno++;	/* arg reg用の番号を確保……  */
-			vector_push(v, new_ir(IR_KILL, regno - 2, -1, NULL));
-			vector_push(v, new_ir(IR_KILL_ARG, i, -1, NULL));
-			i++;
-		}
 		return -1;
 	}
 
@@ -308,8 +301,18 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		vector_push(v, new_ir(IR_FUNC_DEF, -1, -1, node->lhs->lhs->name));
 
 		/* for parameters */
-		if (node->lhs->lhs->lhs)
-			gen_ir_sub(v, d, node->lhs->lhs->lhs);
+		if (node->lhs->lhs->parameter_list != NULL) {
+			for (j = 0; j < node->lhs->lhs->parameter_list->len; j++) {
+				n = node->lhs->lhs->parameter_list->data[j];
+				dict_append(d, n->rhs->name, new_variable(n->rhs, 1));
+				vector_push(v, new_ir(IR_LOADADDR, regno++, -1, n->rhs->name));
+				vector_push(v, new_ir(IR_FUNC_PARAM, regno - 1, i, n->rhs->name));
+				regno++;	/* arg reg用の番号を確保……  */
+				vector_push(v, new_ir(IR_KILL, regno - 2, -1, NULL));
+				vector_push(v, new_ir(IR_KILL_ARG, i, -1, NULL));
+				i++;
+			}
+		}
 
 		vector_push(v, new_ir(IR_FUNC_END, gen_ir_sub(v, d, node->rhs), -1, node->lhs->lhs->name));
 
@@ -317,11 +320,9 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_FUNC_CALL) {
-
-		if (node->rhs != NULL && node->rhs->type == ND_FUNC_ALIST) {
-
-			for (j = 0; j < node->rhs->list->len; j++) {
-				n = node->rhs->list->data[j];
+		if (node->list != NULL) {
+			for (j = 0; j < node->list->len; j++) {
+				n = node->list->data[j];
 
 				if (n->type == ND_FUNC_ARG) {
 					rhs = gen_ir_sub(v, d, n->lhs);
@@ -333,9 +334,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 				}
 			}
 		}
-
 		vector_push(v, new_ir(IR_FUNC_CALL, regno++, -1, node->name));
-
 		return r;
 	}
 

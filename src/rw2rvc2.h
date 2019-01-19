@@ -122,7 +122,6 @@ typedef enum {
 	ND_XOR,			/**< ^ */
 	ND_CONST,		/**< 定数 */
 	ND_IDENT,		/**< 識別子 */
-	ND_SEMICOLON,		/**< ; */
 	ND_RETURN,		/**< "return" */
 	ND_IF,			/**< "if" */
 	ND_COMPOUND_STATEMENTS,	/**< 複合文 */
@@ -147,9 +146,7 @@ typedef enum {
 	ND_FUNC_DEF,		/**< 関数定義 */
 	ND_FUNC_CALL,		/**< 関数コール */
 	ND_FUNC_ARG,		/**< 関数引数 */
-	ND_FUNC_ALIST,		/**< 関数引数リスト */
 	ND_FUNC_PARAM,		/**< 関数パラメータ */
-	ND_FUNC_PLIST,		/**< 関数パラメータリスト */
 	ND_PROGRAM,		/**< プログラム (スタートポイント) */
 	ND_ILLEGAL = -1,	/**< 不正なノードの場合 */
 } node_type_t;
@@ -158,15 +155,16 @@ typedef enum {
  * @brief ノード構造体
  */
 typedef struct node_t {
-	node_type_t type;		/**< タイプ (ND_XXXX) */
-	struct node_t *lhs;		/**< 左辺値 */
-	struct node_t *rhs;		/**< 右辺値 */
-	struct node_t *condition;	/**< 条件 */
-	struct node_t *consequence;	/**< consequence */
-	struct node_t *alternative;	/**< alternative */
-	struct vector_t *list;		/**< リスト */
-	char *name;			/**< 識別子等の名前 */
-	int value;			/**< 値 */
+	node_type_t type;			/**< タイプ (ND_XXXX) */
+	struct node_t *lhs;			/**< 左辺値 */
+	struct node_t *rhs;			/**< 右辺値 */
+	struct node_t *condition;		/**< 条件 */
+	struct node_t *consequence;		/**< consequence */
+	struct node_t *alternative;		/**< alternative */
+	struct vector_t *list;			/**< リスト */
+	struct vector_t *parameter_list;	/**< パラメーターリスト */
+	char *name;				/**< 識別子等の名前 */
+	int value;				/**< 値 */
 } node_t;
 
 /**

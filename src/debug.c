@@ -107,7 +107,6 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_XOR),			/**< ^ */
 		TRANS_ELEMENT(ND_CONST),		/**< 定数 */
 		TRANS_ELEMENT(ND_IDENT),		/**< 識別子 */
-		TRANS_ELEMENT(ND_SEMICOLON),		/**< ; */
 		TRANS_ELEMENT(ND_RETURN),		/**< "return" */
 		TRANS_ELEMENT(ND_IF),			/**< "if" */
 		TRANS_ELEMENT(ND_COMPOUND_STATEMENTS),	/**< 複合文 */
@@ -132,9 +131,7 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_FUNC_DEF),		/**< 関数定義 */
 		TRANS_ELEMENT(ND_FUNC_CALL),		/**< 関数コール */
 		TRANS_ELEMENT(ND_FUNC_ARG),		/**< 関数引数 */
-		TRANS_ELEMENT(ND_FUNC_ALIST),		/**< 関数引数リスト */
 		TRANS_ELEMENT(ND_FUNC_PARAM),		/**< 関数パラメータ */
-		TRANS_ELEMENT(ND_FUNC_PLIST),		/**< 関数パラメータリスト */
 		TRANS_ELEMENT(ND_PROGRAM),		/**< プログラム (スタートポイント) */
 	};
 	size_t i;
@@ -154,6 +151,36 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 			color_printf(file, COL_GREEN, "list%d:\n", i);
 			show_node(file, node->list->data[i], indent + 1);
 		}
+	}
+
+	if (node->parameter_list != NULL) {
+		for (i = 0; i < node->parameter_list->len; i++) {
+			fprintf(file, ASM_COMMENTOUT_STR);
+			print_indent(file, indent + 1);
+			color_printf(file, COL_GREEN, "parameter_list%d:\n", i);
+			show_node(file, node->parameter_list->data[i], indent + 1);
+		}
+	}
+
+	if (node->condition != NULL) {
+		fprintf(file, ASM_COMMENTOUT_STR);
+		print_indent(file, indent + 1);
+		color_printf(file, COL_GREEN, "condition:\n");
+		show_node(file, node->condition, indent + 1);
+	}
+
+	if (node->consequence != NULL) {
+		fprintf(file, ASM_COMMENTOUT_STR);
+		print_indent(file, indent + 1);
+		color_printf(file, COL_GREEN, "consequence:\n");
+		show_node(file, node->consequence, indent + 1);
+	}
+
+	if (node->alternative != NULL) {
+		fprintf(file, ASM_COMMENTOUT_STR);
+		print_indent(file, indent + 1);
+		color_printf(file, COL_GREEN, "alternative:\n");
+		show_node(file, node->alternative, indent + 1);
 	}
 
 	if (node->name != NULL) {
