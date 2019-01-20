@@ -6,7 +6,7 @@
 /* static関数のプロトタイプ宣言. (循環コールのため) */
 static struct node_t *expression(struct vector_t *tokens);
 static struct node_t *statement(struct vector_t *tokens);
-static struct node_t *statement_list(struct vector_t *tokens);
+static struct vector_t *statement_list(struct vector_t *tokens);
 static struct node_t *declarator(struct vector_t *tokens);
 static struct node_t *declaration_specifiers(struct vector_t *tokens);
 static struct node_t *assignment_expression(struct vector_t *tokens);
@@ -960,18 +960,18 @@ static struct node_t *declaration(struct vector_t *tokens)
  *                   | declaration_list declaration
  *                   ;
  */
-static struct node_t *declaration_list(struct vector_t *tokens)
+static struct vector_t *declaration_list(struct vector_t *tokens)
 {
-	struct node_t *dl = NULL;
+	struct vector_t *dl = NULL;
 	struct node_t *dn = NULL;
 
 	if ((dn = declaration(tokens)) == NULL)
 		return NULL;
 
-	dl = new_node(ND_VAR_DLIST, NULL, NULL, new_vector(), NULL, -1);
+	dl = new_vector();
 
 	do {
-		vector_push(dl->list, dn);
+		vector_push(dl, dn);
 		dn = declaration(tokens);
 	} while (dn != NULL);
 
@@ -990,7 +990,8 @@ static struct node_t *declaration_list(struct vector_t *tokens)
 static struct node_t *compound_statement(struct vector_t *tokens)
 {
 	struct token_t *t = tokens->data[g_position];
-	struct node_t *sl = NULL, *dl = NULL, *n;
+	struct vector_t *sl = NULL, *dl = NULL;
+	struct node_t *n;
 
 	if (t->type == TK_LEFT_BRACE) {
 		g_position++;
@@ -1004,11 +1005,8 @@ static struct node_t *compound_statement(struct vector_t *tokens)
 
 	n = new_node(ND_COMPOUND_STATEMENTS, NULL, NULL, new_vector(), NULL, -1);
 
-	if (dl != NULL)
-		vector_push(n->list, dl);
-
-	if (sl != NULL)
-		vector_push(n->list, sl);
+	vector_merge(n->list, dl);
+	vector_merge(n->list, sl);
 
 	return n;
 }
@@ -1050,19 +1048,19 @@ static struct node_t *statement(struct vector_t *tokens)
  *                 | statement_list statement
  *                 ;
  */
-static struct node_t *statement_list(struct vector_t *tokens)
+static struct vector_t *statement_list(struct vector_t *tokens)
 {
-	struct node_t *sl = NULL;
+	struct vector_t *sl = NULL;
 	struct node_t *s;
 
 	if ((s = statement(tokens)) == NULL)
 		return NULL;
 
 	/* 新規にSTATEMENTSノードを作成する  */
-	sl = new_node(ND_STATEMENTS, NULL, NULL, new_vector(), NULL, -1);
+	sl = new_vector();
 
 	do {
-		vector_push(sl->list, s);
+		vector_push(sl, s);
 		s = statement(tokens);
 	} while (s != NULL);
 

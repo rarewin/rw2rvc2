@@ -87,6 +87,20 @@ void vector_push(struct vector_t *v, void *element)
 	v->data[v->len++] = element;
 }
 
+/**
+ * @brief ベクタをマージする
+ */
+void vector_merge(struct vector_t *dst, struct vector_t *src)
+{
+	size_t i;
+
+	/* どちらかがNULLなら何もしない */
+	if (dst == NULL || src == NULL)
+		return;
+
+	for (i = 0; i < src->len; i++)
+		vector_push(dst, src->data[i]);
+}
 
 /**
  * @brief 辞書を新規に作成する

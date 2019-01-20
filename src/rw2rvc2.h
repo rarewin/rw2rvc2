@@ -125,7 +125,6 @@ typedef enum {
 	ND_RETURN,		/**< "return" */
 	ND_IF,			/**< "if" */
 	ND_COMPOUND_STATEMENTS,	/**< 複合文 */
-	ND_STATEMENTS,		/**< 文リスト */
 	ND_EXPRESSION,		/**< 式 */
 	ND_ASSIGN,		/**< 代入文 */
 	ND_OR_OP,		/**< OR */
@@ -141,7 +140,6 @@ typedef enum {
 	ND_TYPE,		/**< 型名 */
 	ND_VAR_DEC,		/**< 変数宣言 */
 	ND_VAR_DEC_STATIC,	/**< 静的変数制限 */
-	ND_VAR_DLIST,		/**< 変数宣言リスト */
 	ND_VAR_INIT_DLIST,	/**< 初期宣言リスト  */
 	ND_FUNC_DEF,		/**< 関数定義 */
 	ND_FUNC_CALL,		/**< 関数コール */
@@ -318,6 +316,15 @@ int error_printf(const char *format, ...);
  * @param[in] element  プッシュする要素
  */
 void vector_push(struct vector_t *v, void *element);
+
+/**
+ * @brief ベクタをマージする
+ * @param[out] dst  マージ先
+ * @param[in]  src  マージ元
+ * @note どちらかがNULLであれば何もしない
+ */
+void vector_merge(struct vector_t *dst, struct vector_t *src);
+
 
 /**
  * @brief 新規ベクタを生成する

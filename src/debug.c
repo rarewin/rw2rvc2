@@ -110,7 +110,6 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_RETURN),		/**< "return" */
 		TRANS_ELEMENT(ND_IF),			/**< "if" */
 		TRANS_ELEMENT(ND_COMPOUND_STATEMENTS),	/**< 複合文 */
-		TRANS_ELEMENT(ND_STATEMENTS),		/**< 文リスト */
 		TRANS_ELEMENT(ND_EXPRESSION),		/**< 式 */
 		TRANS_ELEMENT(ND_ASSIGN),		/**< 代入文 */
 		TRANS_ELEMENT(ND_OR_OP),		/**< OR */
@@ -126,7 +125,6 @@ void show_node(FILE *file, struct node_t *node, unsigned int indent)
 		TRANS_ELEMENT(ND_TYPE),			/**< 型名 */
 		TRANS_ELEMENT(ND_VAR_DEC),		/**< 変数宣言 */
 		TRANS_ELEMENT(ND_VAR_DEC_STATIC),	/**< 静的変数制限 */
-		TRANS_ELEMENT(ND_VAR_DLIST),		/**< 変数宣言リスト */
 		TRANS_ELEMENT(ND_VAR_INIT_DLIST),	/**< 初期宣言リスト  */
 		TRANS_ELEMENT(ND_FUNC_DEF),		/**< 関数定義 */
 		TRANS_ELEMENT(ND_FUNC_CALL),		/**< 関数コール */
