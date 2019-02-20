@@ -159,8 +159,10 @@ typedef struct node_t {
 	struct node_t *condition;		/**< 条件 */
 	struct node_t *consequence;		/**< consequence */
 	struct node_t *alternative;		/**< alternative */
+	struct node_t *expression;		/**< 式 (return, ...)*/
 	struct vector_t *list;			/**< リスト */
 	struct vector_t *parameter_list;	/**< パラメーターリスト */
+	struct vector_t *argument_list;		/**< 引数リスト */
 	char *name;				/**< 識別子等の名前 */
 	int value;				/**< 値 */
 } node_t;

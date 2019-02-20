@@ -160,7 +160,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_RETURN) {
-		lhs = gen_ir_sub(v, d, node->lhs);
+		lhs = gen_ir_sub(v, d, node->expression);
 		vector_push(v, new_ir(IR_RETURN, lhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 		return r;
@@ -293,7 +293,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_EXPRESSION) {
-		return gen_ir_sub(v, d, node->lhs);
+		return gen_ir_sub(v, d, node->expression);
 	}
 
 	if (node->type == ND_FUNC_DEF) {
