@@ -246,7 +246,6 @@ void show_ir(FILE *file, struct vector_t *irv)
 		TRANS_ELEMENT(IR_FUNC_CALL),	/**< 関数呼び出し */
 		TRANS_ELEMENT(IR_FUNC_END),	/**< 関数定義終端 */
 		TRANS_ELEMENT(IR_FUNC_ARG),	/**< 関数引数 */
-		TRANS_ELEMENT(IR_FUNC_PLIST),	/**< 関数パラメータリスト */
 		TRANS_ELEMENT(IR_FUNC_PARAM),	/**< 関数パラメータ */
 		TRANS_ELEMENT(IR_NOP),
 	};

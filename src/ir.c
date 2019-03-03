@@ -96,12 +96,13 @@ static struct variable_t *new_variable(struct node_t *node, int slevel)
 
 /**
  * @brief IR生成 サブ関数
- * @param[in] v     IRのベクタ
- * @param[in] d     変数の辞書
- * @param[in] node  パースしたノード
+ * @param[in] v            IRのベクタ
+ * @param[in] d            変数の辞書
+ * @param[in] node         パースしたノード
+ * @param[in] scode_level  スコープレベル
  * @return 上段に渡す結果レジスタ, もしくはそれに相当する値
  */
-static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
+static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node, int scope_level)
 {
 	static int regno = 0;
 	static int label = 0;
@@ -116,8 +117,10 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		return -1;
 
 	if (node->type == ND_PROGRAM || node->type == ND_COMPOUND_STATEMENTS) {
+
 		for (j = 0; j < node->list->len; j++)
-			gen_ir_sub(v, d, node->list->data[j]);
+			gen_ir_sub(v, d, node->list->data[j], scope_level + 1);
+
 		return -1;
 	}
 
@@ -140,7 +143,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 
 #if 0
 			if (n->rhs != NULL) {
-				rhs = gen_ir_sub(v, d, n->rhs);
+				rhs = gen_ir_sub(v, d, n->rhs, scope_level);
 				vector_push(v, new_ir(IR_LOADADDR, regno++, -1, n->name));
 				vector_push(v, new_ir(IR_STORE, regno - 1, rhs, NULL));
 				vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
@@ -160,7 +163,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_RETURN) {
-		lhs = gen_ir_sub(v, d, node->expression);
+		lhs = gen_ir_sub(v, d, node->expression, scope_level);
 		vector_push(v, new_ir(IR_RETURN, lhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 		return r;
@@ -172,8 +175,8 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_ASSIGN) {
-		rhs = gen_ir_sub(v, d, node->rhs);
-		lhs = gen_ir_sub(v, d, node->lhs);
+		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
+		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
 		vector_push(v, new_ir(IR_LOADADDR, regno++, -1, node->lhs->name));
 		vector_push(v, new_ir(IR_STORE, regno - 1, rhs, NULL));
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
@@ -195,17 +198,17 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_IF) {
-		lhs = gen_ir_sub(v, d, node->condition);
+		lhs = gen_ir_sub(v, d, node->condition, scope_level);
 		vector_push(v, new_ir(IR_BEQZ, lhs, label++, NULL));
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 
-		gen_ir_sub(v, d, node->consequence);	// then
+		gen_ir_sub(v, d, node->consequence, scope_level);	// then
 
 		if (node->alternative != NULL) {
 			int l2 = label++;
 			vector_push(v, new_ir(IR_JUMP, l2, 0, NULL));
 			vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
-			gen_ir_sub(v, d, node->alternative);	// else
+			gen_ir_sub(v, d, node->alternative, scope_level);	// else
 			vector_push(v, new_ir(IR_LABEL, l2, 0, NULL));
 		} else {
 			vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
@@ -218,7 +221,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	    node->type == ND_AND || node->type == ND_OR || node->type == ND_XOR) {
 
 		if (node->lhs != NULL) {
-			lhs = gen_ir_sub(v, d, node->lhs);
+			lhs = gen_ir_sub(v, d, node->lhs, scope_level);
 		} else {
 			if (node->type == ND_PLUS || node->type == ND_MINUS) {
 				lhs = regno;
@@ -228,7 +231,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 				exit(1);
 			}
 		}
-		rhs = gen_ir_sub(v, d, node->rhs);
+		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
 
 		vector_push(v, new_ir(CONVERSION_NODE_TO_IR[node->type], lhs, rhs, NULL));
 		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
@@ -237,8 +240,8 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 
 	if (node->type == ND_AND_OP) {
 		/* a && b = ~(~a || ~b) */
-		lhs = gen_ir_sub(v, d, node->lhs);
-		rhs = gen_ir_sub(v, d, node->rhs);
+		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
+		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
 
 		vector_push(v, new_ir(IR_NOT, lhs, 0, NULL));
 		vector_push(v, new_ir(IR_NOT, rhs, 0, NULL));
@@ -249,8 +252,8 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_EQ_OP || node->type == ND_NE_OP) {
-		lhs = gen_ir_sub(v, d, node->lhs);
-		rhs = gen_ir_sub(v, d, node->rhs);
+		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
+		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
 
 		vector_push(v, new_ir(IR_MINUS, lhs, rhs, NULL));
 
@@ -264,8 +267,8 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 
 	if (node->type == ND_LESS_OP || node->type == ND_GREATER_OP ||
 	    node->type == ND_LE_OP || node->type == ND_GE_OP) {
-		lhs = gen_ir_sub(v, d, node->lhs);
-		rhs = gen_ir_sub(v, d, node->rhs);
+		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
+		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
 
 		if (node->type == ND_GREATER_OP || node->type == ND_LE_OP) {
 			int tmp;
@@ -283,8 +286,8 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_LEFT_OP || node->type == ND_RIGHT_OP) {
-		lhs = gen_ir_sub(v, d, node->lhs);
-		rhs = gen_ir_sub(v, d, node->rhs);
+		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
+		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
 
 		vector_push(v, new_ir((node->type == ND_LEFT_OP) ? IR_LEFT_OP : IR_RIGHT_OP, lhs, rhs, NULL));
 		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
@@ -293,7 +296,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 	}
 
 	if (node->type == ND_EXPRESSION) {
-		return gen_ir_sub(v, d, node->expression);
+		return gen_ir_sub(v, d, node->expression, scope_level);
 	}
 
 	if (node->type == ND_FUNC_DEF) {
@@ -303,7 +306,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 		if (node->lhs->lhs->parameter_list != NULL) {
 			for (j = 0; j < node->lhs->lhs->parameter_list->len; j++) {
 				n = node->lhs->lhs->parameter_list->data[j];
-				dict_append(d, n->rhs->name, new_variable(n->rhs, 1));
+				dict_append(d, n->rhs->name, new_variable(n->rhs, scope_level));
 				vector_push(v, new_ir(IR_LOADADDR, regno++, -1, n->rhs->name));
 				vector_push(v, new_ir(IR_FUNC_PARAM, regno - 1, i, n->rhs->name));
 				regno++;	/* arg reg用の番号を確保……  */
@@ -313,7 +316,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 			}
 		}
 
-		vector_push(v, new_ir(IR_FUNC_END, gen_ir_sub(v, d, node->rhs), -1, node->lhs->lhs->name));
+		vector_push(v, new_ir(IR_FUNC_END, gen_ir_sub(v, d, node->rhs, scope_level), -1, node->lhs->lhs->name));
 
 		return -1;
 	}
@@ -324,7 +327,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node)
 				n = node->list->data[j];
 
 				if (n->type == ND_FUNC_ARG) {
-					rhs = gen_ir_sub(v, d, n->lhs);
+					rhs = gen_ir_sub(v, d, n->lhs, scope_level);
 					vector_push(v, new_ir(IR_FUNC_ARG, n->value, rhs, NULL));
 					vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
 					vector_push(v, new_ir(IR_KILL_ARG, n->value, 0, NULL));
@@ -348,7 +351,7 @@ struct vector_t *gen_ir(struct node_t *node, struct dict_t *d)
 	struct vector_t *v = NULL;
 
 	v = new_vector();
-	gen_ir_sub(v, d, node);
+	gen_ir_sub(v, d, node, 0);
 
 	return v;
 }

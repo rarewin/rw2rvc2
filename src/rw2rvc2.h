@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define COMPILE_WORD_SIZE	8
+
 #define ASM_COMMENTOUT_STR	"# "
 
 /**
@@ -106,6 +108,7 @@ struct token_t {
 struct variable_t {
 	struct node_t *node;		/**< ノード */
 	int            scope_level;	/**< スコープレベル (0: グローバル) */
+	size_t         offset;		/**< フレームポインタからのオフセット */
 };
 
 /**
@@ -201,10 +204,7 @@ typedef enum {
 	IR_FUNC_CALL,		/**< 関数呼び出し */
 	IR_FUNC_END,		/**< 関数定義終端 */
 	IR_FUNC_ARG,		/**< 関数引数 */
-	IR_FUNC_PLIST,		/**< 関数パラメータリスト */
 	IR_FUNC_PARAM,		/**< 関数パラメータ */
-	IR_GET_VAR_STACK,	/**< ローカル変数用スタック領域確保: lhsワード分だけスタックを確保する */
-	IR_RELEASE_VAR_STACK,	/**< ローカル変数用スタック領域解放: lhsワード分だけスタックを解放する */
 	IR_NOP,
 } ir_type_t;
 

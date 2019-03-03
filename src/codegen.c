@@ -46,119 +46,153 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 	for (i = 0; i < irv->len; i++) {
 		ir = irv->data[i];
 
-		if (ir->op == IR_FUNC_DEF) {
+		switch (ir->op) {
+		case IR_FUNC_DEF:
 			printf("	.section .text\n");
 			printf("	.global %s\n", ir->name);
 			printf("	.type %s, @function\n", ir->name);
 			printf("%s:\n", ir->name);
-			printf("	sd	ra, -8(sp)\n");
-			printf("	sd	s0, -16(sp)\n");
+			printf("	sd	ra, -%d(sp)\n", COMPILE_WORD_SIZE);
+			printf("	sd	s0, -%d(sp)\n", COMPILE_WORD_SIZE * 2);
 			printf("	mv	s0, sp\n");
-			printf("	addi	sp, sp, -16\n");
-		}
+			printf("	addi	sp, sp, -%d\n", COMPILE_WORD_SIZE * 2);
+			break;
 
-		if (ir->op == IR_FUNC_CALL) {
+		case IR_FUNC_CALL:
+		{
 			struct using_regs_list_t *using_regs;
 
 			using_regs = get_using_regs(ir->rhs);
 
-			printf("	addi	sp, sp, -%d\n", using_regs->num * 8 + 8);
+			printf("	addi	sp, sp, -%d\n", using_regs->num * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
 			printf("	sd	ra, 0(sp)\n");
 
 			for (j = 0; j < using_regs->num; j++)
-				printf("	sd	%s, %d(sp)\n", get_temp_reg_str(using_regs->list[j]), j * 8 + 8);
+				printf("	sd	%s, %d(sp)\n", get_temp_reg_str(using_regs->list[j]), j * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
 
 			printf("	call	%s\n", ir->name);
 
 			for (j = using_regs->num - 1; j >= 0 ; j--)
-				printf("	ld	%s, %d(sp)\n", get_temp_reg_str(using_regs->list[j]), j * 8 + 8);
+				printf("	ld	%s, %d(sp)\n", get_temp_reg_str(using_regs->list[j]), j * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
 
 			printf("	ld	ra, 0(sp)\n");
-			printf("	addi	sp, sp, %d\n", using_regs->num * 8 + 8);
+			printf("	addi	sp, sp, %d\n", using_regs->num * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
 			printf("	mv	%s, a0\n", get_temp_reg_str(ir->lhs));
+			break;
 		}
 
-		if (ir->op == IR_FUNC_PARAM)
+		case IR_FUNC_PARAM:
 			printf("	sw	%s, 0(%s)\n", get_temp_reg_str(ir->rhs), get_temp_reg_str(ir->lhs));
+			break;
 
-		if (ir->op == IR_FUNC_ARG)
+		case IR_FUNC_ARG:
 			printf("	mv	%s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_FUNC_END)
+		case IR_FUNC_END:
 			printf("	.size %s, . - %s\n\n", ir->name, ir->name);
+			break;
 
-		if (ir->op == IR_IMM)
+		case IR_IMM:
 			printf("	li	%s, %d\n", get_temp_reg_str(ir->lhs), ir->rhs);
+			break;
 
-		if (ir->op == IR_MOV)
+		case IR_MOV:
 			printf("	mv	%s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_LOADADDR)
+		case IR_LOADADDR:
 			printf("	la	%s, %s\n", get_temp_reg_str(ir->lhs), ir->name);
+			break;
 
-		if (ir->op == IR_RETURN) {
+		case IR_RETURN:
 			if (ir->lhs != -1)
 				printf("	mv	a0, %s\n", get_temp_reg_str(ir->lhs));
-			printf("	ld	ra, -8(s0)\n");
-			printf("	ld	s0, -16(s0)\n");
-			printf("	addi	sp, sp, 16\n");
+			printf("	ld	ra, -%d(s0)\n", COMPILE_WORD_SIZE);
+			printf("	ld	s0, -%d(s0)\n", COMPILE_WORD_SIZE * 2);
+			printf("	addi	sp, sp, %d\n", COMPILE_WORD_SIZE * 2);
 			printf("	ret\n");
-		}
+			break;
 
-		if (ir->op == IR_PLUS)
+		case IR_PLUS:
 			printf("	add	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_MINUS)
+		case IR_MINUS:
 			printf("	sub	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_MUL)
+		case IR_MUL:
 			printf("	mul	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_DIV)
+		case IR_DIV:
 			printf("	div	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_MOD)
+		case IR_MOD:
 			printf("	rem	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_AND)
+		case IR_AND:
 			printf("	and	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_OR)
+		case IR_OR:
 			printf("	or	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_XOR)
+		case IR_XOR:
 			printf("	xor	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_NOT)
+		case IR_NOT:
 			printf("	not	%s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs));
+			break;
 
-		if (ir->op == IR_STORE)
+		case IR_STORE:
 			printf("	sw	%s, 0(%s)\n", get_temp_reg_str(ir->rhs), get_temp_reg_str(ir->lhs));
+			break;
 
-		if (ir->op == IR_LOAD)
+		case IR_LOAD:
 			printf("	lw	%s, 0(%s)\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_BEQZ)
+		case IR_BEQZ:
 			printf("	beqz	%s, .L%d\n", get_temp_reg_str(ir->lhs), ir->rhs);
+			break;
 
-		if (ir->op == IR_SLT)
+		case IR_SLT:
 			printf("	slt	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_SLET) {
+		case IR_SLET:
 			printf("	slt	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
 			printf("	xori	%s, %s, 1\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs));
-		}
+			break;
 
-		if (ir->op == IR_LEFT_OP)
+		case IR_LEFT_OP:
 			printf("	sllw	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_RIGHT_OP)
+		case IR_RIGHT_OP:
 			printf("	srl	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			break;
 
-		if (ir->op == IR_JUMP)
+		case IR_JUMP:
 			printf("	j	.L%d\n", ir->lhs);
+			break;
 
-		if (ir->op == IR_LABEL)
+		case IR_LABEL:
 			printf(".L%d:\n", ir->lhs);
+			break;
+
+		case IR_EQ_OP:
+		case IR_NE_OP:
+		case IR_KILL:
+		case IR_KILL_ARG:
+		case IR_NOP:
+			break;
+		}
 	}
 }
