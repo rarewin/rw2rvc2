@@ -3,7 +3,7 @@
 /**
  * @brief conversion table for node type to IR type
  */
-static node_type_t CONVERSION_NODE_TO_IR[] = {
+static ir_type_t CONVERSION_NODE_TO_IR[] = {
 	[ND_PLUS] = IR_PLUS,	//
 	[ND_MINUS] = IR_MINUS,      //
 	[ND_MUL] = IR_MUL,	  //

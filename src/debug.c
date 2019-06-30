@@ -216,29 +216,37 @@ void show_ir(FILE *file, struct vector_t *irv)
 	struct using_regs_list_t *using_regs;
 
 	const char *OP2STR[] = {
-		TRANS_ELEMENT(IR_PLUS),       TRANS_ELEMENT(IR_MINUS),    TRANS_ELEMENT(IR_MUL),
-		TRANS_ELEMENT(IR_DIV),	TRANS_ELEMENT(IR_MOD), /**< 剰余を求める a0 % a1 */
-		TRANS_ELEMENT(IR_AND),				     /**< 論理積 */
-		TRANS_ELEMENT(IR_OR),				     /**< 論理和 */
-		TRANS_ELEMENT(IR_NOT),				     /**< 論理否定 */
-		TRANS_ELEMENT(IR_XOR),				     /**< 排他的論理和 */
-		TRANS_ELEMENT(IR_EQ_OP),			     /**< == */
-		TRANS_ELEMENT(IR_NE_OP),			     /**< != */
-		TRANS_ELEMENT(IR_SLT),				     /**< < */
-		TRANS_ELEMENT(IR_SLET),				     /**< <= */
-		TRANS_ELEMENT(IR_LEFT_OP),			     /**< << */
-		TRANS_ELEMENT(IR_RIGHT_OP),			     /**< >> */
-		TRANS_ELEMENT(IR_RETURN),     TRANS_ELEMENT(IR_IMM),      TRANS_ELEMENT(IR_MOV),
-		TRANS_ELEMENT(IR_KILL),       TRANS_ELEMENT(IR_KILL_ARG), /**< アーギュメントレジスタを解放する */
-		TRANS_ELEMENT(IR_LOAD),       TRANS_ELEMENT(IR_STORE),    TRANS_ELEMENT(IR_LOADADDR),
-		TRANS_ELEMENT(IR_BEQZ),       /**< lhs がゼロならブランチする */
-		TRANS_ELEMENT(IR_JUMP),       /**< ジャンプする */
-		TRANS_ELEMENT(IR_LABEL),      /**< ラベルを生成 */
-		TRANS_ELEMENT(IR_FUNC_DEF),   /**< 関数定義 */
-		TRANS_ELEMENT(IR_FUNC_CALL),  /**< 関数呼び出し */
-		TRANS_ELEMENT(IR_FUNC_END),   /**< 関数定義終端 */
-		TRANS_ELEMENT(IR_FUNC_ARG),   /**< 関数引数 */
-		TRANS_ELEMENT(IR_FUNC_PARAM), /**< 関数パラメータ */
+		TRANS_ELEMENT(IR_PLUS),	//
+		TRANS_ELEMENT(IR_MINUS),       //
+		TRANS_ELEMENT(IR_MUL),	 //
+		TRANS_ELEMENT(IR_DIV),	 //
+		TRANS_ELEMENT(IR_MOD),	 /**< 剰余を求める a0 % a1 */
+		TRANS_ELEMENT(IR_AND),	 /**< 論理積 */
+		TRANS_ELEMENT(IR_OR),	  /**< 論理和 */
+		TRANS_ELEMENT(IR_NOT),	 /**< 論理否定 */
+		TRANS_ELEMENT(IR_XOR),	 /**< 排他的論理和 */
+		TRANS_ELEMENT(IR_EQ_OP),       /**< == */
+		TRANS_ELEMENT(IR_NE_OP),       /**< != */
+		TRANS_ELEMENT(IR_SLT),	 /**< < */
+		TRANS_ELEMENT(IR_SLET),	/**< <= */
+		TRANS_ELEMENT(IR_LEFT_OP),     /**< << */
+		TRANS_ELEMENT(IR_RIGHT_OP),    /**< >> */
+		TRANS_ELEMENT(IR_RETURN),      //
+		TRANS_ELEMENT(IR_IMM),	 //
+		TRANS_ELEMENT(IR_MOV),	 //
+		TRANS_ELEMENT(IR_KILL),	//
+		TRANS_ELEMENT(IR_KILL_ARG),    /**< アーギュメントレジスタを解放する */
+		TRANS_ELEMENT(IR_LOAD),	//
+		TRANS_ELEMENT(IR_STORE),       //
+		TRANS_ELEMENT(IR_LOADADDR),    //
+		TRANS_ELEMENT(IR_BEQZ),	/**< lhs がゼロならブランチする */
+		TRANS_ELEMENT(IR_JUMP),	/**< ジャンプする */
+		TRANS_ELEMENT(IR_LABEL),       /**< ラベルを生成 */
+		TRANS_ELEMENT(IR_FUNC_DEF),    /**< 関数定義 */
+		TRANS_ELEMENT(IR_FUNC_CALL),   /**< 関数呼び出し */
+		TRANS_ELEMENT(IR_FUNC_END),    /**< 関数定義終端 */
+		TRANS_ELEMENT(IR_FUNC_ARG),    /**< 関数引数 */
+		TRANS_ELEMENT(IR_FUNC_PARAM),  /**< 関数パラメータ */
 		TRANS_ELEMENT(IR_NOP),
 	};
 
