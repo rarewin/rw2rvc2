@@ -28,6 +28,10 @@ $(TARGET): $(OBJS)
 $(OUTDIR)/%.o: $(OUTDIR) %.c
 	$(CC) $(CFLAGS) -c $(word 2,$^) -o $@
 
+.PHONY: fmt
+fmt:
+	clang-format -i $(SRCS)
+
 .PHONY: clean
 clean:
 	rm -f rw2rvc2

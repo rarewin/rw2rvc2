@@ -4,14 +4,13 @@
 
 #include "rw2rvc2.h"
 
-static char *TEMP_REGS[] = {"t0", "t1", "t2", "t3", "t4", "t5", "t6",
-			    "a7", "a6", "a5", "a4", "a3", "a2", "a1", "a0", NULL};
+static char *TEMP_REGS[] = {"t0", "t1", "t2", "t3", "t4", "t5", "t6", "a7",
+			    "a6", "a5", "a4", "a3", "a2", "a1", "a0", NULL};
 static bool used_temp_regs[NUM_OF_TEMP_REGS];
 
 // static char *SAVED_REGS[] = {"s0", "s1", "s2", "s3", "s4", "s5", "s6",
 // 			     "s7", "s8", "s9", "s10", "s11",  NULL};
 // #define NUM_OF_SAVED_REGS 12 // = sizeof(SAVED_REGS) / sizeof(SAVED_REGS[0]) - 1
-
 
 /**
  * @brief 割り当て可能なスクラッチレジスタを探す
@@ -23,7 +22,7 @@ static int find_allocatable_reg(int ir_reg, int *reg_map)
 	int i;
 
 	if (reg_map[ir_reg] != -2)
-		return reg_map[ir_reg];		// ?
+		return reg_map[ir_reg];    // ?
 
 	for (i = 0; i < NUM_OF_TEMP_REGS; i++) {
 		if (!used_temp_regs[i]) {
@@ -33,7 +32,7 @@ static int find_allocatable_reg(int ir_reg, int *reg_map)
 		}
 	}
 
-	return -10;	/* 割り当て不可 */
+	return -10; /* 割り当て不可 */
 }
 
 /**
@@ -49,7 +48,7 @@ static int allocate_argument_reg(int ir_reg, int *reg_map, int arg)
 {
 	int index = NUM_OF_TEMP_REGS - 1 - arg;
 	if (used_temp_regs[index])
-		return -10;	/* 割り当て不可 */
+		return -10; /* 割り当て不可 */
 
 	used_temp_regs[index] = true;
 	reg_map[ir_reg] = index;
@@ -140,7 +139,7 @@ void allocate_regs(struct vector_t *irv)
 		}
 
 		if (ir->op == IR_FUNC_PARAM) {
-			ir->rhs = allocate_argument_reg(ir->lhs + 1/* 特殊 */, reg_map, ir->rhs);
+			ir->rhs = allocate_argument_reg(ir->lhs + 1 /* 特殊 */, reg_map, ir->rhs);
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 		}
 
@@ -149,13 +148,10 @@ void allocate_regs(struct vector_t *irv)
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 		}
 
-		if (ir->op == IR_MOV || ir->op == IR_PLUS || ir->op == IR_MINUS ||
-		    ir->op == IR_MUL || ir->op == IR_DIV  || ir->op == IR_MOD   ||
-		    ir->op == IR_EQ_OP || ir->op == IR_NE_OP ||
-		    ir->op == IR_SLT || ir->op == IR_SLET ||
-		    ir->op == IR_LEFT_OP || ir->op == IR_RIGHT_OP ||
-		    ir->op == IR_AND || ir->op == IR_OR || ir->op == IR_XOR ||
-		    ir->op == IR_LOAD) {
+		if (ir->op == IR_MOV || ir->op == IR_PLUS || ir->op == IR_MINUS || ir->op == IR_MUL ||
+		    ir->op == IR_DIV || ir->op == IR_MOD || ir->op == IR_EQ_OP || ir->op == IR_NE_OP ||
+		    ir->op == IR_SLT || ir->op == IR_SLET || ir->op == IR_LEFT_OP || ir->op == IR_RIGHT_OP ||
+		    ir->op == IR_AND || ir->op == IR_OR || ir->op == IR_XOR || ir->op == IR_LOAD) {
 			ir->lhs = find_allocatable_reg(ir->lhs, reg_map);
 			ir->rhs = find_allocatable_reg(ir->rhs, reg_map);
 		}

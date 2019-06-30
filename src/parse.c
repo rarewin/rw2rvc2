@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "rw2rvc2.h"
 
@@ -24,7 +24,7 @@ static void expect_token(struct vector_t *tokens, token_type_t type)
 	struct token_t *t = tokens->data[g_position];
 
 	if (t->type == type) {
-		g_position++;	/* 期待値通りならインデックスを進めて戻る. */
+		g_position++; /* 期待値通りならインデックスを進めて戻る. */
 	} else {
 		/* 期待値と異なった場合, 止まる. */
 		error_printf("unexpect token: %s at line %d position %d\n", t->input, t->line, t->position);
@@ -43,7 +43,7 @@ static void consume_token(struct vector_t *tokens, token_type_t type)
 	struct token_t *t = tokens->data[g_position];
 
 	if (t->type == type)
-		g_position++;	/* 期待値通りならインデックスを進めて戻る. */
+		g_position++; /* 期待値通りならインデックスを進めて戻る. */
 }
 
 /**
@@ -68,7 +68,7 @@ static struct node_t *allocate_node(void)
 
 	/* 新規のメモリプールを作成 */
 	if (node_array == NULL || index >= ALLOCATE_SIZE) {
-		if ((node_array = (struct node_t*)malloc(sizeof(struct node_t) * size)) == NULL) {
+		if ((node_array = (struct node_t *)malloc(sizeof(struct node_t) * size)) == NULL) {
 			color_printf(stderr, COL_RED, "memory allocation failed\n");
 			exit(1);
 		}
@@ -85,9 +85,7 @@ static struct node_t *allocate_node(void)
  * @param[in] rhs     右辺
  * @param[in] list    リスト
  */
-static struct node_t *new_node(node_type_t op,
-			       struct node_t *lhs,
-			       struct node_t *rhs)
+static struct node_t *new_node(node_type_t op, struct node_t *lhs, struct node_t *rhs)
 {
 	node_t *node = allocate_node();
 
@@ -453,7 +451,6 @@ static struct node_t *shift_expression(struct vector_t *tokens)
 	return lhs;
 }
 
-
 /**
  * @brief relational_expression
  *
@@ -475,8 +472,7 @@ static struct node_t *relational_expression(struct vector_t *tokens)
 	for (;;) {
 		t = tokens->data[g_position];
 
-		if (t->type != TK_LESS_OP && t->type != TK_GREATER_OP &&
-		    t->type != TK_LE_OP && t->type != TK_GE_OP)
+		if (t->type != TK_LESS_OP && t->type != TK_GREATER_OP && t->type != TK_LE_OP && t->type != TK_GE_OP)
 			break;
 
 		if (t->type == TK_LESS_OP)
@@ -607,7 +603,6 @@ static struct node_t *inclusive_or_expression(struct vector_t *tokens)
 	return lhs;
 }
 
-
 /**
  * @brief logical_and_expression
  *
@@ -662,7 +657,6 @@ static struct node_t *logical_or_expression(struct vector_t *tokens)
 	return lhs;
 }
 
-
 /**
  * @brief conditional_expression
  *
@@ -675,7 +669,6 @@ static struct node_t *conditional_expression(struct vector_t *tokens)
 	return logical_or_expression(tokens);
 }
 
-
 /**
  * @brief assignment_operatorかどうか判断する
  * @param[in]  type  トークンタイプ
@@ -683,10 +676,10 @@ static struct node_t *conditional_expression(struct vector_t *tokens)
  */
 static inline bool is_assignment_operator(token_type_t type)
 {
-	return ((type == TK_EQUAL || type == TK_MUL_ASSIGN ||
-		 type == TK_DIV_ASSIGN || type == TK_MOD_ASSIGN ||
-		 type == TK_ADD_ASSIGN || type == TK_SUB_ASSIGN ||
-		 type == TK_LEFT_ASSIGN || type == TK_RIGHT_ASSIGN)) ? true : false;
+	return ((type == TK_EQUAL || type == TK_MUL_ASSIGN || type == TK_DIV_ASSIGN || type == TK_MOD_ASSIGN ||
+		 type == TK_ADD_ASSIGN || type == TK_SUB_ASSIGN || type == TK_LEFT_ASSIGN || type == TK_RIGHT_ASSIGN))
+		       ? true
+		       : false;
 }
 
 /**
@@ -1360,7 +1353,7 @@ static struct node_t *translation_unit(struct vector_t *tokens)
  */
 struct node_t *parse(struct vector_t *tokens)
 {
-	struct node_t *p = translation_unit(tokens); // start point
+	struct node_t *p = translation_unit(tokens);    // start point
 
 	if (p == NULL)
 		parse_error();

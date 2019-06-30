@@ -4,16 +4,16 @@
  * @brief conversion table for node type to IR type
  */
 static node_type_t CONVERSION_NODE_TO_IR[] = {
-	[ND_PLUS]   = IR_PLUS,
-	[ND_MINUS]  = IR_MINUS,
-	[ND_MUL]    = IR_MUL,
-	[ND_DIV]    = IR_DIV,
-	[ND_MOD]    = IR_MOD,
-	[ND_RETURN] = IR_RETURN,
-	[ND_OR_OP]  = IR_OR,
-	[ND_AND]    = IR_AND,
-	[ND_OR]     = IR_OR,
-	[ND_XOR]    = IR_XOR,
+	[ND_PLUS] = IR_PLUS,	//
+	[ND_MINUS] = IR_MINUS,      //
+	[ND_MUL] = IR_MUL,	  //
+	[ND_DIV] = IR_DIV,	  //
+	[ND_MOD] = IR_MOD,	  //
+	[ND_RETURN] = IR_RETURN,    //
+	[ND_OR_OP] = IR_OR,	 //
+	[ND_AND] = IR_AND,	  //
+	[ND_OR] = IR_OR,	    //
+	[ND_XOR] = IR_XOR,
 };
 
 /**
@@ -28,7 +28,7 @@ static struct ir_t *allocate_ir(void)
 
 	/* initial allocation */
 	if (ir_array == NULL || index >= ALLOCATE_SIZE) {
-		if ((ir_array = (struct ir_t*)malloc(sizeof(struct ir_t) * ALLOCATE_SIZE)) == NULL) {
+		if ((ir_array = (struct ir_t *)malloc(sizeof(struct ir_t) * ALLOCATE_SIZE)) == NULL) {
 			error_printf("memmory allocation failed\n");
 			exit(1);
 		}
@@ -73,13 +73,13 @@ static struct variable_t *new_variable(struct node_t *node, int slevel)
 
 	/* assert */
 	if (node == NULL || node->type != ND_IDENT /* @TODO たぶんおかしい*/) {
-		error_printf("unexpected error in %s() (unexpected node type: %d)\n",
-			     __FUNCTION__, (node == NULL) ? -1 : node->type);
+		error_printf("unexpected error in %s() (unexpected node type: %d)\n", __FUNCTION__,
+			     (node == NULL) ? -1 : node->type);
 		exit(1);
 	}
 
 	if (var_array == NULL || index >= ALLOCATE_SIZE) {
-		if ((var_array = (struct variable_t*)malloc(sizeof(struct variable_t) * ALLOCATE_SIZE)) == NULL) {
+		if ((var_array = (struct variable_t *)malloc(sizeof(struct variable_t) * ALLOCATE_SIZE)) == NULL) {
 			error_printf("memory allocation error\n");
 			exit(1);
 		}
@@ -138,7 +138,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 		}
 
 		for (j = 0; j < node->rhs->list->len; j++) {
-		 	n = node->rhs->list->data[j];
+			n = node->rhs->list->data[j];
 			dict_append(d, n->name, new_variable(n, 0));
 
 #if 0
@@ -202,23 +202,22 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 		vector_push(v, new_ir(IR_BEQZ, lhs, label++, NULL));
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 
-		gen_ir_sub(v, d, node->consequence, scope_level);	// then
+		gen_ir_sub(v, d, node->consequence, scope_level);    // then
 
 		if (node->alternative != NULL) {
 			int l2 = label++;
 			vector_push(v, new_ir(IR_JUMP, l2, 0, NULL));
 			vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
-			gen_ir_sub(v, d, node->alternative, scope_level);	// else
+			gen_ir_sub(v, d, node->alternative, scope_level);    // else
 			vector_push(v, new_ir(IR_LABEL, l2, 0, NULL));
 		} else {
 			vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
 		}
 	}
 
-	if (node->type == ND_PLUS || node->type == ND_MINUS ||
-	    node->type == ND_MUL  || node->type == ND_DIV || node->type == ND_MOD ||
-	    node->type == ND_OR_OP ||
-	    node->type == ND_AND || node->type == ND_OR || node->type == ND_XOR) {
+	if (node->type == ND_PLUS || node->type == ND_MINUS || node->type == ND_MUL || node->type == ND_DIV ||
+	    node->type == ND_MOD || node->type == ND_OR_OP || node->type == ND_AND || node->type == ND_OR ||
+	    node->type == ND_XOR) {
 
 		if (node->lhs != NULL) {
 			lhs = gen_ir_sub(v, d, node->lhs, scope_level);
@@ -265,14 +264,16 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 		return lhs;
 	}
 
-	if (node->type == ND_LESS_OP || node->type == ND_GREATER_OP ||
-	    node->type == ND_LE_OP || node->type == ND_GE_OP) {
+	if (node->type == ND_LESS_OP || node->type == ND_GREATER_OP || node->type == ND_LE_OP ||
+	    node->type == ND_GE_OP) {
 		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
 		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
 
 		if (node->type == ND_GREATER_OP || node->type == ND_LE_OP) {
 			int tmp;
-			tmp = lhs; lhs = rhs; rhs = tmp;	/* swap */
+			tmp = lhs;
+			lhs = rhs;
+			rhs = tmp; /* swap */
 		}
 
 		if (node->type == ND_LESS_OP || node->type == ND_GREATER_OP)
@@ -309,7 +310,7 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 				dict_append(d, n->rhs->name, new_variable(n->rhs, scope_level));
 				vector_push(v, new_ir(IR_LOADADDR, regno++, -1, n->rhs->name));
 				vector_push(v, new_ir(IR_FUNC_PARAM, regno - 1, i, n->rhs->name));
-				regno++;	/* arg reg用の番号を確保……  */
+				regno++; /* arg reg用の番号を確保……  */
 				vector_push(v, new_ir(IR_KILL, regno - 2, -1, NULL));
 				vector_push(v, new_ir(IR_KILL_ARG, i, -1, NULL));
 				i++;
@@ -355,4 +356,3 @@ struct vector_t *gen_ir(struct node_t *node, struct dict_t *d)
 
 	return v;
 }
-

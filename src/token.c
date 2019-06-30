@@ -19,7 +19,7 @@ static struct token_t *allocate_token(void)
 
 	/* 新規のメモリプールを作成 */
 	if (token_array == NULL || index >= ALLOCATE_SIZE) {
-		if ((token_array = (struct token_t*)malloc(sizeof(struct token_t) * ALLOCATE_SIZE)) == NULL) {
+		if ((token_array = (struct token_t *)malloc(sizeof(struct token_t) * ALLOCATE_SIZE)) == NULL) {
 			color_printf(stderr, COL_RED, "memory allocation failed\n");
 			exit(1);
 		}
@@ -39,9 +39,9 @@ struct token_t *add_token(struct vector_t *v, token_type_t type, char *input, in
 {
 	struct token_t *t = allocate_token();
 
-	t->type     = type;
-	t->input    = input;
-	t->line     = line;
+	t->type = type;
+	t->input = input;
+	t->line = line;
 	t->position = position;
 	vector_push(v, t);
 
@@ -59,28 +59,28 @@ static token_type_t get_token_type_of_symbol(char s)
 		char s;
 		token_type_t tkval;
 	} symbols[] = {
-		{'+', TK_PLUS},
-		{'-', TK_MINUS},
-		{'*', TK_MUL},
-		{'/', TK_DIV},
-		{'%', TK_MOD},
-		{';', TK_SEMICOLON},
-		{':', TK_COLON},
-		{'(', TK_LEFT_PAREN},
-		{')', TK_RIGHT_PAREN},
-		{'{', TK_LEFT_BRACE},
-		{'}', TK_RIGHT_BRACE},
-		{'\'', TK_SINGLE_QUOTE},
-		{'"', TK_DOUBLE_QUOTE},
-		{'=', TK_EQUAL},
-		{'&', TK_AND},
-		{'|', TK_OR},
-		{'^', TK_XOR},
-		{'!', TK_NOT},
-		{'~', TK_INV},
-		{'<', TK_LESS_OP},
-		{'>', TK_GREATER_OP},
-		{',', TK_COMMA},
+		{'+', TK_PLUS},		    //
+		{'-', TK_MINUS},	    //
+		{'*', TK_MUL},		    //
+		{'/', TK_DIV},		    //
+		{'%', TK_MOD},		    //
+		{';', TK_SEMICOLON},	//
+		{':', TK_COLON},	    //
+		{'(', TK_LEFT_PAREN},       //
+		{')', TK_RIGHT_PAREN},      //
+		{'{', TK_LEFT_BRACE},       //
+		{'}', TK_RIGHT_BRACE},      //
+		{'\'', TK_SINGLE_QUOTE},    //
+		{'"', TK_DOUBLE_QUOTE},     //
+		{'=', TK_EQUAL},	    //
+		{'&', TK_AND},		    //
+		{'|', TK_OR},		    //
+		{'^', TK_XOR},		    //
+		{'!', TK_NOT},		    //
+		{'~', TK_INV},		    //
+		{'<', TK_LESS_OP},	  //
+		{'>', TK_GREATER_OP},       //
+		{',', TK_COMMA},	    //
 	};
 	unsigned int i;
 
@@ -105,31 +105,31 @@ struct vector_t *tokenize(char *p)
 		char *word;
 		token_type_t tkval;
 	} keywords[] = {
-		{"return", TK_RETURN},
-		{"if",     TK_IF},
-		{"else",   TK_ELSE},
-		{"goto",   TK_GOTO},
-		{"int",    TK_INT},
+		{"return", TK_RETURN},    //
+		{"if", TK_IF},		  //
+		{"else", TK_ELSE},	//
+		{"goto", TK_GOTO},	//
+		{"int", TK_INT},	  //
 	};
 	const struct multibytes_operation_t {
 		char *word;
 		token_type_t tkval;
 	} multibytes_operations[] = {
-		{"||",  TK_OR_OP},
-		{"&&",  TK_AND_OP},
-		{"==",  TK_EQ_OP},
-		{"!=",  TK_NE_OP},
-		{"<=",  TK_LE_OP},
-		{">=",  TK_GE_OP},
-		{"*=",  TK_MUL_ASSIGN},
-		{"/=",  TK_DIV_ASSIGN},
-		{"%=",  TK_MOD_ASSIGN},
-		{"+=",  TK_ADD_ASSIGN},
-		{"-=",  TK_SUB_ASSIGN},
-		{"<<=", TK_LEFT_ASSIGN},
-		{">>=", TK_RIGHT_ASSIGN},
-		{">>",  TK_RIGHT_OP},
-		{"<<",  TK_LEFT_OP},
+		{"||", TK_OR_OP},	    //
+		{"&&", TK_AND_OP},	   //
+		{"==", TK_EQ_OP},	    //
+		{"!=", TK_NE_OP},	    //
+		{"<=", TK_LE_OP},	    //
+		{">=", TK_GE_OP},	    //
+		{"*=", TK_MUL_ASSIGN},       //
+		{"/=", TK_DIV_ASSIGN},       //
+		{"%=", TK_MOD_ASSIGN},       //
+		{"+=", TK_ADD_ASSIGN},       //
+		{"-=", TK_SUB_ASSIGN},       //
+		{"<<=", TK_LEFT_ASSIGN},     //
+		{">>=", TK_RIGHT_ASSIGN},    ///
+		{">>", TK_RIGHT_OP},	 //
+		{"<<", TK_LEFT_OP},	  //
 	};
 	unsigned int i;
 	int line = 1;
@@ -187,7 +187,7 @@ struct vector_t *tokenize(char *p)
 			t = add_token(v, TK_NUM, p, line, p - begin);
 			t->value = strtol(p, &p, 16);
 			continue;
-		 }
+		}
 
 		/* octal */
 		if (*p == '0' && isdigit(*(p + 1))) {
@@ -212,7 +212,7 @@ struct vector_t *tokenize(char *p)
 			/* 予約語かどうかの判定 */
 			for (i = 0; i < (sizeof(keywords) / sizeof(keywords[0])); i++) {
 				if (strncmp(keywords[i].word, p, strlen(keywords[i].word)) == 0) {
-					t = add_token(v, keywords[i].tkval, p, line, p - begin);	/* 予約語だった */
+					t = add_token(v, keywords[i].tkval, p, line, p - begin); /* 予約語だった */
 					t->name = keywords[i].word;
 					p += len;
 					break;
@@ -232,8 +232,7 @@ struct vector_t *tokenize(char *p)
 
 		color_printf(stderr, COL_RED, "tokenize error: %s at line %d position %d\n", p, line, p - begin);
 		exit(1);
-	LOOP_END:
-		;
+	LOOP_END:;
 	}
 
 	add_token(v, TK_EOF, "EOF", line, p - begin);

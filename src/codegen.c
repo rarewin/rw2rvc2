@@ -58,22 +58,24 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			printf("	addi	sp, sp, -%d\n", COMPILE_WORD_SIZE * 2);
 			break;
 
-		case IR_FUNC_CALL:
-		{
+		case IR_FUNC_CALL: {
 			struct using_regs_list_t *using_regs;
 
 			using_regs = get_using_regs(ir->rhs);
 
-			printf("	addi	sp, sp, -%d\n", using_regs->num * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
+			printf("	addi	sp, sp, -%d\n",
+			       using_regs->num * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
 			printf("	sd	ra, 0(sp)\n");
 
 			for (j = 0; j < using_regs->num; j++)
-				printf("	sd	%s, %d(sp)\n", get_temp_reg_str(using_regs->list[j]), j * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
+				printf("	sd	%s, %d(sp)\n", get_temp_reg_str(using_regs->list[j]),
+				       j * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
 
 			printf("	call	%s\n", ir->name);
 
-			for (j = using_regs->num - 1; j >= 0 ; j--)
-				printf("	ld	%s, %d(sp)\n", get_temp_reg_str(using_regs->list[j]), j * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
+			for (j = using_regs->num - 1; j >= 0; j--)
+				printf("	ld	%s, %d(sp)\n", get_temp_reg_str(using_regs->list[j]),
+				       j * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
 
 			printf("	ld	ra, 0(sp)\n");
 			printf("	addi	sp, sp, %d\n", using_regs->num * COMPILE_WORD_SIZE + COMPILE_WORD_SIZE);
@@ -115,35 +117,43 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			break;
 
 		case IR_PLUS:
-			printf("	add	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	add	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_MINUS:
-			printf("	sub	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	sub	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_MUL:
-			printf("	mul	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	mul	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_DIV:
-			printf("	div	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	div	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_MOD:
-			printf("	rem	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	rem	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_AND:
-			printf("	and	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	and	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_OR:
-			printf("	or	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	or	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_XOR:
-			printf("	xor	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	xor	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_NOT:
@@ -163,20 +173,24 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			break;
 
 		case IR_SLT:
-			printf("	slt	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	slt	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_SLET:
-			printf("	slt	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	slt	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			printf("	xori	%s, %s, 1\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs));
 			break;
 
 		case IR_LEFT_OP:
-			printf("	sllw	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	sllw	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_RIGHT_OP:
-			printf("	srl	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->rhs));
+			printf("	srl	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
 			break;
 
 		case IR_JUMP:

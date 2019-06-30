@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include "rw2rvc2.h"
@@ -11,9 +11,8 @@
 static void usage(char *prog)
 {
 	fprintf(stderr, "usage: %s [source file]  or  %s [code]\n\n", prog, prog);
-	fprintf(stderr,
-		"  Options:\n"
-		"    -z  output debug info as comment\n");
+	fprintf(stderr, "  Options:\n"
+			"    -z  output debug info as comment\n");
 }
 
 /**

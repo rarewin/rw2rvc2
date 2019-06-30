@@ -17,13 +17,13 @@ static struct vector_t *allocate_vector(void)
 	/* initial allocation */
 	if (vector_array == NULL) {
 		size += ALLOCATE_SIZE;
-		vector_array = (struct vector_t*)malloc(sizeof(struct vector_t) * size);
+		vector_array = (struct vector_t *)malloc(sizeof(struct vector_t) * size);
 	}
 
 	/* リサイズ */
 	if (index >= size) {
 		size *= 2;
-		if ((vector_array = (struct vector_t*)realloc(vector_array, sizeof(struct vector_t) * size)) == NULL) {
+		if ((vector_array = (struct vector_t *)realloc(vector_array, sizeof(struct vector_t) * size)) == NULL) {
 			color_printf(stderr, COL_RED, "memory allocation failed\n");
 			exit(1);
 		}
@@ -50,18 +50,19 @@ struct vector_t *new_vector(void)
 	/* initial allocation */
 	if (vector_data_array == NULL) {
 		size += ALLOCATE_SIZE;
-		vector_data_array = (void*)malloc(sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * size);
+		vector_data_array = (void *)malloc(sizeof(void *) * VECTOR_DATA_DEFAULT_CAPACITY * size);
 	}
 
 	/* リサイズ */
 	if (index >= size) {
 		size *= 2;
-		vector_data_array = (void*)realloc(vector_data_array, sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * size);
+		vector_data_array =
+			(void *)realloc(vector_data_array, sizeof(void *) * VECTOR_DATA_DEFAULT_CAPACITY * size);
 	}
 
 	v->capacity = VECTOR_DATA_DEFAULT_CAPACITY;
 	v->len = 0;
-	v->data = ((void*)vector_data_array + sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * index);
+	v->data = ((void *)vector_data_array + sizeof(void *) * VECTOR_DATA_DEFAULT_CAPACITY * index);
 	index++;
 
 	return v;
@@ -76,11 +77,11 @@ void vector_push(struct vector_t *v, void *element)
 		if (v->capacity == VECTOR_DATA_DEFAULT_CAPACITY) {
 			void *old = v->data;
 			v->capacity *= 2;
-			v->data = malloc(sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * v->capacity);
-			memcpy(v->data, old, sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY);
+			v->data = malloc(sizeof(void *) * VECTOR_DATA_DEFAULT_CAPACITY * v->capacity);
+			memcpy(v->data, old, sizeof(void *) * VECTOR_DATA_DEFAULT_CAPACITY);
 		} else {
 			v->capacity *= 2;
-			v->data = realloc(v->data, sizeof(void*) * VECTOR_DATA_DEFAULT_CAPACITY * v->capacity);
+			v->data = realloc(v->data, sizeof(void *) * VECTOR_DATA_DEFAULT_CAPACITY * v->capacity);
 		}
 	}
 
@@ -118,19 +119,19 @@ struct dict_t *new_dict(void)
 
 	/* 初期化 */
 	if (dict_array == NULL)
-		dict_array = (struct dict_t*)malloc(sizeof(struct dict_t) * size);
+		dict_array = (struct dict_t *)malloc(sizeof(struct dict_t) * size);
 
 	/* サイズを拡大する */
 	if (index >= size) {
 		size *= 2;
-		dict_array = (struct dict_t*)realloc(dict_array, sizeof(struct dict_t) * size);
+		dict_array = (struct dict_t *)realloc(dict_array, sizeof(struct dict_t) * size);
 	}
 
 	d = &dict_array[index++];
 
 	d->len = 0;
 	d->capacity = DICT_SIZE;
-	d->dict = (struct dict_element_t*)malloc(sizeof(struct dict_element_t) * d->capacity);
+	d->dict = (struct dict_element_t *)malloc(sizeof(struct dict_element_t) * d->capacity);
 
 	return d;
 }
@@ -143,7 +144,7 @@ void dict_append(struct dict_t *d, char *key, void *value)
 	/* サイズを拡大する */
 	if (d->len >= d->capacity) {
 		d->capacity *= 2;
-		d->dict = (struct dict_element_t*)realloc(d->dict, sizeof(struct dict_element_t) * d->capacity);
+		d->dict = (struct dict_element_t *)realloc(d->dict, sizeof(struct dict_element_t) * d->capacity);
 	}
 
 	(d->dict)[d->len].key = key;
