@@ -1,0 +1,14 @@
+language: c
+
+os:
+  - linux
+
+install:
+  - make
+
+compiler:
+  - clang
+
+script:
+  - make test
+
