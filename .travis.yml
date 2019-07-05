@@ -1,14 +1,19 @@
+os: linux
+
+dist: bionic
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y gcc-riscv64-linux-gnu libc6-dev-riscv64-cross
+  - sudo apt-get install -y qemu-user-static
+  - sudo wget https://github.com/multiarch/qemu-user-static/releases/download/v4.0.0-5/qemu-riscv64-static -O /usr/local/bin/qemu-riscv64-static
+  - sudo chmod a+x /usr/local/bin/qemu-riscv64-static
+
 language: c
 
-os:
-  - linux
-
-install:
-  - make
-
 compiler:
+  - gcc
   - clang
 
 script:
   - make test
-

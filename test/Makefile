@@ -8,7 +8,7 @@ test: $(OBJS)
 	@../tools/gen_test.py . > test.c
 	@riscv64-linux-gnu-gcc test.c -c -o test.o
 	@riscv64-linux-gnu-gcc -static *.o -o test
-	@./test
+	@qemu-riscv64-static test
 	@echo "\\e[1;32mAll green!!\\e[m\\n"
 
 %.o: %.c
