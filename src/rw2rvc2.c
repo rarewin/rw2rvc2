@@ -1,3 +1,4 @@
+#include <getopt.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -68,7 +69,10 @@ int main(int argc, char **argv)
 			return 3;
 		}
 
-		fread(buf, 1, s, fp);
+		if (fread(buf, 1, s, fp) != s) {
+			fprintf(dbgout, "file read error\n");
+			return 4;
+		}
 		buf[s] = 0;
 	}
 
