@@ -9,24 +9,24 @@ else
 	OUTDIR = release
 endif
 
-SRCS = $(wildcard src/*.c)
-OBJS = $(addprefix $(OUTDIR)/,$(subst src/,,$(SRCS:.c=.o)))
+SRCDIR = src
+
+SRCS = $(wildcard $(SRCDIR)/*.c)
+OBJS = $(addprefix $(OUTDIR)/,$(SRCS:$(SRCDIR)/%.c=%.o))
 DEPS = $(OBJS:.o=.d)
-TARGET = $(OUTDIR)/rw2rvc2
+TARGET = rw2rvc2
 
-vpath %.c src
+vpath %.c $(SRCDIR)
+vpath %.o $(OUTDIR)
 
-all: $(TARGET)
+all: $(OUTDIR)/$(TARGET)
 
-$(OUTDIR):
-	mkdir $(OUTDIR)
+$(OUTDIR)/$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
 
-$(TARGET): $(OBJS)
-
--include $(DEPS)
-
-$(OUTDIR)/%.o: $(OUTDIR) %.c
-	$(CC) $(CFLAGS) -c $(word 2,$^) -o $@
+$(OUTDIR)/%.o: %.c
+	-@mkdir -p $(OUTDIR)
+	$(CC) $(CFLAGS) -c $^ -o $@
 
 .PHONY: fmt
 fmt:
@@ -34,7 +34,6 @@ fmt:
 
 .PHONY: clean
 clean:
-	rm -f rw2rvc2
 	rm -rf release debug
 	rm -rf doc/html
 
@@ -53,3 +52,5 @@ test: release/rw2rvc2
 .PHONY: doc
 doc:
 	doxygen doc/Doxyfile
+
+-include $(DEPS)
