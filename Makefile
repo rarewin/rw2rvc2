@@ -32,6 +32,10 @@ $(OUTDIR)/%.o: %.c
 fmt:
 	clang-format -i $(SRCS)
 
+.PHONY: fmt-check
+fmt-check:
+	clang-format --dry-run $(SRCS)
+
 .PHONY: clean
 clean:
 	rm -rf release debug
