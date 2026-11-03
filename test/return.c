@@ -48,6 +48,26 @@ int test_return_hex_value() /* */ /* 0x10 */
 	return 0x10;
 }
 
+int test_return_hex_value_ff() /* */ /* 0xff */
+{
+	return 0xff;
+}
+
+int test_return_hex_value_upper_ff() /* */ /* 0XFF */
+{
+	return 0XFF;
+}
+
+int test_return_hex_value_abcdef() /* */ /* 0xabcdef */
+{
+	return 0xabcdef;
+}
+
+int test_return_hex_value_0() /* */ /* 0x0 */
+{
+	return 0x0;
+}
+
 int test_return_oct_value() /* */ /* 020 */
 {
 	return 020;
