@@ -183,7 +183,7 @@ struct vector_t *tokenize(char *p)
 		/* number */
 
 		/* hex */
-		if (*p == '0' && (*(p + 1) == 'X' || *(p + 1) == 'x') && isdigit(*(p + 2))) {
+		if (*p == '0' && (*(p + 1) == 'X' || *(p + 1) == 'x') && isxdigit(*(p + 2))) {
 			t = add_token(v, TK_NUM, p, line, p - begin);
 			t->value = strtol(p, &p, 16);
 			continue;
