@@ -93,6 +93,8 @@ static token_type_t get_token_type_of_symbol(char s)
 	return TK_INVALID;
 }
 
+#define KEYWORD_ENTRY(word, tkval) {word, tkval, sizeof(word) - 1}
+
 /**
  * @brief トークナイザー メイン
  * @param[in] p  入力文字列へのポインタ
@@ -104,12 +106,13 @@ struct vector_t *tokenize(char *p)
 	const struct keyword_t {
 		char *word;
 		token_type_t tkval;
+		size_t len;
 	} keywords[] = {
-		{"return", TK_RETURN},    //
-		{"if", TK_IF},		  //
-		{"else", TK_ELSE},	//
-		{"goto", TK_GOTO},	//
-		{"int", TK_INT},	  //
+		KEYWORD_ENTRY("return", TK_RETURN),
+		KEYWORD_ENTRY("if", TK_IF),
+		KEYWORD_ENTRY("else", TK_ELSE),
+		KEYWORD_ENTRY("goto", TK_GOTO),
+		KEYWORD_ENTRY("int", TK_INT),
 	};
 	const struct multibytes_operation_t {
 		char *word;
@@ -211,8 +214,8 @@ struct vector_t *tokenize(char *p)
 
 			/* 予約語かどうかの判定 */
 			for (i = 0; i < (sizeof(keywords) / sizeof(keywords[0])); i++) {
-				if (len == strlen(keywords[i].word) &&
-				    strncmp(keywords[i].word, p, len) == 0) {
+				if (len == keywords[i].len &&
+				    memcmp(keywords[i].word, p, len) == 0) {
 					t = add_token(v, keywords[i].tkval, p, line, p - begin); /* 予約語だった */
 					t->name = keywords[i].word;
 					p += len;
