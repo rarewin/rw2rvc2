@@ -47,3 +47,12 @@ int test_declarate_va4() /* */ /* 1 */
 
 	return f;
 }
+
+int iffy = 10;
+int returnValue = 20;
+int integer = 12;
+
+int test_keyword_prefix() /* */ /* 42 */
+{
+	return iffy + returnValue + integer;
+}
