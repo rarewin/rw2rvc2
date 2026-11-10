@@ -27,3 +27,18 @@ int test_priority_shift_and_or() /* */ /* 17 */
 {
 	return (1 | 1 << 4);
 }
+
+int test_rshift_neg() /* */ /* -4 */
+{
+	return -8 >> 1;
+}
+
+int test_rshift_neg2() /* */ /* -4 */
+{
+	return -16 >> 2;
+}
+
+int test_rshift_neg3() /* */ /* -1 */
+{
+	return -1 >> 1;
+}
