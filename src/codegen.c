@@ -189,7 +189,7 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			break;
 
 		case IR_RIGHT_OP:
-			printf("	srl	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			printf("	sraw	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
 			       get_temp_reg_str(ir->rhs));
 			break;
 
