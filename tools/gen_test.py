@@ -8,14 +8,14 @@ import os
 TEST_FUNC_HEADER = """#include <stdio.h>
 #include <stdbool.h>
 
-static inline int assert(int result, int expected, char *func_name)
+static inline int assert(long result, long expected, char *func_name)
 {
         bool exp = (result == expected);
 	printf("%s => ", func_name);
 	if (exp) {
 		printf("\\e[1;32mOK\\e[m\\n");
 	} else {
-		printf("\\e[1;31mNG\\e[m: %d (expected: %d)\\n", result, expected);
+		printf("\\e[1;31mNG\\e[m: 0x%lx (%ld) (expected: 0x%lx (%ld))\\n", (unsigned long)result, result, (unsigned long)expected, expected);
 	}
 
 	return (!exp) ? 1 : 0;
@@ -26,7 +26,7 @@ static inline int assert(int result, int expected, char *func_name)
 def main():
 
     reg_func = re.compile(
-        r"^\s*(?P<ret_type>int)\s+(?P<func_name>test_\w+)\s*\((?P<parameters>.*)\)\s*/\*\s*(?P<args>([\w\s,]*?)\s*)\*/\s*/\*\s*(?P<expected>\w+)\s*\*/$")
+        r"^\s*(?P<ret_type>int)\s+(?P<func_name>test_\w+)\s*\((?P<parameters>.*)\)\s*/\*\s*(?P<args>([\w\s,]*?)\s*)\*/\s*/\*\s*(?P<expected>-?\w+)\s*\*/$")
 
     if len(sys.argv) < 2:
         print("Usage: {} [directory containing tests]".format(sys.argv[0]))
