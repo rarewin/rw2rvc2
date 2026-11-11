@@ -254,10 +254,10 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
 		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
 
-		vector_push(v, new_ir(IR_MINUS, lhs, rhs, NULL));
-
 		if (node->type == ND_EQ_OP) {
-			vector_push(v, new_ir(IR_NOT, lhs, 0, NULL));
+			vector_push(v, new_ir(IR_EQ_OP, lhs, rhs, NULL));
+		} else {
+			vector_push(v, new_ir(IR_NE_OP, lhs, rhs, NULL));
 		}
 
 		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
