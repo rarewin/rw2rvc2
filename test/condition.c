@@ -125,3 +125,29 @@ int test_less_equal3() /* */ /* 1 */
 		return 1;
 	}
 }
+
+int test_eq_true() /* */ /* 1 */
+{
+	return 3 == 3;
+}
+
+int test_eq_false() /* */ /* 0 */
+{
+	return 3 == 1;
+}
+
+int test_ne_true() /* */ /* 1 */
+{
+	return 3 != 1;
+}
+
+int test_ne_false() /* */ /* 0 */
+{
+	return 3 != 3;
+}
+
+int test_eq_calc() /* */ /* 1 */
+{
+	return (5 == 5) + (4 == 2);
+}
+

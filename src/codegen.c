@@ -202,7 +202,17 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 			break;
 
 		case IR_EQ_OP:
+			printf("	sub	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
+			printf("	seqz	%s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs));
+			break;
+
 		case IR_NE_OP:
+			printf("	sub	%s, %s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs),
+			       get_temp_reg_str(ir->rhs));
+			printf("	snez	%s, %s\n", get_temp_reg_str(ir->lhs), get_temp_reg_str(ir->lhs));
+			break;
+
 		case IR_KILL:
 		case IR_KILL_ARG:
 		case IR_NOP:
