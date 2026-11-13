@@ -10,7 +10,6 @@ static ir_type_t CONVERSION_NODE_TO_IR[] = {
 	[ND_DIV] = IR_DIV,	  //
 	[ND_MOD] = IR_MOD,	  //
 	[ND_RETURN] = IR_RETURN,    //
-	[ND_OR_OP] = IR_OR,	 //
 	[ND_AND] = IR_AND,	  //
 	[ND_OR] = IR_OR,	    //
 	[ND_XOR] = IR_XOR,
@@ -109,7 +108,6 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 	struct node_t *n = NULL;
 	int lhs, rhs;
 	int r = regno;
-	int l = label;
 	int i = 0;
 	size_t j = 0;
 
@@ -198,8 +196,11 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 	}
 
 	if (node->type == ND_IF) {
+		int l1;
+
 		lhs = gen_ir_sub(v, d, node->condition, scope_level);
-		vector_push(v, new_ir(IR_BEQZ, lhs, label++, NULL));
+		l1 = label++;
+		vector_push(v, new_ir(IR_BEQZ, lhs, l1, NULL));
 		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
 
 		gen_ir_sub(v, d, node->consequence, scope_level);    // then
@@ -207,16 +208,16 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 		if (node->alternative != NULL) {
 			int l2 = label++;
 			vector_push(v, new_ir(IR_JUMP, l2, 0, NULL));
-			vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
+			vector_push(v, new_ir(IR_LABEL, l1, 0, NULL));
 			gen_ir_sub(v, d, node->alternative, scope_level);    // else
 			vector_push(v, new_ir(IR_LABEL, l2, 0, NULL));
 		} else {
-			vector_push(v, new_ir(IR_LABEL, l, 0, NULL));
+			vector_push(v, new_ir(IR_LABEL, l1, 0, NULL));
 		}
 	}
 
 	if (node->type == ND_PLUS || node->type == ND_MINUS || node->type == ND_MUL || node->type == ND_DIV ||
-	    node->type == ND_MOD || node->type == ND_OR_OP || node->type == ND_AND || node->type == ND_OR ||
+	    node->type == ND_MOD || node->type == ND_AND || node->type == ND_OR ||
 	    node->type == ND_XOR) {
 
 		if (node->lhs != NULL) {
@@ -238,16 +239,54 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 	}
 
 	if (node->type == ND_AND_OP) {
-		/* a && b = ~(~a || ~b) */
-		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
-		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
+		int l_false = label++;
+		int l_end = label++;
+		int r = regno++;
 
-		vector_push(v, new_ir(IR_NOT, lhs, 0, NULL));
-		vector_push(v, new_ir(IR_NOT, rhs, 0, NULL));
-		vector_push(v, new_ir(IR_OR, lhs, rhs, NULL));
+		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
+		vector_push(v, new_ir(IR_BEQZ, lhs, l_false, NULL));
+		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
+
+		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
+		vector_push(v, new_ir(IR_BEQZ, rhs, l_false, NULL));
 		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
-		vector_push(v, new_ir(IR_NOT, lhs, 0, NULL));
-		return lhs;
+
+		vector_push(v, new_ir(IR_IMM, r, 1, NULL));
+		vector_push(v, new_ir(IR_JUMP, l_end, 0, NULL));
+
+		vector_push(v, new_ir(IR_LABEL, l_false, 0, NULL));
+		vector_push(v, new_ir(IR_IMM, r, 0, NULL));
+
+		vector_push(v, new_ir(IR_LABEL, l_end, 0, NULL));
+		return r;
+	}
+
+	if (node->type == ND_OR_OP) {
+		int l_rhs = label++;
+		int l_zero = label++;
+		int l_end = label++;
+		int r = regno++;
+
+		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
+		vector_push(v, new_ir(IR_BEQZ, lhs, l_rhs, NULL));
+		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
+
+		vector_push(v, new_ir(IR_IMM, r, 1, NULL));
+		vector_push(v, new_ir(IR_JUMP, l_end, 0, NULL));
+
+		vector_push(v, new_ir(IR_LABEL, l_rhs, 0, NULL));
+		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
+		vector_push(v, new_ir(IR_BEQZ, rhs, l_zero, NULL));
+		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
+
+		vector_push(v, new_ir(IR_IMM, r, 1, NULL));
+		vector_push(v, new_ir(IR_JUMP, l_end, 0, NULL));
+
+		vector_push(v, new_ir(IR_LABEL, l_zero, 0, NULL));
+		vector_push(v, new_ir(IR_IMM, r, 0, NULL));
+
+		vector_push(v, new_ir(IR_LABEL, l_end, 0, NULL));
+		return r;
 	}
 
 	if (node->type == ND_EQ_OP || node->type == ND_NE_OP) {
