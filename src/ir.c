@@ -118,8 +118,12 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 
 	if (node->type == ND_PROGRAM || node->type == ND_COMPOUND_STATEMENTS) {
 
-		for (j = 0; j < node->list->len; j++)
-			gen_ir_sub(v, d, node->list->data[j], scope_level + 1);
+		for (j = 0; j < node->list->len; j++) {
+			struct node_t *stmt = node->list->data[j];
+			int reg = gen_ir_sub(v, d, stmt, scope_level + 1);
+			if (stmt != NULL && stmt->type == ND_EXPRESSION && reg >= 0)
+				vector_push(v, new_ir(IR_KILL, reg, 0, NULL));
+		}
 
 		return -1;
 	}
@@ -176,13 +180,10 @@ static int gen_ir_sub(struct vector_t *v, struct dict_t *d, struct node_t *node,
 
 	if (node->type == ND_ASSIGN) {
 		rhs = gen_ir_sub(v, d, node->rhs, scope_level);
-		lhs = gen_ir_sub(v, d, node->lhs, scope_level);
 		vector_push(v, new_ir(IR_LOADADDR, regno++, -1, node->lhs->name));
 		vector_push(v, new_ir(IR_STORE, regno - 1, rhs, NULL));
-		vector_push(v, new_ir(IR_KILL, lhs, 0, NULL));
-		vector_push(v, new_ir(IR_KILL, rhs, 0, NULL));
 		vector_push(v, new_ir(IR_KILL, regno - 1, 0, NULL));
-		return -1;
+		return rhs;
 	}
 
 	if (node->type == ND_IDENT) {
