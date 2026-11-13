@@ -132,3 +132,54 @@ int test_logical_and_3() /* */ /* 0 */
 		return 1;
 	}
 }
+
+int flag;
+
+int test_logical_and_value_1() /* */ /* 1 */
+{
+	return (1 && 2);
+}
+
+int test_logical_and_value_2() /* */ /* 0 */
+{
+	return (0 && 5);
+}
+
+int test_logical_or_value_1() /* */ /* 1 */
+{
+	return (1 || 2);
+}
+
+int test_logical_or_value_2() /* */ /* 0 */
+{
+	return (0 || 0);
+}
+
+int test_logical_and_short_circuit_false() /* */ /* 0 */
+{
+	flag = 0;
+	0 && (flag = 1);
+	return flag;
+}
+
+int test_logical_and_short_circuit_true() /* */ /* 1 */
+{
+	flag = 0;
+	1 && (flag = 1);
+	return flag;
+}
+
+int test_logical_or_short_circuit_true() /* */ /* 0 */
+{
+	flag = 0;
+	1 || (flag = 1);
+	return flag;
+}
+
+int test_logical_or_short_circuit_false() /* */ /* 1 */
+{
+	flag = 0;
+	0 || (flag = 1);
+	return flag;
+}
+
