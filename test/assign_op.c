@@ -79,3 +79,14 @@ int test_right_assign_op2() /* */ /* 0x100 */
 
 	return a;
 }
+
+int test_chain_assign() /* */ /* 2 */
+{
+	a = b = 1;
+	return a + b;
+}
+
+int test_assign_return() /* */ /* 42 */
+{
+	return a = 42;
+}
