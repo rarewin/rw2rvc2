@@ -249,6 +249,7 @@ static struct node_t *postfix_expression(struct vector_t *tokens)
 		/* '(' argument_expression_list ')' */
 		if (t->type == TK_LEFT_PAREN) {
 			consume_token(tokens, TK_LEFT_PAREN);
+			t = tokens->data[g_position];
 
 			if (t->type == TK_RIGHT_PAREN) { /* '(' ')' */
 				expect_token(tokens, TK_RIGHT_PAREN);
