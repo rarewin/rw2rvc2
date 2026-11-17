@@ -209,6 +209,7 @@ static struct vector_t *argument_expression_list(struct vector_t *tokens)
 		if (t->type != TK_COMMA)
 			break;
 
+		consume_token(tokens, TK_COMMA);
 		num++;
 		if ((n = assignment_expression(tokens)) == NULL)
 			break;
