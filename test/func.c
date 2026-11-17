@@ -53,3 +53,14 @@ int test_func_arg() /* */ /* 17 */
 {
 	return func_echo(17);
 }
+
+int func_zero_args()
+{
+	return 100;
+}
+
+int test_func_zero_args() /* */ /* 100 */
+{
+	return func_zero_args();
+}
+
