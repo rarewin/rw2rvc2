@@ -64,3 +64,22 @@ int test_func_zero_args() /* */ /* 100 */
 	return func_zero_args();
 }
 
+int add_two(int x, int y)
+{
+	return x + y;
+}
+
+int test_func_two_args() /* */ /* 7 */
+{
+	return add_two(3, 4);
+}
+
+int add_three(int x, int y, int z)
+{
+	return x + y + z;
+}
+
+int test_func_three_args() /* */ /* 15 */
+{
+	return add_three(2, 5, 8);
+}
