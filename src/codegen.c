@@ -9,6 +9,109 @@
 #include "rw2rvc2.h"
 
 /**
+ * @brief 定数式を評価する
+ */
+static int eval_const_expr(struct node_t *node, int *val)
+{
+	if (node == NULL)
+		return 0;
+
+	if (node->type == ND_EXPRESSION)
+		return eval_const_expr(node->expression, val);
+
+	if (node->type == ND_CONST) {
+		*val = node->value;
+		return 1;
+	}
+
+	if (node->lhs == NULL && node->rhs != NULL) {
+		int r;
+		if (!eval_const_expr(node->rhs, &r))
+			return 0;
+		if (node->type == ND_PLUS) {
+			*val = r;
+			return 1;
+		}
+		if (node->type == ND_MINUS) {
+			*val = -r;
+			return 1;
+		}
+		return 0;
+	}
+
+	if (node->lhs != NULL && node->rhs != NULL) {
+		int l, r;
+		if (!eval_const_expr(node->lhs, &l) || !eval_const_expr(node->rhs, &r))
+			return 0;
+
+		switch (node->type) {
+		case ND_PLUS:
+			*val = l + r;
+			return 1;
+		case ND_MINUS:
+			*val = l - r;
+			return 1;
+		case ND_MUL:
+			*val = l * r;
+			return 1;
+		case ND_DIV:
+			if (r == 0)
+				return 0;
+			*val = l / r;
+			return 1;
+		case ND_MOD:
+			if (r == 0)
+				return 0;
+			*val = l % r;
+			return 1;
+		case ND_OR:
+			*val = l | r;
+			return 1;
+		case ND_AND:
+			*val = l & r;
+			return 1;
+		case ND_XOR:
+			*val = l ^ r;
+			return 1;
+		case ND_LEFT_OP:
+			*val = l << r;
+			return 1;
+		case ND_RIGHT_OP:
+			*val = l >> r;
+			return 1;
+		case ND_EQ_OP:
+			*val = (l == r);
+			return 1;
+		case ND_NE_OP:
+			*val = (l != r);
+			return 1;
+		case ND_GREATER_OP:
+			*val = (l > r);
+			return 1;
+		case ND_LESS_OP:
+			*val = (l < r);
+			return 1;
+		case ND_GE_OP:
+			*val = (l >= r);
+			return 1;
+		case ND_LE_OP:
+			*val = (l <= r);
+			return 1;
+		case ND_OR_OP:
+			*val = (l || r);
+			return 1;
+		case ND_AND_OP:
+			*val = (l && r);
+			return 1;
+		default:
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
+/**
  * @brief RISC-Vのアセンブラを生成する
  */
 void gen_riscv(struct vector_t *irv, struct dict_t *d)
@@ -21,9 +124,10 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 	for (i = 0; i < d->len; i++) {
 		struct variable_t *v = (d->dict)[i].value;
 		if (v->scope_level == 0) {
-			if (v->node->rhs != NULL && (v->node->rhs->type == ND_CONST && v->node->rhs->value != 0)) {
+			int val;
+			if (v->node->rhs != NULL && eval_const_expr(v->node->rhs, &val) && val != 0) {
 				printf("%s:\n", (d->dict)[i].key);
-				printf("	.word	%d\n", v->node->rhs->value);
+				printf("	.word	%d\n", val);
 			}
 		}
 	}
@@ -33,7 +137,8 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 	for (i = 0; i < d->len; i++) {
 		struct variable_t *v = (d->dict)[i].value;
 		if (v->scope_level == 0) {
-			if (v->node->rhs == NULL || (v->node->rhs->type == ND_CONST && v->node->rhs->value == 0))
+			int val;
+			if (v->node->rhs == NULL || !eval_const_expr(v->node->rhs, &val) || val == 0)
 				printf("	.comm %s, 4, 4\n", (d->dict)[i].key);
 		} else {
 			/* @todo スタック上への割り当て  */
