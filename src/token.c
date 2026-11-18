@@ -108,11 +108,11 @@ struct vector_t *tokenize(char *p)
 		token_type_t tkval;
 		size_t len;
 	} keywords[] = {
-		KEYWORD_ENTRY("return", TK_RETURN),
-		KEYWORD_ENTRY("if", TK_IF),
-		KEYWORD_ENTRY("else", TK_ELSE),
-		KEYWORD_ENTRY("goto", TK_GOTO),
-		KEYWORD_ENTRY("int", TK_INT),
+		KEYWORD_ENTRY("return", TK_RETURN), //
+		KEYWORD_ENTRY("if", TK_IF),         //
+		KEYWORD_ENTRY("else", TK_ELSE),     //
+		KEYWORD_ENTRY("goto", TK_GOTO),     //
+		KEYWORD_ENTRY("int", TK_INT),       //
 	};
 	const struct multibytes_operation_t {
 		char *word;

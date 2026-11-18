@@ -56,3 +56,11 @@ int test_keyword_prefix() /* */ /* 42 */
 {
 	return iffy + returnValue + integer;
 }
+
+int g_expr = 1 + 2;
+
+int test_global_expr_init() /* */ /* 3 */
+{
+	return g_expr;
+}
+
