@@ -13,11 +13,13 @@
  */
 static int eval_const_expr(struct node_t *node, int *val)
 {
-	if (node == NULL)
+	if (node == NULL) {
 		return 0;
+	}
 
-	if (node->type == ND_EXPRESSION)
+	if (node->type == ND_EXPRESSION) {
 		return eval_const_expr(node->expression, val);
+	}
 
 	if (node->type == ND_CONST) {
 		*val = node->value;
@@ -26,8 +28,9 @@ static int eval_const_expr(struct node_t *node, int *val)
 
 	if (node->lhs == NULL && node->rhs != NULL) {
 		int r;
-		if (!eval_const_expr(node->rhs, &r))
+		if (!eval_const_expr(node->rhs, &r)) {
 			return 0;
+		}
 		if (node->type == ND_PLUS) {
 			*val = r;
 			return 1;
@@ -41,8 +44,9 @@ static int eval_const_expr(struct node_t *node, int *val)
 
 	if (node->lhs != NULL && node->rhs != NULL) {
 		int l, r;
-		if (!eval_const_expr(node->lhs, &l) || !eval_const_expr(node->rhs, &r))
+		if (!eval_const_expr(node->lhs, &l) || !eval_const_expr(node->rhs, &r)) {
 			return 0;
+		}
 
 		switch (node->type) {
 		case ND_PLUS:
@@ -55,13 +59,15 @@ static int eval_const_expr(struct node_t *node, int *val)
 			*val = l * r;
 			return 1;
 		case ND_DIV:
-			if (r == 0)
+			if (r == 0) {
 				return 0;
+			}
 			*val = l / r;
 			return 1;
 		case ND_MOD:
-			if (r == 0)
+			if (r == 0) {
 				return 0;
+			}
 			*val = l % r;
 			return 1;
 		case ND_OR:
@@ -138,8 +144,9 @@ void gen_riscv(struct vector_t *irv, struct dict_t *d)
 		struct variable_t *v = (d->dict)[i].value;
 		if (v->scope_level == 0) {
 			int val;
-			if (v->node->rhs == NULL || !eval_const_expr(v->node->rhs, &val) || val == 0)
+			if (v->node->rhs == NULL || !eval_const_expr(v->node->rhs, &val) || val == 0) {
 				printf("	.comm %s, 4, 4\n", (d->dict)[i].key);
+			}
 		} else {
 			/* @todo スタック上への割り当て  */
 			printf("	.comm %s, 4, 4\n", (d->dict)[i].key);
